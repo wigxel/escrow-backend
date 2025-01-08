@@ -1,0 +1,87 @@
+
+> @repo/backend@ test C:\Users\Kadima\Desktop\escrow\apps\backend
+> vitest --run
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.0[39m [90mC:/Users/Kadima/Desktop/escrow/apps/backend[39m
+
+ [33m❯[39m tests/review.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m tests/userLocation.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m tests/dispute.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m tests/auth.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m tests/notification.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m tests/user.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+[90mstdout[2m | layers/notification/__tests__/notif.test.ts[2m > [22m[2mNotificationService[2m > [22m[2mcan send multiple notification[22m[39m
+Sending Email to {
+  from_address: [32m'app@domain.com'[39m,
+  app_name: [32m'TestApp'[39m,
+  payload: {
+    name: [32m'mail'[39m,
+    params: { address: [32m'johnny@gmail.com'[39m },
+    entity: OrderFulfilled { data: [36m[Object][39m },
+    notifiable: AnonymousNotifiable { prefer_sms: [33mtrue[39m, routes: [90mundefined[39m }
+  }
+}
+Sending SMS TO { phoneNumber: [32m'+32049939288'[39m } OrderFulfilled { data: { name: [32m'Johnny'[39m } }
+
+ [32m✓[39m layers/notification/__tests__/notif.test.ts [2m ([22m[2m2 tests[22m [2m|[22m [33m1 skipped[39m[2m)[22m[90m 206[2mms[22m[39m
+ [32m✓[39m layers/mailing/__tests__/mail.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 94[2mms[22m[39m
+ [32m✓[39m layers/encryption/presets/argon2d.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[33m 386[2mms[22m[39m
+ [33m❯[39m services/repository/repo.types.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m services/mailing/mailing.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [33m❯[39m tests/profile.service.test.ts [2m ([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m layers/mailing/hashing.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 84[2mms[22m[39m
+ [32m✓[39m tests/disputeUtils.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m services/otp/otp.service.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 56[2mms[22m[39m
+ [32m✓[39m tests/mocks/test-helper.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m layers/encryption/presets/reversible-hasher.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Suites 9 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/auth.service.test.ts [2m[ tests/auth.service.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m tests/dispute.service.test.ts [2m[ tests/dispute.service.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m tests/notification.service.test.ts [2m[ tests/notification.service.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m tests/profile.service.test.ts [2m[ tests/profile.service.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m tests/user.service.test.ts [2m[ tests/user.service.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m tests/userLocation.service.test.ts [2m[ tests/userLocation.service.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m services/mailing/mailing.test.ts [2m[ services/mailing/mailing.test.ts ][22m
+[31m[1m[7m FAIL [27m[22m[39m services/repository/repo.types.test.ts [2m[ services/repository/repo.types.test.ts ][22m
+[31m[1mError[22m: Cannot find module '~/migrations/tables/product-table' imported from 'C:/Users/Kadima/Desktop/escrow/apps/backend/migrations/schema.ts'.
+
+- If you rely on tsconfig.json's "paths" to resolve modules, please install "vite-tsconfig-paths" plugin to handle module resolution.
+- Make sure you don't have relative aliases in your Vitest config. Use absolute paths instead. Read more: https://vitest.dev/guide/common-errors[39m
+[36m [2m❯[22m migrations/schema.ts:[2m1:1[22m[39m
+    [90m  1| [39m[35mexport[39m [33m*[39m [35mfrom[39m [32m"~/migrations/tables/product-table"[39m[33m;[39m
+    [90m   | [39m[31m^[39m
+    [90m  2| [39m[35mexport[39m [33m*[39m [35mfrom[39m [32m"~/migrations/tables/category-table"[39m[33m;[39m
+[2m Test Files [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[2m | [22m[90m1 todo[39m[90m (11)[39m
+    [90m  3| [39m[35mexport[39m [33m*[39m [35mfrom[39m [32m"~/migrations/tables/reviews-table"[39m[33m;[39m
+[2m   Start at [22m 18:02:21
+[90m [2m❯[22m config/database.ts:[2m5:31[22m[39m
+[2m   Duration [22m 29.60s[2m (transform 4.45s, setup 5ms, collect 18.55s, tests 852ms, environment 9ms, prepare 13.13s)[22m
+
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22m[39m
+[31m[1mSerialized Error:[22m[39m [90m{ code: 'ERR_MODULE_NOT_FOUND' }[39m
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/review.service.test.ts [2m[ tests/review.service.test.ts ][22m
+[31m[1mError[22m: Cannot find module '~/repositories/comment.repository' imported from 'C:/Users/Kadima/Desktop/escrow/apps/backend/services/reviews.service.ts'.
+
+- If you rely on tsconfig.json's "paths" to resolve modules, please install "vite-tsconfig-paths" plugin to handle module resolution.
+- Make sure you don't have relative aliases in your Vitest config. Use absolute paths instead. Read more: https://vitest.dev/guide/common-errors[39m
+[36m [2m❯[22m services/reviews.service.ts:[2m5:31[22m[39m
+    [90m  4| [39m[35mimport[39m { [33mExpectedError[39m[33m,[39m [33mPermissionError[39m } [35mfrom[39m [32m"~/config/exceptions"[39m[33m;[39m
+    [90m  5| [39m[35mimport[39m type {
+    [90m  6| [39m  [33mComment[39m[33m,[39m
+    [90m   | [39m      [31m^[39m
+    [90m  7| [39m  [33mNewComments[39m[33m,[39m
+    [90m  8| [39m  [33mNewReview[39m[33m,[39m
+[90m [2m❯[22m tests/review.service.test.ts:[2m5:31[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22m[39m
+[31m[1mSerialized Error:[22m[39m [90m{ code: 'ERR_MODULE_NOT_FOUND' }[39m
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+ ELIFECYCLE  Test failed. See above for more details.
