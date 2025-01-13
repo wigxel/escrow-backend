@@ -1,24 +1,18 @@
 import { ConfigProvider, Effect, Layer, type Scope } from "effect";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
-import { Mailer } from "~/layers/mailing";
-import { MailLive } from "~/layers/mailing/mail";
-import { NotificationLive } from "~/layers/notification/layer";
 import { resolveErrorResponse } from "~/libs/response";
 import type { InferRequirements } from "~/services/effect.util";
-import { FakeMaker } from "~/services/mailing/faker-mailer";
 import { PaginationImpl } from "~/services/search/pagination.service";
-import { ChatServiceTest } from "~/tests/mocks/chatServiceMock";
 import { DatabaseTest } from "~/tests/mocks/database";
 import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
 import { OTPRepoTest } from "~/tests/mocks/otp";
 import { SessionProviderTest } from "~/tests/mocks/session-provider";
-import { FileStorageTest } from "~/tests/mocks/storage";
-import { UserRepoTest } from "~/tests/mocks/userRepoMock";
+import { UserRepoTest } from "~/tests/mocks/user";
+import { PaymentServiceTest } from "./PaymentServiceMock";
 import { AuthUserTest } from "./auth";
 import { CartItemRepoTest } from "./cartItemsRepoMock";
 import { CartRepoTest } from "./cartRepoMock";
 import { CategoryRepoTest } from "./categoryRepoMock";
-import { CheckoutManagerServiceTest } from "./checkoutManagerServiceMock";
 import { CommentTest } from "./comment";
 import { DisputeMemberRepoTest } from "./disputeMembersRepo";
 import { DisputeRepoTest } from "./disputeRepoMock";
@@ -67,16 +61,6 @@ const OrderModuleTest = Layer.empty.pipe(
   Layer.provideMerge(DeliveryDetailsRepoTest),
 );
 
-export const MailingService = Layer.empty.pipe(
-  Layer.provideMerge(NotificationLive),
-  Layer.provideMerge(MailLive),
-  Layer.provideMerge(Layer.succeed(Mailer, new FakeMaker())),
-);
-
-export const StorageModule = Layer.empty.pipe(
-  Layer.provideMerge(FileStorageTest),
-);
-
 export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(DatabaseTest),
   Layer.provideMerge(ReviewModuleTest),
@@ -85,16 +69,13 @@ export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(CartRepoTest),
   Layer.provideMerge(CartItemRepoTest),
   Layer.provideMerge(DisputeRepoTest),
-  Layer.provideMerge(StorageModule),
   Layer.provideMerge(DisputeMemberRepoTest),
-  Layer.provideMerge(ChatServiceTest),
   Layer.provideMerge(PaymentRepoTest),
   Layer.provideMerge(OrderModuleTest),
   Layer.provideMerge(PaymentOrderRepoTest),
   Layer.provideMerge(UserLocationRepoTest),
-  Layer.provideMerge(CheckoutManagerServiceTest),
+  Layer.provideMerge(PaymentServiceTest),
   Layer.provideMerge(NotificationServiceTest),
-  Layer.provideMerge(MailingService),
   Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(
@@ -104,9 +85,8 @@ export const AppTest = Layer.empty.pipe(
         MAIL_PORT: 1111,
         MAIL_USERNAME: "somemailuser",
         MAIL_PASSWORD: "somemailpassword",
-        MAIL_FROM: "from@testapp.com",
-        APP_ENV: "local",
-        APP_NAME: "TheYardBazaarTest",
+        MAIL_FROM: "frommail",
+        NODE_ENV: "nodenv",
         ENABLE_MAILING: false,
         OTP_SECRET:
           "khvezZbbF9PefeRNpNIbN2OzeY3sqQQmRcFweI3GbBGAI3ihdTx3xVTEXdUItSIgu4VQte94xKw5Shjxd0qEmg==",

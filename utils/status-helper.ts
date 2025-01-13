@@ -1,0 +1,17 @@
+export enum TransactionStatus {
+  CREATED = "created",
+  USER_INVITE = "user invited",
+  INVITE_ACCEPTED = "invite accepted",
+  INVITE_DECLINED = "invite declined",
+  AWAITING_TERMS_CONFIRMATION = "awaiting terms conf",
+  TERMS_CONFIRMED = "terms confirmed",
+  DEPOSIT_PENDING = "deposit pending",
+  DEPOSIT_CONFIRMED = "deposit confirmed",
+  AWAITING_SERVICE = "awaiting service",
+  SERVICE_COMPLETED = "service completed",
+  SERVICE_CONFIRMATION = "service confirmation",
+  COMPLETED = "completed",
+  DISPUTE = "dispute",
+  REFUNDED = "refunded",
+  CANCELLED = "cancelled",
+}

@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
     const token = getBearerToken(getHeaders(event));
 
     const program = validateSession(token);
-    const response = await NitroApp.runPromise(event, program);
+    const response = await runLive(event, program);
 
     pipe(
       response,

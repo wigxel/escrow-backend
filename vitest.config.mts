@@ -1,4 +1,4 @@
-import path from "node:path";
+import path from "path";
 import AutoImport from "unplugin-auto-import/vite";
 import { defineConfig } from "vitest/config";
 

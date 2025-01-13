@@ -2,7 +2,7 @@ import { Effect, Layer } from "effect";
 import { head } from "effect/Array";
 import {
   DisputeMemberRepo,
-  type DisputeMemberRepository,
+  DisputeMemberRepository,
 } from "~/repositories/disputeMember.repo";
 import { extendMockImplementation } from "./helpers";
 

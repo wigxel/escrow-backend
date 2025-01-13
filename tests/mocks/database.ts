@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 import {
   DatabaseConnection,
-  type DatabaseResourceInterface,
+  DatabaseResourceInterface,
 } from "~/config/database";
 
 const DatabaseResourceTest = Effect.acquireRelease(

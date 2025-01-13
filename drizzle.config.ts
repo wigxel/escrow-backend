@@ -3,9 +3,11 @@ import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 import { Config, Effect } from "effect";
 
-const conf = Config.all([Config.string("APP_ENV"), Config.string("DB_URL")]);
+const conf = Effect.gen(function* () {
+  return yield* Config.string("DB_URL");
+});
 
-const [env, connectionString] = Effect.runSync(conf);
+const connectionString = Effect.runSync(conf);
 
 if (!connectionString) {
   console.log("\n\n");
@@ -25,5 +27,5 @@ export default defineConfig({
   dbCredentials: {
     url: connectionString,
   },
-  verbose: env !== "production",
+  verbose: process.env.NODE_ENV !== "production",
 });

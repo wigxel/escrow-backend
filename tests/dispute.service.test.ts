@@ -1,18 +1,18 @@
 import { Effect, Layer } from "effect";
-import { NoSuchElementException } from "effect/Cause";
 import { notNil } from "~/libs/query.helpers";
 import {
-  createDispute,
-  getDisputesByUserId,
+  getUserDisputes,
   inviteMember,
+  newDispute,
   removeMember,
   updateDisputeStatus,
 } from "~/services/dispute.service";
+import { FindArg1 } from "~/services/repository/repo.types";
 import { runTest } from "./mocks/app";
 import { extendDisputeMemberRepo } from "./mocks/disputeMembersRepo";
 import { extendDisputeRepo } from "./mocks/disputeRepoMock";
 import { extendOrderRepo } from "./mocks/orderRepoMock";
-import { extendUserRepoMock } from "./mocks/userRepoMock";
+import { extendUserRepoMock } from "./mocks/user";
 
 describe("Dispute service", () => {
   describe("create new dispute", () => {
@@ -21,7 +21,6 @@ describe("Dispute service", () => {
       reason: "reason",
       message: "message",
     };
-
     test("should fail if invalid order id", async () => {
       const orderRepo = extendOrderRepo({
         getSingleOrder(where) {
@@ -29,14 +28,14 @@ describe("Dispute service", () => {
         },
       });
 
-      const program = createDispute({
+      const program = newDispute({
         currentUser: { id: "user-id" },
         disputeData,
       });
 
       const result = runTest(Effect.provide(program, orderRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid Order ID]`,
+        `[ExpectedError: Invalid order id]`,
       );
     });
     test("should fail if unauthorized user tries to open dispute", async () => {
@@ -50,41 +49,39 @@ describe("Dispute service", () => {
         },
       });
 
-      const program = createDispute({
+      const program = newDispute({
         currentUser: { id: "user-id" },
         disputeData,
       });
 
       const result = runTest(Effect.provide(program, orderRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot create dispute]`,
+        `[ExpectedError: Unauthorized order: cannot open dispute]`,
       );
     });
 
     test("should fail if order has existing dispute", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow() {
+        firstOrThrow(order, id) {
           return Effect.succeed({});
         },
       });
 
-      const program = createDispute({
+      const program = newDispute({
         currentUser: { id: "seller-id" },
         disputeData,
       });
 
       const result = runTest(Effect.provide(program, disputeRepo));
-
       expect(result).resolves.toMatchInlineSnapshot(
         `[ExpectedError: Order already has an open dispute]`,
       );
     });
-
     test("should create new dispute", async () => {
       let created = false;
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow() {
-          return Effect.fail(new NoSuchElementException());
+        firstOrThrow(order, id) {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
         //@ts-expect-error
         create(data) {
@@ -93,7 +90,7 @@ describe("Dispute service", () => {
         },
       });
 
-      const program = createDispute({
+      const program = newDispute({
         currentUser: { id: "seller-id" },
         disputeData,
       });
@@ -109,7 +106,6 @@ describe("Dispute service", () => {
       `);
       expect(created).toBeTruthy();
     });
-
     test("should add dispute creator to dispute members", async () => {
       let addDisputeMember = false;
       const disputeRepo = extendDisputeRepo({
@@ -124,7 +120,7 @@ describe("Dispute service", () => {
           return Effect.succeed({});
         },
       });
-      const program = createDispute({
+      const program = newDispute({
         currentUser: { id: "seller-id" },
         disputeData,
       });
@@ -153,7 +149,7 @@ describe("Dispute service", () => {
         },
       });
 
-      const program = getDisputesByUserId("current-user-id");
+      const program = getUserDisputes("current-user-id");
       const result = await runTest(Effect.provide(program, disputeMemberRepo));
       expect(result).toMatchInlineSnapshot(`
         {
@@ -169,7 +165,7 @@ describe("Dispute service", () => {
         },
       });
 
-      const program = getDisputesByUserId("current-user-id");
+      const program = getUserDisputes("current-user-id");
       const result = await runTest(Effect.provide(program, disputeMemberRepo));
       expect(result).toMatchInlineSnapshot(`
         {
@@ -232,7 +228,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot affect dispute status]`,
+        `[ExpectedError: Unauthoized user action: cannot affect dispute status]`,
       );
     });
     test("should set dispute status to open", async () => {
@@ -320,7 +316,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot invite user]`,
+        `[ExpectedError: Unauthorized action: Cannot invite user]`,
       );
     });
     test("should fail if dispute id doesn't exist", async () => {
@@ -480,7 +476,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot remove user]`,
+        `[ExpectedError: Unauthorized action: Cannot uninvite user]`,
       );
     });
     test("should fail if user not dispute member", async () => {

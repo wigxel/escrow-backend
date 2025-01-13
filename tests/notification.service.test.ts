@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { NotificationSetup } from "~/app/notifications/notification.utils";
+import { extendNotificationRepo } from "./mocks/notificationRepoMock";
 import {
   deleteNotification,
   getNotifications,
@@ -7,7 +7,6 @@ import {
   sendNotification,
 } from "~/services/notification.service";
 import { runTest } from "./mocks/app";
-import { extendNotificationRepo } from "./mocks/notificationRepoMock";
 
 describe("notification serivce", () => {
   describe("send notification", () => {

@@ -1,10 +1,7 @@
 import { Effect } from "effect";
 import { randomUUID } from "uncrypto";
-import type { NewReview, Review } from "~/migrations/tables/interfaces";
-import {
-  ReviewRepo,
-  type ReviewRepository,
-} from "~/repositories/review.repository";
+import { NewReview, Review } from "~/migrations/tables/interfaces";
+import { ReviewRepo, ReviewRepository } from "~/repositories/review.repository";
 import { extendMockImplementation } from "./helpers";
 
 export const MockMethods: ReviewRepository = {

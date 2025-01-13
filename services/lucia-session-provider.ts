@@ -100,7 +100,6 @@ declare module "lucia" {
     DatabaseSessionAttributes: DatabaseSessionAttributes;
     DatabaseUserAttributes: DatabaseUserAttributes;
   }
-  type DatabaseSessionAttributes = Record<string, never>;
 
   interface DatabaseUserAttributes {
     email: string;

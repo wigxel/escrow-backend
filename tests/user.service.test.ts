@@ -1,10 +1,4 @@
-import { Effect, Layer, pipe } from "effect";
-import { NoSuchElementException } from "effect/Cause";
-import {
-  FindArg1,
-  FindArg2,
-  RepoHelperInner,
-} from "~/services/repository/repo.types";
+import { Effect, Layer } from "effect";
 import {
   createUser,
   passwordReset,
@@ -13,7 +7,7 @@ import {
 } from "~/services/user.service";
 import { AppTest, runTest } from "~/tests/mocks/app";
 import { readOTP } from "~/tests/mocks/otp";
-import { TestUserData, extendUserRepoMock } from "./mocks/userRepoMock";
+import { extendUserRepoMock } from "./mocks/user";
 
 describe("Account verification", () => {
   it("should fail if otp is incorrect", async () => {
@@ -48,21 +42,13 @@ describe("Account verification", () => {
 
   describe("Resend verification email", () => {
     it("should fail if user doesn't exist", async () => {
-      const mockInstance = extendUserRepoMock({
-        firstOrThrow() {
-          return Effect.fail(new NoSuchElementException());
-        },
-      });
-
       const program = Effect.scoped(
-        pipe(
+        Effect.provide(
           requestEmailVerificationOtp("MOCK_INCORRECT_EMAIL", "verify"),
-          Effect.provide(mockInstance),
-          Effect.provide(AppTest),
+          AppTest,
         ),
       );
       const session = await runTest(program);
-
       expect(session).toMatchInlineSnapshot(
         `[ExpectedError: User with email doesn't exist]`,
       );
@@ -81,23 +67,12 @@ describe("Account verification", () => {
       );
     });
     it("should succeed if user exists and email isn't verified", async () => {
-      const mockInstance = extendUserRepoMock({
-        firstOrThrow() {
-          const clone = structuredClone(TestUserData);
-          clone.emailVerified = false;
-
-          return Effect.succeed(clone);
-        },
-      });
-
       const program = Effect.scoped(
-        pipe(
+        Effect.provide(
           requestEmailVerificationOtp("user1@example.com", "verify"),
-          Effect.provide(mockInstance),
-          Effect.provide(AppTest),
+          AppTest,
         ),
       );
-
       const session = await runTest(program);
       expect(session).toMatchObject(
         expect.objectContaining({

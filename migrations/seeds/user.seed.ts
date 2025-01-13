@@ -9,11 +9,11 @@ export const runSeed = createSeed(
     const repo = yield* UserRepo;
     const password = yield* generatePassword;
 
-    yield* repo.find("email", "joseph.owonwo@gmail.com").pipe(
+    yield* repo.find("email", "user@gmail.com").pipe(
       Effect.catchTag("NoSuchElementException", () => {
         return UserFactory.create({
           emailVerified: true,
-          email: "joseph.owonwo@gmail.com",
+          email: "user@gmail.com",
           firstName: "Joseph",
           lastName: "John",
           password: password,
@@ -21,13 +21,13 @@ export const runSeed = createSeed(
       }),
     );
 
-    const isGreaterThan12 = yield* _(
+    const isGreaterThan5 = yield* _(
       repo.count(),
-      Effect.map((e) => e > 12),
+      Effect.map((e) => e > 5),
     );
 
-    if (!isGreaterThan12) {
-      yield* UserFactory.count(12).create({
+    if (!isGreaterThan5) {
+      yield* UserFactory.count(5).create({
         emailVerified: false,
       });
     }

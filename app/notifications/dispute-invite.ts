@@ -14,7 +14,7 @@ export class DisputeInviteNotification extends Notification {
       .line(
         [
           "We would like to inform you that you have been invited to",
-          "Your participate in an open dispute related to an order.",
+          "participate in an open dispute related to an order.",
           "involvement is important for resolving this matter.",
         ].join("\n"),
       );

@@ -2,7 +2,7 @@ import { Effect, Layer } from "effect";
 import { verifyPassword } from "~/layers/encryption/helpers";
 import { changePassword, login, logout } from "~/services/auth.service";
 import { extendPasswordHasher } from "~/tests/mocks/password-hasher";
-import { extendUserRepoMock } from "~/tests/mocks/userRepoMock";
+import { extendUserRepoMock } from "~/tests/mocks/user";
 import { AppTest, runTest } from "./mocks/app";
 
 describe("Authentication service", () => {
@@ -68,6 +68,26 @@ describe("Authentication service", () => {
 
     expect(response).resolves.toMatchInlineSnapshot(
       `[PermissionError: Invalid username or password provided]`,
+    );
+  });
+
+  test("unverified users should verify account before login", async () => {
+    const program = Effect.scoped(
+      Effect.provide(
+        login({
+          body: {
+            email: "user1@example.com",
+            password: "pass123",
+          },
+        }),
+        AppTest,
+      ),
+    );
+
+    const response = runTest(program);
+
+    expect(response).resolves.toMatchInlineSnapshot(
+      `[ExpectedError: Please verify your email user1@example.com. We sent a verification email to your inbox]`,
     );
   });
 });

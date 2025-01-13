@@ -1,11 +1,11 @@
 import { Effect, Layer } from "effect";
 import { head } from "effect/Array";
-import type { TInsertAddress } from "~/migrations/schema";
+import { TInsertAddress } from "~/migrations/schema";
 import {
   UserLocationRepo,
-  type UserLocationRepository,
+  UserLocationRepository,
 } from "~/repositories/userLocation.repo";
-import type { FindArg1, FindArg2 } from "~/services/repository/repo.types";
+import { FindArg1, FindArg2 } from "~/services/repository/repo.types";
 import { extendMockImplementation } from "./helpers";
 
 const list = Effect.succeed([

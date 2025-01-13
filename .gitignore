@@ -5,5 +5,3 @@ dist
 .cache
 .output
 .env
-.amplify-hosting/
-.env.*

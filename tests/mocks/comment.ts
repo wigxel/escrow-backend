@@ -1,11 +1,11 @@
 import { Effect, Layer } from "effect";
 import { randomUUID } from "uncrypto";
-import type { Comment, NewComments } from "~/migrations/tables/interfaces";
+import { Comment, NewComments } from "~/migrations/tables/interfaces";
 import {
   CommentRepo,
-  type CommentRepository,
+  CommentRepository,
 } from "~/repositories/comment.repository";
-import type {
+import {
   FindArg1,
   FindArg2,
   RepoModelIdType,

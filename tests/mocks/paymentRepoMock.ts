@@ -1,9 +1,9 @@
 import { Effect, Layer } from "effect";
-import type { PaymentDetail } from "~/migrations/tables/interfaces";
+import { PaymentDetail } from "~/migrations/tables/interfaces";
 
 import {
   PaymentRepo,
-  type PaymentRepository,
+  PaymentRepository,
 } from "~/repositories/payment.repository";
 import { extendMockImplementation } from "./helpers";
 

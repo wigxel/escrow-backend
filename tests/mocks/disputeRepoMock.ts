@@ -1,16 +1,7 @@
 import { Effect, Layer } from "effect";
-import { head } from "effect/Array";
-import {
-  DisputeRepo,
-  type DisputeRepository,
-} from "~/repositories/dispute.repo";
 import { extendMockImplementation } from "./helpers";
-
-const TestDisputeData = {
-  id: "id",
-  createdAt: new Date(2024, 6, 30),
-  status: "pending",
-};
+import { DisputeRepo, DisputeRepository } from "~/repositories/dispute.repo";
+import { head } from "effect/Array";
 
 const disputeMock: DisputeRepository = {
   create: (data) => {
@@ -41,13 +32,18 @@ const disputeMock: DisputeRepository = {
     return Effect.void;
   },
 
-  // @ts-expect-error
   find: () => {
-    return Effect.succeed(structuredClone(TestDisputeData));
+    throw new Error("Function not implemented.");
   },
 
   firstOrThrow: (arg1, arg2) => {
-    return Effect.succeed(structuredClone(TestDisputeData));
+    return Effect.succeed([
+      {
+        id: "id",
+        createdAt: new Date(2024, 6, 30),
+        status: "pending",
+      },
+    ]).pipe(Effect.flatMap(head));
   },
 
   update: () => {

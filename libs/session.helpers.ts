@@ -25,13 +25,11 @@ export function validateSession(token: string) {
   return Effect.gen(function* (_) {
     const session = yield* Session;
 
-    yield* _(Effect.logTrace(`Validating Token: ${token}`));
+    yield* _(Effect.logDebug(`Validating Token: ${token}`));
 
     return yield* _(
       session.validate(token), // Query -> 50ms
-      Effect.mapError(
-        () => new PermissionError("Access denied. Session unrecognized"),
-      ),
+      Effect.mapError(() => new PermissionError("Access denied")),
     );
   });
 }
@@ -40,5 +38,5 @@ export function getSessionInfo(event: H3Event<unknown>) {
   return Effect.gen(function* (_) {
     const token = getBearerToken(getHeaders(event));
     return yield* validateSession(token);
-  }).pipe(Effect.tap(Effect.log("Reading session")));
+  });
 }

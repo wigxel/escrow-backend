@@ -1,7 +1,8 @@
-import { type Cause, Effect, pipe } from "effect";
+import { safeObj } from "@repo/shared/src/data.helpers";
+import { Cause, Effect, pipe } from "effect";
 // @ts-expect-error
-import type { H3Event } from "h3";
-import type { SafeParseReturnType, z } from "zod";
+import { H3Event } from "h3";
+import { SafeParseReturnType, z } from "zod";
 import { ValidationError } from "~/config/exceptions";
 
 export function validateZod<TSuccess>(
@@ -37,11 +38,6 @@ export const validateQuery = <T>(event: H3Event, schema: z.Schema<T>) =>
     validateZod(async () => schema.safeParseAsync(await getQuery(event))),
   );
 
-/**
- * @deprecated Use validateZod instead
- *
- * A shorter signature of validateZod
- * **/
 export const validateParams = <T>(schema: z.Schema<T>, data: unknown) =>
   Effect.suspend(() =>
     validateZod<z.infer<typeof schema>>(async () => schema.safeParse(data)),

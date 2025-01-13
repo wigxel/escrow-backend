@@ -1,17 +1,9 @@
 import { eq, like, or } from "drizzle-orm";
-import { Context, Effect, Layer, pipe } from "effect";
-import { head } from "effect/Array";
-import { notNil, queryEqualMap, runDrizzleQuery } from "~/libs/query.helpers";
-import { type NewUser, User, userTable } from "~/migrations/schema";
+import { Context, Effect, Layer} from "effect";
+import { notNil,  runDrizzleQuery } from "~/libs/query.helpers";
+import { userTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
-import { createRepoHelpers } from "~/services/repository/drizzle-repo-helper";
-import {
-  FindArg1,
-  FindArg2,
-  RepoModel,
-  RepoModelIdType,
-  SearchableParams,
-} from "~/services/repository/repo.types";
+
 import type {
   FilterQuery,
   PaginationQuery,

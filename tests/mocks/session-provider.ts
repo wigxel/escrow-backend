@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { NoSuchElementException } from "effect/Cause";
 import {
   SessionProvider,
-  type SessionProviderImpl,
+  SessionProviderImpl,
 } from "~/layers/session-provider";
 import { extendMockImplementation } from "~/tests/mocks/helpers";
 

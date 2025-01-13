@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import { randomUUID } from "uncrypto";
-import { Session, type SessionImpl } from "~/layers/session";
+import { Session, SessionImpl } from "~/layers/session";
 
 export const SesssionTest = Layer.effect(
   Session,

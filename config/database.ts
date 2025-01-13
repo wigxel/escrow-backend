@@ -4,6 +4,7 @@ import { TaggedError } from "effect/Data";
 import postgres from "postgres";
 import * as schema from "../migrations/schema";
 
+type t = typeof schema
 export type DrizzlePgDatabase = PostgresJsDatabase<typeof schema>;
 
 export class DatabaseConnection extends Context.Tag("DatabaseConnection")<

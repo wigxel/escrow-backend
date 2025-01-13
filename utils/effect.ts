@@ -1,7 +1,5 @@
 import { safeObj } from "@repo/shared/src/data.helpers";
-import { Effect, Layer, Match, type Scope, pipe } from "effect";
-import { ConfigProvider } from "effect";
-// @ts-expect-error
+import { Effect, Match, type Scope, pipe } from "effect";
 import type { H3Event } from "h3";
 import { AppLive } from "~/config/app";
 import type { AppExceptions } from "~/config/exceptions";
@@ -28,73 +26,49 @@ export const runLive = <
     InferRequirements<typeof AppLive>
   >;
 
-  const ConfigLayer = readConfigLayer(event);
-
-  const app = pipe(
-    program.pipe(
-      Effect.tapError((reason) => Effect.logDebug("RequestError", reason)),
-      Effect.mapError((error) => {
-        return pipe(
-          Match.value(error),
-          Match.tag("ValidationError", (error) => {
-            setResponseStatus(event, 422);
-            return error;
+  return Effect.runPromise(
+    Effect.scoped(
+      Effect.provide(
+        program.pipe(
+          Effect.tapError((reason) => Effect.logDebug("RequestError", reason)),
+          Effect.mapError((error) => {
+            return pipe(
+              Match.value(error),
+              Match.tag("ValidationError", (error) => {
+                setResponseStatus(event, 422);
+                return error;
+              }),
+              Match.tag("PermissionError", (permission_err) => {
+                return createError({
+                  status: 401,
+                  statusMessage: "Unauthorized",
+                  message: permission_err.message,
+                });
+              }),
+              Match.orElse((err) => {
+                return createError({
+                  status: 400,
+                  statusMessage: "Bad Request",
+                  message: err.message,
+                });
+              }),
+            );
           }),
-          Match.tag("PermissionError", (permission_err) => {
-            return createError({
-              status: 401,
-              statusMessage: "Unauthorized",
-              message: permission_err.message,
-            });
+          Effect.match({
+            onSuccess: (d) =>
+              ({ data: d ?? null, status: 200, message: "" }) as unknown as {
+                data: A;
+                status: number;
+                message: string;
+              },
+            onFailure: resolveErrorResponse,
           }),
-          Match.orElse((err) =>
-            createError({
-              status: 400,
-              statusMessage: "Bad Request",
-              message: err.message,
-            }),
-          ),
-        );
-      }),
+        ),
+        AppLive,
+      ),
     ),
-    Effect.match({
-      onSuccess: (d) => d as unknown as A,
-      onFailure: resolveErrorResponse,
-    }),
-    Effect.provide(AppLive),
-    Effect.provide(ConfigLayer),
-    Effect.scoped,
   );
-
-  return Effect.runPromise(app);
 };
-
-export function runSync<A, E, R extends never>(
-  event: H3Event,
-  effect: Effect.Effect<A, E, R>,
-) {
-  const program = pipe(effect, Effect.provide(readConfigLayer(event)));
-
-  return Effect.runSync(program);
-}
-
-function readConfigLayer(event: H3Event) {
-  const runtimeConfig = useRuntimeConfig(event);
-
-  const appConfig = pipe(
-    runtimeConfig,
-    ConfigProvider.fromJson,
-    ConfigProvider.snakeCase,
-    ConfigProvider.upperCase,
-  );
-
-  return Layer.setConfigProvider(appConfig);
-}
-
-export const NitroApp = Object.freeze({
-  runSync,
-  runPromise: runLive,
-});
 
 export const resolveError = (err: unknown) => {
   if (typeof err === "string") return new Error(err);

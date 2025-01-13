@@ -1,4 +1,4 @@
-import { type Context, Layer } from "effect";
+import { Context, Layer } from "effect";
 
 // TODO: Give extendMockImplementation a better name
 export function extendMockImplementation<

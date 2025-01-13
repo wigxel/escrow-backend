@@ -1,8 +1,5 @@
 import { Effect, Layer } from "effect";
-import {
-  CategoryRepo,
-  type CategoryRepository,
-} from "~/repositories/category.repo";
+import { CategoryRepo, CategoryRepository } from "~/repositories/category.repo";
 import { extendMockImplementation } from "./helpers";
 
 const CategoryLive: CategoryRepository = {

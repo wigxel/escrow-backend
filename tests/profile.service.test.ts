@@ -1,5 +1,9 @@
 import { changePassword } from "~/services/auth.service";
-import { editProfile, getProfile } from "~/services/profile.service";
+import {
+  editProfile,
+  getProfile,
+  uploadImage,
+} from "~/services/profile.service";
 import { runTest } from "./mocks/app";
 
 describe("Profile service", () => {
@@ -24,5 +28,19 @@ describe("Profile service", () => {
     expect(await runTest(program)).toMatchInlineSnapshot(
       `[PasswordHasherError: Password verification failed]`,
     );
+  });
+
+  it("should upload user profile image", async () => {
+    const program = uploadImage("test-id", {
+      data: Buffer.from([0, 3]),
+      filename: "MOCK_FILE_NAME",
+    });
+
+    const imageUploadResponse = await runTest(program);
+    expect(imageUploadResponse).toMatchInlineSnapshot(`
+      {
+        "secure_url": "Skipping upload",
+      }
+    `);
   });
 });
