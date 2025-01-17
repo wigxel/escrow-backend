@@ -6,4 +6,4 @@ export * from "~/migrations/tables/user-table";
 export * from "./tables/notification-table";
 export * from "./tables/dispute-table";
 export * from "./tables/address-table";
-export * from "./tables/transaction-table";
+export * from "./tables/escrow-transaction-table";

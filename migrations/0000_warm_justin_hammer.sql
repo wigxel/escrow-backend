@@ -11,13 +11,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."method" AS ENUM('email', 'phone', 'link');
+ CREATE TYPE "public"."invitation_status" AS ENUM('pending', 'accepted', 'declined');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."invitation_status" AS ENUM('pending', 'accepted', 'declined');
+ CREATE TYPE "public"."escrow_participants_status" AS ENUM('active', 'inactive');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -41,13 +41,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."transaction_status" AS ENUM('created', 'awaiting terms conf', 'terms confirmed', 'deposit pending', 'deposit confirmed', 'awaiting service', 'service completed', 'service confirmation', 'completed', 'dispute', 'refunded', 'cancelled');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."tranaction_participants_status" AS ENUM('active', 'inactive');
+ CREATE TYPE "public"."transaction_status" AS ENUM('created', 'deposit pending', 'deposit confirmed', 'awaiting service', 'service completed', 'service confirmation', 'completed', 'dispute', 'refunded', 'cancelled', 'expired');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -70,6 +64,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"first_name" varchar(60) NOT NULL,
 	"last_name" varchar(60) NOT NULL,
+	"username" varchar,
 	"email" varchar(60) NOT NULL,
 	"password" varchar(255) NOT NULL,
 	"phone" varchar(30) NOT NULL,
@@ -139,32 +134,42 @@ CREATE TABLE IF NOT EXISTS "addresses" (
 	"latitude" varchar
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "transaction_invitation" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"transaction_id" uuid NOT NULL,
-	"sender_id" uuid,
-	"receiver_id" uuid,
-	"role" "roles",
-	"token" varchar,
-	"user_id" uuid NOT NULL,
-	"status" "invitation_status" DEFAULT 'pending',
-	"method" "method",
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "transaction_payment" (
+CREATE TABLE IF NOT EXISTS "escrow_participants" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"transaction_id" uuid,
-	"amount" numeric(2),
-	"fee" numeric(2),
+	"user_id" uuid,
+	"role" "roles",
+	"status" "escrow_participants_status"
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "escrow_payment" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"transaction_id" uuid,
+	"user_id" uuid,
+	"amount" numeric(10, 2) NOT NULL,
+	"fee" numeric(10, 2),
 	"status" "payment_status" DEFAULT 'pending',
 	"method" "payment_method",
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "transactions" (
+CREATE TABLE IF NOT EXISTS "escrow_request" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"transaction_id" uuid NOT NULL,
+	"sender_id" uuid,
+	"customer_id" uuid,
+	"customer_role" "roles",
+	"customer_name" uuid,
+	"customer_phone" varchar,
+	"customer_email" varchar,
+	"expires_at" timestamp,
+	"status" "invitation_status" DEFAULT 'pending',
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "escrow_transactions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar,
 	"description" text,
@@ -180,14 +185,6 @@ CREATE TABLE IF NOT EXISTS "transaction_terms" (
 	"terms" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "transaction_participants" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"transaction_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
-	"roles" "roles" NOT NULL,
-	"status" "tranaction_participants_status" DEFAULT 'active'
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -209,30 +206,16 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "transactions" ADD CONSTRAINT "transactions_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "escrow_transactions" ADD CONSTRAINT "escrow_transactions_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "transaction_terms" ADD CONSTRAINT "transaction_terms_transaction_id_transactions_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transactions"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "transaction_participants" ADD CONSTRAINT "transaction_participants_transaction_id_transactions_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transactions"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "transaction_participants" ADD CONSTRAINT "transaction_participants_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "transaction_terms" ADD CONSTRAINT "transaction_terms_transaction_id_escrow_transactions_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."escrow_transactions"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "emailIndex" ON "user" USING btree ("email");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "name_idx" ON "transaction_terms" USING btree ("transaction_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "transaction_idx" ON "transaction_participants" USING btree ("transaction_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "user_idx" ON "transaction_participants" USING btree ("user_id");
+CREATE INDEX IF NOT EXISTS "name_idx" ON "transaction_terms" USING btree ("transaction_id");

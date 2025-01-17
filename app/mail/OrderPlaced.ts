@@ -2,7 +2,7 @@ import { render } from "@react-email/render";
 import { Mailable } from "~/layers/mailing/mailables";
 import { Content } from "~/layers/mailing/mailables/Content";
 import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import type { Product, User } from "~/migrations/tables/interfaces";
+import type { User } from "~/migrations/tables/interfaces";
 import { OrderPlaced } from "~/resources/view/mail/order-placed";
 
 export class OrderPlacedMail extends Mailable {
@@ -28,7 +28,7 @@ export class OrderPlacedMail extends Mailable {
     });
 
     return new Content({
-      html: render(viewTemplate),
+      html:  render(viewTemplate),
       text: render(viewTemplate, { plainText: true }),
     });
   }

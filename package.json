@@ -17,23 +17,27 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "type-testing": "0.2.0",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@types/nodemailer": "^6.4.15",
     "@vitest/ui": "^2.0.4",
     "chalk": "^5.3.0",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.22.7",
     "nitropack": "latest",
+    "react": "^18.2.0",
     "tsx": "^4.15.7",
+    "type-testing": "0.2.0",
     "typescript": "5.5.2",
-    "unplugin-auto-import": "^0.17.6",
-    "@paralleldrive/cuid2": "^2.2.2"
+    "unplugin-auto-import": "^0.17.6"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
+    "@react-email/components": "^0.0.32",
+    "@react-email/render": "^0.0.13",
     "@repo/shared": "workspace:*",
     "cloudinary": "^2.2.0",
+    "date-fns": "^3.6.0",
     "drizzle-orm": "^0.31.2",
     "drizzle-zod": "^0.5.1",
     "effect": "^3.4.8",
@@ -43,9 +47,12 @@
     "oslo": "^1.2.1",
     "postgres": "^3.4.4",
     "ramda": "^0.29.1",
+    "react-dom": "18.3.1",
+    "react-email": "^3.0.6",
     "std-env": "^3.7.0",
     "stripe": "^16.8.0",
     "supertest": "^6.0.2",
+    "tigerbeetle-node": "^0.16.21",
     "uncrypto": "^0.1.3",
     "vitest": "^1.6.0",
     "zod": "^3.23.8"

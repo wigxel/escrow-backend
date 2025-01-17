@@ -12,7 +12,7 @@ import type { InferRequirements } from "~/services/effect.util";
  * @param effect {Effect.Effect}
  */
 export const runLive = <
-  A extends Record<string, unknown>,
+  A,
   E,
   R extends InferRequirements<typeof AppLive> | Scope.Scope,
   TEvent extends H3Event<unknown>,

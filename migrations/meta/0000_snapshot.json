@@ -1,5 +1,5 @@
 {
-  "id": "96186b2d-c2da-48c7-9c19-8190801f5cfc",
+  "id": "4c683e57-9111-411d-804f-59cc4702961d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -111,6 +111,12 @@
           "type": "varchar(60)",
           "primaryKey": false,
           "notNull": true
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "email": {
           "name": "email",
@@ -533,8 +539,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.transaction_invitation": {
-      "name": "transaction_invitation",
+    "public.escrow_participants": {
+      "name": "escrow_participants",
       "schema": "",
       "columns": {
         "id": {
@@ -548,16 +554,10 @@
           "name": "transaction_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
-        },
-        "sender_id": {
-          "name": "sender_id",
-          "type": "uuid",
-          "primaryKey": false,
           "notNull": false
         },
-        "receiver_id": {
-          "name": "receiver_id",
+        "user_id": {
+          "name": "user_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -569,46 +569,12 @@
           "primaryKey": false,
           "notNull": false
         },
-        "token": {
-          "name": "token",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "status": {
           "name": "status",
-          "type": "invitation_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'pending'"
-        },
-        "method": {
-          "name": "method",
-          "type": "method",
+          "type": "escrow_participants_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -616,8 +582,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.transaction_payment": {
-      "name": "transaction_payment",
+    "public.escrow_payment": {
+      "name": "escrow_payment",
       "schema": "",
       "columns": {
         "id": {
@@ -633,15 +599,21 @@
           "primaryKey": false,
           "notNull": false
         },
-        "amount": {
-          "name": "amount",
-          "type": "numeric(2)",
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "fee": {
           "name": "fee",
-          "type": "numeric(2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
           "notNull": false
         },
@@ -680,8 +652,96 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.transactions": {
-      "name": "transactions",
+    "public.escrow_request": {
+      "name": "escrow_request",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sender_id": {
+          "name": "sender_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_role": {
+          "name": "customer_role",
+          "type": "roles",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_phone": {
+          "name": "customer_phone",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_email": {
+          "name": "customer_email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "invitation_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.escrow_transactions": {
+      "name": "escrow_transactions",
       "schema": "",
       "columns": {
         "id": {
@@ -734,9 +794,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "transactions_created_by_user_id_fk": {
-          "name": "transactions_created_by_user_id_fk",
-          "tableFrom": "transactions",
+        "escrow_transactions_created_by_user_id_fk": {
+          "name": "escrow_transactions_created_by_user_id_fk",
+          "tableFrom": "escrow_transactions",
           "tableTo": "user",
           "columnsFrom": [
             "created_by"
@@ -807,114 +867,12 @@
         }
       },
       "foreignKeys": {
-        "transaction_terms_transaction_id_transactions_id_fk": {
-          "name": "transaction_terms_transaction_id_transactions_id_fk",
+        "transaction_terms_transaction_id_escrow_transactions_id_fk": {
+          "name": "transaction_terms_transaction_id_escrow_transactions_id_fk",
           "tableFrom": "transaction_terms",
-          "tableTo": "transactions",
+          "tableTo": "escrow_transactions",
           "columnsFrom": [
             "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.transaction_participants": {
-      "name": "transaction_participants",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "roles": {
-          "name": "roles",
-          "type": "roles",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "tranaction_participants_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'active'"
-        }
-      },
-      "indexes": {
-        "transaction_idx": {
-          "name": "transaction_idx",
-          "columns": [
-            {
-              "expression": "transaction_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "user_idx": {
-          "name": "user_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "transaction_participants_transaction_id_transactions_id_fk": {
-          "name": "transaction_participants_transaction_id_transactions_id_fk",
-          "tableFrom": "transaction_participants",
-          "tableTo": "transactions",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "transaction_participants_user_id_user_id_fk": {
-          "name": "transaction_participants_user_id_user_id_fk",
-          "tableFrom": "transaction_participants",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -944,15 +902,6 @@
         "user"
       ]
     },
-    "public.method": {
-      "name": "method",
-      "schema": "public",
-      "values": [
-        "email",
-        "phone",
-        "link"
-      ]
-    },
     "public.invitation_status": {
       "name": "invitation_status",
       "schema": "public",
@@ -960,6 +909,14 @@
         "pending",
         "accepted",
         "declined"
+      ]
+    },
+    "public.escrow_participants_status": {
+      "name": "escrow_participants_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "inactive"
       ]
     },
     "public.payment_method": {
@@ -994,8 +951,6 @@
       "schema": "public",
       "values": [
         "created",
-        "awaiting terms conf",
-        "terms confirmed",
         "deposit pending",
         "deposit confirmed",
         "awaiting service",
@@ -1004,15 +959,8 @@
         "completed",
         "dispute",
         "refunded",
-        "cancelled"
-      ]
-    },
-    "public.tranaction_participants_status": {
-      "name": "tranaction_participants_status",
-      "schema": "public",
-      "values": [
-        "active",
-        "inactive"
+        "cancelled",
+        "expired"
       ]
     }
   },

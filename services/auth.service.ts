@@ -54,11 +54,8 @@ export function login({
     yield* Effect.logDebug("Session created");
 
     return {
-      message: "Login successful",
-      data: {
-        access_token: session_id,
-        expires: expires_at.toISOString(),
-      },
+      access_token: session_id,
+      expires: expires_at.toISOString(),
     };
   });
 }

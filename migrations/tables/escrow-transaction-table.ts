@@ -7,13 +7,12 @@ import {
   index,
   numeric,
   varchar,
+  integer,
 } from "drizzle-orm/pg-core";
 import { userTable } from "./user-table";
 
 export const transactionStatus = pgEnum("transaction_status", [
   "created",
-  "awaiting terms conf",
-  "terms confirmed",
   "deposit pending",
   "deposit confirmed",
   "awaiting service",
@@ -23,6 +22,7 @@ export const transactionStatus = pgEnum("transaction_status", [
   "dispute",
   "refunded",
   "cancelled",
+  "expired",
 ]);
 export const paymentStatus = pgEnum("payment_status", [
   "pending",
@@ -35,20 +35,22 @@ export const paymentMethod = pgEnum("payment_method", [
   "bank transfer",
 ]);
 export const roles = pgEnum("roles", ["buyer", "seller", "mediator"]);
-export const txPartiesStatus = pgEnum("tranaction_participants_status", ["active", "inactive"]);
+export const participantStatus = pgEnum("escrow_participants_status", [
+  "active",
+  "inactive",
+]);
 export const invitationStatus = pgEnum("invitation_status", [
   "pending",
   "accepted",
   "declined",
 ]);
-export const invitationMethod = pgEnum("method", ["email", "phone", "link"]);
 
 const timestamps = {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 };
 
-export const transactionTable = pgTable("transactions", {
+export const escrowTransactionTable = pgTable("escrow_transactions", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: varchar("title"),
   description: text("description"),
@@ -57,42 +59,24 @@ export const transactionTable = pgTable("transactions", {
   ...timestamps,
 });
 
-export const transactionPaymentTable = pgTable("transaction_payment", {
+export const escrowPaymentTable = pgTable("escrow_payment", {
   id: uuid("id").primaryKey().defaultRandom(),
   transactionId: uuid("transaction_id"),
-  amount: numeric("amount", { precision: 2 }),
-  fee: numeric("fee", { precision: 2 }),
+  userId:uuid("user_id"),
+  amount: numeric("amount", { precision: 10,scale:2 }).notNull(),
+  fee: numeric("fee", { precision: 10,scale:2 }),
   status: paymentStatus("status").default("pending"),
   method: paymentMethod("method"),
   ...timestamps,
 });
 
-export const transactionparticipantTable = pgTable(
-  "transaction_participants",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    transactionId: uuid("transaction_id")
-      .notNull()
-      .references(() => transactionTable.id),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => userTable.id),
-    role: roles("roles").notNull(),
-    status: txPartiesStatus("status").default("active"),
-  },
-  (table) => {
-    return {
-      transactionIdx: index("transaction_idx").on(table.transactionId),
-      userIdx: index("user_idx").on(table.userId),
-    };
-  },
-);
-
 export const transactionTermsTable = pgTable(
   "transaction_terms",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    transactionId: uuid("transaction_id").references(() => transactionTable.id),
+    transactionId: uuid("transaction_id").references(
+      () => escrowTransactionTable.id,
+    ),
     terms: text("terms"),
     ...timestamps,
   },
@@ -103,15 +87,24 @@ export const transactionTermsTable = pgTable(
   },
 );
 
-export const transactionInvitationTable = pgTable("transaction_invitation", {
+export const escrowParticipantsTable = pgTable("escrow_participants",{
+  id:uuid("id").primaryKey().defaultRandom(),
+  transactionId:uuid("transaction_id"),
+  userId:uuid("user_id"),
+  role:roles("role"),
+  status:participantStatus("status")
+})
+
+export const escrowRequestTable = pgTable("escrow_request", {
   id: uuid("id").primaryKey().defaultRandom(),
   transactionId: uuid("transaction_id").notNull(),
   senderId: uuid("sender_id"),
-  receiverId: uuid("receiver_id"),
-  role: roles("role"),
-  token: varchar("token"),
-  userId: uuid("user_id").notNull(),
+  customerId:uuid("customer_id"),
+  customerRole:roles("customer_role"),
+  customerName: uuid("customer_name"),
+  customerPhone: varchar("customer_phone"),
+  customerEmail: varchar("customer_email"),
+  expires_at:timestamp("expires_at"),
   status: invitationStatus("status").default("pending"),
-  method: invitationMethod("method"),
   ...timestamps,
 });
