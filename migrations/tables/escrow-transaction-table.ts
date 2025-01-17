@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { userTable } from "./user-table";
 
-export const transactionStatus = pgEnum("transaction_status", [
+export const escrowStatus = pgEnum("escrow_status", [
   "created",
   "deposit pending",
   "deposit confirmed",
@@ -54,14 +54,14 @@ export const escrowTransactionTable = pgTable("escrow_transactions", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: varchar("title"),
   description: text("description"),
-  status: transactionStatus("status").default("created"),
+  status: escrowStatus("status").default("created"),
   createdBy: uuid("created_by").references(() => userTable.id),
   ...timestamps,
 });
 
 export const escrowPaymentTable = pgTable("escrow_payment", {
   id: uuid("id").primaryKey().defaultRandom(),
-  transactionId: uuid("transaction_id"),
+  escrowId: uuid("escrow_id"),
   userId:uuid("user_id"),
   amount: numeric("amount", { precision: 10,scale:2 }).notNull(),
   fee: numeric("fee", { precision: 10,scale:2 }),
@@ -70,11 +70,11 @@ export const escrowPaymentTable = pgTable("escrow_payment", {
   ...timestamps,
 });
 
-export const transactionTermsTable = pgTable(
-  "transaction_terms",
+export const escrowTermsTable = pgTable(
+  "escrow_terms",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    transactionId: uuid("transaction_id").references(
+    escrowId: uuid("escrow_id").references(
       () => escrowTransactionTable.id,
     ),
     terms: text("terms"),
@@ -82,14 +82,13 @@ export const transactionTermsTable = pgTable(
   },
   (table) => {
     return {
-      nameIdx: index("name_idx").on(table.transactionId),
+      nameIdx: index("name_idx").on(table.escrowId),
     };
   },
 );
 
 export const escrowParticipantsTable = pgTable("escrow_participants",{
-  id:uuid("id").primaryKey().defaultRandom(),
-  transactionId:uuid("transaction_id"),
+  escrowId:uuid("escrow_id").primaryKey(),
   userId:uuid("user_id"),
   role:roles("role"),
   status:participantStatus("status")
@@ -97,7 +96,7 @@ export const escrowParticipantsTable = pgTable("escrow_participants",{
 
 export const escrowRequestTable = pgTable("escrow_request", {
   id: uuid("id").primaryKey().defaultRandom(),
-  transactionId: uuid("transaction_id").notNull(),
+  escrowId: uuid("escrow_id").notNull(),
   senderId: uuid("sender_id"),
   customerId:uuid("customer_id"),
   customerRole:roles("customer_role"),

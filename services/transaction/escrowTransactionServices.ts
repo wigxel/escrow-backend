@@ -16,6 +16,7 @@ import { EscrowParticipantRepoLayer } from "~/repositories/transaction/escrowPar
 import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment.repo";
 import { addHours } from "date-fns";
 import { ExpectedError } from "~/config/exceptions";
+import { NoSuchElementException } from "effect/Cause";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -34,8 +35,8 @@ export const createEscrowTransaction = (
         username: input.customerUsername,
       });
 
-      if(customer.id === currentUser.id){
-        yield* new ExpectedError("You cannot create transaction with yourself")
+      if (customer.id === currentUser.id) {
+        yield* new ExpectedError("You cannot create transaction with yourself");
       }
     }
 
@@ -51,24 +52,24 @@ export const createEscrowTransaction = (
 
     //add the creator to the participant table
     yield* escrowParticipantRepo.create({
-      transactionId: escrowTransaction.id,
+      escrowId: escrowTransaction.id,
       userId: currentUser.id,
       role: input.creatorRole,
     });
 
     //escrow payment
     yield* escrowPaymentRepo.create({
-      transactionId: escrowTransaction.id,
+      escrowId: escrowTransaction.id,
       amount: String(input.amount),
     });
 
     let escrowReqData: TEscrowRequest = {
-      transactionId: escrowTransaction.id,
+      escrowId: escrowTransaction.id,
       customerRole: input.creatorRole === "seller" ? "buyer" : "seller",
       customerName: input.customerUsername,
       customerEmail: input.customerEmail,
       customerPhone: String(input.customerPhone),
-      expires_at:addHours(new Date(),1)
+      expires_at: addHours(new Date(), 1),
     };
     //if the customer exists add the customer id
     if (customer) {
@@ -76,6 +77,25 @@ export const createEscrowTransaction = (
     }
 
     yield* escrowRequestRepo.create(escrowReqData);
-    return {escrowTransactionId:escrowTransaction.id}
+    return { escrowTransactionId: escrowTransaction.id };
+  });
+};
+
+export const getEscrowRequestDetails = (data: {
+  escrowId: string;
+  currentUser: SessionUser|null;
+}) => {
+  return Effect.gen(function* (_) {
+    const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
+
+    const escrowDetails = yield* _(
+      escrowRequestRepo.firstOrThrow({ escrowId: data.escrowId }),
+      Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
+    );
+
+    return {
+      requestDetails: escrowDetails,
+      isAuthenticated: !!data.currentUser,
+    };
   });
 };

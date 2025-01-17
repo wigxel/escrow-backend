@@ -1,5 +1,5 @@
 {
-  "id": "4c683e57-9111-411d-804f-59cc4702961d",
+  "id": "a1009195-a61b-4fca-aa75-38252ce99072",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -543,18 +543,11 @@
       "name": "escrow_participants",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "escrow_id": {
+          "name": "escrow_id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -593,8 +586,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "transaction_id": {
-          "name": "transaction_id",
+        "escrow_id": {
+          "name": "escrow_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -663,8 +656,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "transaction_id": {
-          "name": "transaction_id",
+        "escrow_id": {
+          "name": "escrow_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -740,6 +733,79 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.escrow_terms": {
+      "name": "escrow_terms",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "escrow_id": {
+          "name": "escrow_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terms": {
+          "name": "terms",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "name_idx": {
+          "name": "name_idx",
+          "columns": [
+            {
+              "expression": "escrow_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "escrow_terms_escrow_id_escrow_transactions_id_fk": {
+          "name": "escrow_terms_escrow_id_escrow_transactions_id_fk",
+          "tableFrom": "escrow_terms",
+          "tableTo": "escrow_transactions",
+          "columnsFrom": [
+            "escrow_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.escrow_transactions": {
       "name": "escrow_transactions",
       "schema": "",
@@ -765,7 +831,7 @@
         },
         "status": {
           "name": "status",
-          "type": "transaction_status",
+          "type": "escrow_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
@@ -810,79 +876,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
-    },
-    "public.transaction_terms": {
-      "name": "transaction_terms",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "terms": {
-          "name": "terms",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "name_idx": {
-          "name": "name_idx",
-          "columns": [
-            {
-              "expression": "transaction_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "transaction_terms_transaction_id_escrow_transactions_id_fk": {
-          "name": "transaction_terms_transaction_id_escrow_transactions_id_fk",
-          "tableFrom": "transaction_terms",
-          "tableTo": "escrow_transactions",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
     }
   },
   "enums": {
@@ -900,6 +893,23 @@
       "values": [
         "admin",
         "user"
+      ]
+    },
+    "public.escrow_status": {
+      "name": "escrow_status",
+      "schema": "public",
+      "values": [
+        "created",
+        "deposit pending",
+        "deposit confirmed",
+        "awaiting service",
+        "service completed",
+        "service confirmation",
+        "completed",
+        "dispute",
+        "refunded",
+        "cancelled",
+        "expired"
       ]
     },
     "public.invitation_status": {
@@ -944,23 +954,6 @@
         "buyer",
         "seller",
         "mediator"
-      ]
-    },
-    "public.transaction_status": {
-      "name": "transaction_status",
-      "schema": "public",
-      "values": [
-        "created",
-        "deposit pending",
-        "deposit confirmed",
-        "awaiting service",
-        "service completed",
-        "service confirmation",
-        "completed",
-        "dispute",
-        "refunded",
-        "cancelled",
-        "expired"
       ]
     }
   },
