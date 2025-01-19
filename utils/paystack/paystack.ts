@@ -8,7 +8,7 @@ class Paystack {
   private axiosInstance: AxiosInstance;
 
   public constructor(private secreteKey: string) {
-    this.axiosInstance = Axios.getInstance(secreteKey);
+    this.axiosInstance = Axios.getInstance(this.secreteKey);
   }
 
   /**
