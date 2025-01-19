@@ -36,6 +36,7 @@
     "@react-email/components": "^0.0.32",
     "@react-email/render": "^0.0.13",
     "@repo/shared": "workspace:*",
+    "axios": "^1.7.9",
     "cloudinary": "^2.2.0",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.31.2",
