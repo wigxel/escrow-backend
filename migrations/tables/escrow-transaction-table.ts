@@ -100,7 +100,7 @@ export const escrowRequestTable = pgTable("escrow_request", {
   senderId: uuid("sender_id"),
   customerId:uuid("customer_id"),
   customerRole:roles("customer_role"),
-  customerName: uuid("customer_name"),
+  customerName: varchar("customer_name"),
   customerPhone: varchar("customer_phone"),
   customerEmail: varchar("customer_email"),
   expires_at:timestamp("expires_at"),

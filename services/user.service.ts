@@ -7,13 +7,13 @@ import { PasswordHasherError } from "~/layers/encryption";
 import { hashPassword } from "~/layers/encryption/helpers";
 import { Mail } from "~/layers/mailing/mail";
 import { Session } from "~/layers/session";
-import type { NewUser } from "~/migrations/tables/interfaces";
+import type { TUser } from "~/migrations/tables/interfaces";
 import { OtpRepo } from "~/repositories/otp.repository";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
 
-export function createUser(data: NewUser) {
+export function createUser(data: TUser) {
   return Effect.gen(function* (_) {
     const mail = yield* Mail;
     const userRepo = yield* UserRepoLayer.Tag;

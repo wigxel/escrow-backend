@@ -14,7 +14,8 @@ export const createEscrowTransactionRules = z.object({
 });
 
 
-export const InviteStatusRules = z.object({
-  invitationId:z.string().uuid(),
-  status:z.enum(["accepted", "declined"])
+export const confirmEscrowRequestRules = z.object({
+  customerUsername:z.string().min(3),
+  customerPhone:z.number({coerce:true}),
+  customerEmail:z.string().email()
 })

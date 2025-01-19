@@ -1,0 +1,1 @@
+ALTER TABLE "escrow_request" ALTER COLUMN "customer_name" SET DATA TYPE varchar;

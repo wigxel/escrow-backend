@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import type { MemberRole, NewUser, User } from "~/migrations/schema";
-import { UserRepo, UserRepository } from "~/repositories/user.repository";
+import { UserRepo, type UserRepository } from "~/repositories/user.repository";
 import { extendMockImplementation } from "~/tests/mocks/helpers";
 
 const MockMethods: UserRepository = {
