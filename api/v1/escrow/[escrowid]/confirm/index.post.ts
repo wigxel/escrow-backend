@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
 import { validateBody, validateParams } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
-import { confirmEscrowRequest } from "~/services/transaction/escrowTransactionServices";
+import { initializeEscrowDeposit } from "~/services/transaction/escrowTransactionServices";
 import { confirmEscrowRequestRules } from "~/validationRules/escrowTransactions.rules";
 
 export default eventHandler((event) => {
@@ -25,7 +25,7 @@ export default eventHandler((event) => {
       }),
     );
 
-    return yield* confirmEscrowRequest({ ...data, escrowId }, user);
+    return yield* initializeEscrowDeposit({ ...data, escrowId }, user);
   });
   return runLive(event, program);
 });

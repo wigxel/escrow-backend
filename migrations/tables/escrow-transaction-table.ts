@@ -62,9 +62,9 @@ export const escrowTransactionTable = pgTable("escrow_transactions", {
 export const escrowPaymentTable = pgTable("escrow_payment", {
   id: uuid("id").primaryKey().defaultRandom(),
   escrowId: uuid("escrow_id"),
-  userId:uuid("user_id"),
-  amount: numeric("amount", { precision: 10,scale:2 }).notNull(),
-  fee: numeric("fee", { precision: 10,scale:2 }),
+  userId: uuid("user_id"),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  fee: numeric("fee", { precision: 10, scale: 2 }),
   status: paymentStatus("status").default("pending"),
   method: paymentMethod("method"),
   ...timestamps,
@@ -74,9 +74,7 @@ export const escrowTermsTable = pgTable(
   "escrow_terms",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    escrowId: uuid("escrow_id").references(
-      () => escrowTransactionTable.id,
-    ),
+    escrowId: uuid("escrow_id").references(() => escrowTransactionTable.id),
     terms: text("terms"),
     ...timestamps,
   },
@@ -87,23 +85,24 @@ export const escrowTermsTable = pgTable(
   },
 );
 
-export const escrowParticipantsTable = pgTable("escrow_participants",{
-  escrowId:uuid("escrow_id").primaryKey(),
-  userId:uuid("user_id"),
-  role:roles("role"),
-  status:participantStatus("status")
-})
+export const escrowParticipantsTable = pgTable("escrow_participants", {
+  escrowId: uuid("escrow_id").primaryKey(),
+  userId: uuid("user_id"),
+  role: roles("role"),
+  status: participantStatus("status"),
+});
 
 export const escrowRequestTable = pgTable("escrow_request", {
   id: uuid("id").primaryKey().defaultRandom(),
   escrowId: uuid("escrow_id").notNull(),
   senderId: uuid("sender_id"),
-  customerId:uuid("customer_id"),
-  customerRole:roles("customer_role"),
+  customerId: uuid("customer_id"),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  customerRole: roles("customer_role"),
   customerName: varchar("customer_name"),
   customerPhone: varchar("customer_phone"),
   customerEmail: varchar("customer_email"),
-  expires_at:timestamp("expires_at"),
+  expires_at: timestamp("expires_at"),
   status: invitationStatus("status").default("pending"),
   ...timestamps,
 });

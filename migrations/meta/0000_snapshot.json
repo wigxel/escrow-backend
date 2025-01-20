@@ -1,5 +1,5 @@
 {
-  "id": "a1009195-a61b-4fca-aa75-38252ce99072",
+  "id": "d0c988dc-b795-4453-9eab-6ba9c978b436",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -674,6 +674,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "customer_role": {
           "name": "customer_role",
           "type": "roles",
@@ -683,7 +689,7 @@
         },
         "customer_name": {
           "name": "customer_name",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },

@@ -5,7 +5,7 @@ import { errorHandler } from "./helper/errorHandler";
 import type { TinitializeResponse } from "./type/types";
 import crypto from "node:crypto";
 
-class Paystack {
+export class Paystack {
   private axiosInstance: AxiosInstance;
 
   public constructor(private secretKey: string) {
@@ -16,7 +16,7 @@ class Paystack {
    * This function processes payment requests and determines the most
    * appropriate payment method for a customer.
    *
-   * @param {Record<string unknown>} customerData
+   * @param {TInitializeTransactionData} payload
    * @returns {IResponse<TinitializeResponse>}
    */
   async initializeTransaction(payload: TInitializeTransactionData) {

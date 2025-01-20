@@ -22,6 +22,7 @@ import { NoSuchElementException } from "effect/Cause";
 import { Mail } from "~/layers/mailing/mail";
 import { head } from "effect/Array";
 import { SearchOps } from "../search/sql-search-resolver";
+import { CheckoutManager } from "~/layers/payment/checkout-manager";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -71,6 +72,7 @@ export const createEscrowTransaction = (
     let escrowReqData: TEscrowRequest = {
       escrowId: escrowTransaction.id,
       senderId: currentUser.id,
+      amount: String(input.amount),
       customerRole: input.creatorRole === "seller" ? "buyer" : "seller",
       customerName: input.customerUsername,
       customerEmail: input.customerEmail,
@@ -106,13 +108,14 @@ export const getEscrowRequestDetails = (data: {
   });
 };
 
-export const confirmEscrowRequest = (
+export const initializeEscrowDeposit = (
   input: z.infer<typeof confirmEscrowRequestRules> & { escrowId: string },
   currentUser: SessionUser,
 ) => {
   return Effect.gen(function* (_) {
     const userRepo = yield* _(UserRepoLayer.Tag);
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
+    const checkoutManager = yield* _(CheckoutManager);
 
     const escrowRequestDetails = yield* _(
       escrowRequestRepo.firstOrThrow({ escrowId: input.escrowId }),
@@ -123,14 +126,27 @@ export const confirmEscrowRequest = (
     if (isBefore(escrowRequestDetails.expires_at, new Date())) {
       yield* new ExpectedError("Escrow transaction request has expired");
     }
+
+    const customerPayingDetails = yield* _(findOrCreateUser(userRepo, input));
     /**
      * the escrow request creator shouldn't be able to proceed with the escrow
      */
-    if (currentUser?.id && escrowRequestDetails.senderId === currentUser.id) {
-      yield* new ExpectedError("Cannot proceed: Escrow request created by you");
+    if (escrowRequestDetails.senderId === customerPayingDetails.id) {
+      yield* new ExpectedError("Account associated with the escrow creation");
     }
 
-    yield* _(findOrCreateUser(userRepo, input));
+    return yield* checkoutManager.createSession({
+      amount: String(Number(escrowRequestDetails.amount) * 100),
+      email: input.customerEmail,
+      reference: escrowRequestDetails.escrowId,
+      callback_url: "",
+      metadata: {
+        customer_details: {
+          id: customerPayingDetails.id,
+          email: customerPayingDetails.email,
+        },
+      },
+    });
   });
 };
 

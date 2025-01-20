@@ -15,6 +15,7 @@ import { Mailer } from "~/layers/mailing";
 import { NodeMailer } from "~/services/mailing/node-mailer";
 import { EscrowRequestRepoLayer } from "~/repositories/transaction/escrowRequest.repo";
 import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment.repo";
+import { PaystackCheckoutLive } from "~/layers/payment/adapters/paystack";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserLocationRepoLive),
@@ -50,7 +51,8 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(MailingModule),
   Layer.provideMerge(NotificationRepoLayer.Repo.Live),
   Layer.provideMerge(UserModule),
-  Layer.provideMerge(EscrowModule)
+  Layer.provideMerge(EscrowModule),
+  Layer.provideMerge(PaystackCheckoutLive)
 );
 
 // const DevToolsLive = DevTools.layerWebSocket().pipe(
