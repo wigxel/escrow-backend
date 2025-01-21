@@ -7,9 +7,7 @@ import type {
   createEscrowTransactionRules,
 } from "~/validationRules/escrowTransactions.rules";
 import type { TEscrowRequest, TUser } from "~/migrations/schema";
-import {
-  UserRepoLayer,
-} from "~/repositories/user.repository";
+import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/transaction/escrowRequest.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/transaction/escrowParticipant.repo";
 import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment.repo";
@@ -131,7 +129,7 @@ export const initializeEscrowDeposit = (
       yield* new ExpectedError("Account associated with the escrow creation");
     }
 
-    return yield* checkoutManager.createSession({
+    const checkoutSession = yield* checkoutManager.createSession({
       amount: String(Number(escrowRequestDetails.amount) * 100),
       email: input.customerEmail,
       reference: escrowRequestDetails.escrowId,
@@ -140,24 +138,35 @@ export const initializeEscrowDeposit = (
         customer_details: {
           id: customerPayingDetails.id,
           email: customerPayingDetails.email,
-          reference:escrowRequestDetails.escrowId
         },
+        reference: escrowRequestDetails.escrowId,
       },
     });
+
+    // update the escrow request with the access code so one can resume payment session
+    yield* escrowRequestRepo.update(
+      { escrowId: escrowRequestDetails.escrowId },
+      {
+        accessCode: checkoutSession.data.access_code,
+        authorizationUrl: checkoutSession.data.authorization_url,
+      },
+    );
+
+    return checkoutSession;
   });
 };
 
 /**
  * Handles the necessary updates and actions after a successful deposit.
- * 
+ *
  * This method performs the following tasks:
  * 1. Updates the status of the escrow transaction to 'deposit_received'.
  * 2. Adds the customer(s) as participants in the escrow transaction.
  * 3. Creates an account for the user, if necessary.
  * 4. Deletes the escrow request after the transaction is completed.
  */
-export const updateEscrowStatus = (params:Record<string,string>) => {
-  return Effect.gen(function*(_){
+export const updateEscrowStatus = (params: Record<string, string>) => {
+  return Effect.gen(function* (_) {
     // Implementation
-  })
-}
+  });
+};
