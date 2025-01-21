@@ -1,9 +1,7 @@
-import { Console, Effect } from "effect";
+import { Effect } from "effect";
 import type { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
-
 import { EscrowTransactionRepoLayer } from "~/repositories/transaction/escrowTransaction.repo";
-
 import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
@@ -11,7 +9,6 @@ import type {
 import type { TEscrowRequest, TUser } from "~/migrations/schema";
 import {
   UserRepoLayer,
-  type UserRepository,
 } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/transaction/escrowRequest.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/transaction/escrowParticipant.repo";
@@ -19,10 +16,9 @@ import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment
 import { addHours, isBefore } from "date-fns";
 import { ExpectedError } from "~/config/exceptions";
 import { NoSuchElementException } from "effect/Cause";
-import { Mail } from "~/layers/mailing/mail";
 import { head } from "effect/Array";
-import { SearchOps } from "../search/sql-search-resolver";
 import { CheckoutManager } from "~/layers/payment/checkout-manager";
+import { findOrCreateUser } from "../user.service";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -127,7 +123,7 @@ export const initializeEscrowDeposit = (
       yield* new ExpectedError("Escrow transaction request has expired");
     }
 
-    const customerPayingDetails = yield* _(findOrCreateUser(userRepo, input));
+    const customerPayingDetails = yield* _(findOrCreateUser(input));
     /**
      * the escrow request creator shouldn't be able to proceed with the escrow
      */
@@ -144,6 +140,7 @@ export const initializeEscrowDeposit = (
         customer_details: {
           id: customerPayingDetails.id,
           email: customerPayingDetails.email,
+          reference:escrowRequestDetails.escrowId
         },
       },
     });
@@ -151,53 +148,16 @@ export const initializeEscrowDeposit = (
 };
 
 /**
- * Find or create new user
- * */
-const findOrCreateUser = (
-  userRepo: UserRepository,
-  input: z.infer<typeof confirmEscrowRequestRules>,
-) => {
-  return Effect.matchEffect(
-    userRepo.firstOrThrow({ email: input.customerEmail }),
-    {
-      onSuccess: (user) => Effect.succeed(user),
-      onFailure: (e) => handleUserCreation(userRepo, input),
-    },
-  );
-};
-
-const handleUserCreation = (
-  userRepo: UserRepository,
-  input: z.infer<typeof confirmEscrowRequestRules>,
-) => {
-  return Effect.gen(function* (_) {
-    const mail = yield* Mail;
-    const [existingUserByUsername, existingUserByPhone] = yield* _(
-      Effect.all([
-        userRepo.count(SearchOps.eq("username", input.customerUsername)),
-        userRepo.count(SearchOps.eq("phone", input.customerPhone)),
-      ]),
-    );
-
-    if (existingUserByUsername) {
-      yield* new ExpectedError("Username is already taken");
-    }
-    if (existingUserByPhone) {
-      yield* new ExpectedError("Phone is already taken");
-    }
-
-    return yield* _(
-      userRepo.create({
-        firstName: "",
-        lastName: "",
-        password: "",
-        email: input.customerEmail,
-        phone: String(input.customerPhone),
-        username: input.customerUsername,
-      }),
-      Effect.flatMap(head),
-    );
-
-    //send an email to the user to notify of newly created account
-  });
-};
+ * Handles the necessary updates and actions after a successful deposit.
+ * 
+ * This method performs the following tasks:
+ * 1. Updates the status of the escrow transaction to 'deposit_received'.
+ * 2. Adds the customer(s) as participants in the escrow transaction.
+ * 3. Creates an account for the user, if necessary.
+ * 4. Deletes the escrow request after the transaction is completed.
+ */
+export const updateEscrowStatus = (params:Record<string,string>) => {
+  return Effect.gen(function*(_){
+    // Implementation
+  })
+}

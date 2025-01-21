@@ -1,6 +1,6 @@
 import { type ConfigError, Context, type Effect } from "effect";
 import type { UnknownException } from "effect/Cause";
-import { TaggedClass, TaggedError } from "effect/Data";
+import { TaggedError } from "effect/Data";
 import type { PaymentEventService } from "./payment-events";
 import type { TInitializeTransactionData } from "~/utils/paystack/type/data";
 import type { TinitializeResponse } from "~/utils/paystack/type/types";
@@ -23,7 +23,7 @@ export type TCheckoutManager = {
     params: any,
   ) => Effect.Effect<void, CheckoutErrors, PaymentEventService>;
 
-  verifyWebhook: () => Effect.Effect<void>;
+  verifyWebhook: (payload:unknown, signature:string) => Effect.Effect<boolean,never>;
 
   /** Verifies the state of a payment event **/
   // cashout: () => void;

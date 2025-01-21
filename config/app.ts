@@ -10,12 +10,12 @@ import { EscrowTransactionRepoLayer} from "~/repositories/transaction/escrowTran
 import { EscrowParticipantRepoLayer } from "~/repositories/transaction/escrowParticipant.repo";
 import { MailLive } from "~/layers/mailing/mail";
 import { NotificationLive } from "~/layers/notification/layer";
-import { SESMailer } from "~/services/mailing/aws-ses";
 import { Mailer } from "~/layers/mailing";
 import { NodeMailer } from "~/services/mailing/node-mailer";
 import { EscrowRequestRepoLayer } from "~/repositories/transaction/escrowRequest.repo";
 import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment.repo";
 import { PaystackCheckoutLive } from "~/layers/payment/adapters/paystack";
+import { PaystackEventLive } from "~/layers/payment/adapters/paystack-events";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserLocationRepoLive),
@@ -52,7 +52,8 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoLayer.Repo.Live),
   Layer.provideMerge(UserModule),
   Layer.provideMerge(EscrowModule),
-  Layer.provideMerge(PaystackCheckoutLive)
+  Layer.provideMerge(PaystackCheckoutLive),
+  Layer.provideMerge(PaystackEventLive)
 );
 
 // const DevToolsLive = DevTools.layerWebSocket().pipe(

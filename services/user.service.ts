@@ -9,9 +9,11 @@ import { Mail } from "~/layers/mailing/mail";
 import { Session } from "~/layers/session";
 import type { TUser } from "~/migrations/tables/interfaces";
 import { OtpRepo } from "~/repositories/otp.repository";
-import { UserRepoLayer } from "~/repositories/user.repository";
+import { UserRepoLayer, UserRepository } from "~/repositories/user.repository";
 import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
+import type { confirmEscrowRequestRules } from "~/validationRules/escrowTransactions.rules";
+import type { z } from "zod";
 
 export function createUser(data: TUser) {
   return Effect.gen(function* (_) {
@@ -188,3 +190,56 @@ export function verifyUserEmail(otp: string) {
     };
   });
 }
+
+/**
+ * Find or create new user
+ * */
+export const findOrCreateUser = (
+  input: z.infer<typeof confirmEscrowRequestRules>,
+) => {
+  const userRepo = UserRepoLayer.Tag;
+  return userRepo.pipe(
+    Effect.flatMap((repo) =>
+      Effect.matchEffect(repo.firstOrThrow({ email: input.customerEmail }), {
+        onSuccess: (user) => Effect.succeed(user),
+        onFailure: (e) => handleUserCreationFromEscrow(input),
+      }),
+    ),
+  );
+};
+
+export const handleUserCreationFromEscrow = (
+  input: z.infer<typeof confirmEscrowRequestRules>,
+) => {
+  return Effect.gen(function* (_) {
+    const userRepo = yield* UserRepoLayer.Tag;
+    const mail = yield* Mail;
+    const [existingUserByUsername, existingUserByPhone] = yield* _(
+      Effect.all([
+        userRepo.count(SearchOps.eq("username", input.customerUsername)),
+        userRepo.count(SearchOps.eq("phone", input.customerPhone)),
+      ]),
+    );
+
+    if (existingUserByUsername) {
+      yield* new ExpectedError("Username is already taken");
+    }
+    if (existingUserByPhone) {
+      yield* new ExpectedError("Phone is already taken");
+    }
+
+    return yield* _(
+      userRepo.create({
+        firstName: "",
+        lastName: "",
+        password: "",
+        email: input.customerEmail,
+        phone: String(input.customerPhone),
+        username: input.customerUsername,
+      }),
+      Effect.flatMap(head),
+    );
+
+    //send an email to the user to notify of newly created account
+  });
+};

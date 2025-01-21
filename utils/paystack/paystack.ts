@@ -40,7 +40,10 @@ export class Paystack {
    * sent from paystack to the callback url
    * @returns {IResponse<TinitializeResponse>}
    */
-  verifyWebhookSignature(payload: unknown, signature: string): boolean {
+  verifyWebhookSignature(
+    payload: Record<string, unknown>,
+    signature: string,
+  ): boolean {
     const hash = crypto
       .createHmac("sha512", this.secretKey)
       .update(JSON.stringify(payload))
