@@ -8,9 +8,9 @@ export const createEscrowTransactionRules = z.object({
   description: z.string().optional(),
   terms:z.string().optional(),
   creatorRole: z.enum(USER_ROLE),
-  customerUsername:z.string().min(3).optional(),
-  customerPhone:z.number({coerce:true}).optional(),
-  customerEmail:z.string().email().optional()
+  customerUsername:z.string().min(3),
+  customerPhone:z.number({coerce:true}),
+  customerEmail:z.string().email()
 });
 
 

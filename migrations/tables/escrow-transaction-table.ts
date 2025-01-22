@@ -13,27 +13,24 @@ import { userTable } from "./user-table";
 
 export const escrowStatus = pgEnum("escrow_status", [
   "created",
-  "deposit pending",
-  "deposit confirmed",
-  "awaiting service",
-  "service completed",
-  "service confirmation",
+  "deposit.pending",
+  "deposit.success",
+  "service.pending",
+  "service.confirmed",
   "completed",
   "dispute",
   "refunded",
   "cancelled",
   "expired",
 ]);
+
 export const paymentStatus = pgEnum("payment_status", [
   "pending",
   "success",
   "cancelled",
   "failed",
 ]);
-export const paymentMethod = pgEnum("payment_method", [
-  "credit card",
-  "bank transfer",
-]);
+
 export const roles = pgEnum("roles", ["buyer", "seller", "mediator"]);
 export const participantStatus = pgEnum("escrow_participants_status", [
   "active",
@@ -64,9 +61,9 @@ export const escrowPaymentTable = pgTable("escrow_payment", {
   escrowId: uuid("escrow_id"),
   userId: uuid("user_id"),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  fee: numeric("fee", { precision: 10, scale: 2 }),
+  fee: numeric("fee", { precision: 10, scale: 2 }).default("0"),
   status: paymentStatus("status").default("pending"),
-  method: paymentMethod("method"),
+  method: varchar("method"),
   ...timestamps,
 });
 
@@ -86,25 +83,25 @@ export const escrowTermsTable = pgTable(
 );
 
 export const escrowParticipantsTable = pgTable("escrow_participants", {
-  escrowId: uuid("escrow_id").primaryKey(),
+  id:uuid("id").primaryKey().defaultRandom(),
+  escrowId: uuid("escrow_id"),
   userId: uuid("user_id"),
   role: roles("role"),
-  status: participantStatus("status"),
+  status: participantStatus("status").default("active"),
 });
 
 export const escrowRequestTable = pgTable("escrow_request", {
   id: uuid("id").primaryKey().defaultRandom(),
   escrowId: uuid("escrow_id").notNull(),
   senderId: uuid("sender_id"),
-  customerId: uuid("customer_id"),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   customerRole: roles("customer_role"),
-  customerName: varchar("customer_name"),
+  customerUsername: varchar("customer_name"),
   customerPhone: varchar("customer_phone"),
   customerEmail: varchar("customer_email"),
   status: invitationStatus("status").default("pending"),
-  accessCode:varchar("access-code"),
-  authorizationUrl:text("authorization_url"),
+  accessCode: varchar("access-code"),
+  authorizationUrl: text("authorization_url"),
   expires_at: timestamp("expires_at"),
   ...timestamps,
 });

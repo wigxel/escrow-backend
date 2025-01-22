@@ -1,6 +1,6 @@
 {
-  "id": "33671e81-4344-449e-8c34-c37e04ff9254",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "8db50339-0106-4fd1-81e6-77e90455f690",
+  "prevId": "d09fdeb9-3c6f-4cb9-8b1c-4e6ded95e4b7",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -629,8 +629,7 @@
         },
         "method": {
           "name": "method",
-          "type": "payment_method",
-          "typeSchema": "public",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
@@ -947,14 +946,6 @@
       "values": [
         "active",
         "inactive"
-      ]
-    },
-    "public.payment_method": {
-      "name": "payment_method",
-      "schema": "public",
-      "values": [
-        "credit card",
-        "bank transfer"
       ]
     },
     "public.payment_status": {

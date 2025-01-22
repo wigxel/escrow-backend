@@ -17,6 +17,10 @@ import { NoSuchElementException } from "effect/Cause";
 import { head } from "effect/Array";
 import { CheckoutManager } from "~/layers/payment/checkout-manager";
 import { findOrCreateUser } from "../user.service";
+import type {
+  TPaymentDetails,
+  TSuccessPaymentMetaData,
+} from "../payment.service";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -29,15 +33,15 @@ export const createEscrowTransaction = (
     const escrowPaymentRepo = yield* _(EscrowPaymentRepoLayer.tag);
     const userRepo = yield* _(UserRepoLayer.Tag);
 
-    let customer: TUser;
-    if (input.customerUsername) {
-      customer = yield* userRepo.firstOrThrow({
+    const customer: TUser = yield* _(
+      userRepo.firstOrThrow({
         username: input.customerUsername,
-      });
+      }),
+      Effect.match({ onSuccess: (v) => v, onFailure: () => null }),
+    );
 
-      if (customer.id === currentUser.id) {
-        yield* new ExpectedError("You cannot create transaction with yourself");
-      }
+    if (customer && customer.id === currentUser.id) {
+      yield* new ExpectedError("You cannot create transaction with yourself");
     }
 
     //new escrow transaction
@@ -63,20 +67,16 @@ export const createEscrowTransaction = (
       amount: String(input.amount),
     });
 
-    let escrowReqData: TEscrowRequest = {
+    const escrowReqData: TEscrowRequest = {
       escrowId: escrowTransaction.id,
       senderId: currentUser.id,
       amount: String(input.amount),
       customerRole: input.creatorRole === "seller" ? "buyer" : "seller",
-      customerName: input.customerUsername,
+      customerUsername: input.customerUsername,
       customerEmail: input.customerEmail,
       customerPhone: String(input.customerPhone),
       expires_at: addHours(new Date(), 1),
     };
-    //if the customer exists add the customer id
-    if (customer) {
-      escrowReqData = { ...escrowReqData, customerId: customer.id };
-    }
 
     yield* escrowRequestRepo.create(escrowReqData);
     return { escrowTransactionId: escrowTransaction.id };
@@ -89,14 +89,24 @@ export const getEscrowRequestDetails = (data: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
+    const escrowTransactionRepo = yield* _(EscrowTransactionRepoLayer.tag);
 
-    const escrowDetails = yield* _(
-      escrowRequestRepo.firstOrThrow({ escrowId: data.escrowId }),
+    const escrowRequestDetails = yield* _(
+      escrowRequestRepo.firstOrThrow({
+        escrowId: data.escrowId,
+        status: "pending",
+      }),
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
     );
 
+    //update the escrow transaction status to "deposit.pending"
+    yield* escrowTransactionRepo.update(
+      { id: escrowRequestDetails.escrowId },
+      { status: "deposit.pending" },
+    );
+
     return {
-      requestDetails: escrowDetails,
+      requestDetails: escrowRequestDetails,
       isAuthenticated: !!data.currentUser,
     };
   });
@@ -107,25 +117,51 @@ export const initializeEscrowDeposit = (
   currentUser: SessionUser,
 ) => {
   return Effect.gen(function* (_) {
-    const userRepo = yield* _(UserRepoLayer.Tag);
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
     const checkoutManager = yield* _(CheckoutManager);
+    const escrowTransactionRepo = yield* _(EscrowTransactionRepoLayer.tag);
 
+    const escrowTransactionDetails = yield* _(
+      escrowTransactionRepo.firstOrThrow({ id: input.escrowId }),
+      Effect.mapError(() => new NoSuchElementException("Invalid escrow transaction id")),
+    );
+
+    if(escrowTransactionDetails.status !== "deposit.pending"){
+      yield* new ExpectedError("Please click the link sent to you to proceed with payment")
+    }
+    
     const escrowRequestDetails = yield* _(
-      escrowRequestRepo.firstOrThrow({ escrowId: input.escrowId }),
+      escrowRequestRepo.firstOrThrow({
+        escrowId: input.escrowId,
+        status: "pending",
+      }),
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
     );
 
     //make sure the escrow transaction hasn't expired
-    if (isBefore(escrowRequestDetails.expires_at, new Date())) {
-      yield* new ExpectedError("Escrow transaction request has expired");
+    // if (isBefore(escrowRequestDetails.expires_at, new Date())) {
+    //   yield* new ExpectedError("Escrow transaction request has expired");
+    // }
+
+    if (escrowRequestDetails.accessCode) {
+      return {
+        status: true,
+        message: "Authorization URL created",
+        data: {
+          authorization_url: escrowRequestDetails.authorizationUrl,
+          access_code: escrowRequestDetails.accessCode,
+          reference: escrowRequestDetails.escrowId,
+        },
+      };
     }
 
-    const customerPayingDetails = yield* _(findOrCreateUser(input));
+    //create a new account if neccessary
+    const customerDetails = yield* _(findOrCreateUser(input));
+
     /**
      * the escrow request creator shouldn't be able to proceed with the escrow
      */
-    if (escrowRequestDetails.senderId === customerPayingDetails.id) {
+    if (currentUser && currentUser.id === escrowRequestDetails.senderId) {
       yield* new ExpectedError("Account associated with the escrow creation");
     }
 
@@ -135,11 +171,14 @@ export const initializeEscrowDeposit = (
       reference: escrowRequestDetails.escrowId,
       callback_url: "",
       metadata: {
-        customer_details: {
-          id: customerPayingDetails.id,
-          email: customerPayingDetails.email,
+        customerDetails: {
+          userId: customerDetails.id,
+          email: input.customerEmail,
+          username: input.customerUsername,
+          phone: input.customerPhone,
+          role: escrowRequestDetails.customerRole,
         },
-        reference: escrowRequestDetails.escrowId,
+        escrowId: escrowRequestDetails.escrowId,
       },
     });
 
@@ -162,11 +201,47 @@ export const initializeEscrowDeposit = (
  * This method performs the following tasks:
  * 1. Updates the status of the escrow transaction to 'deposit_received'.
  * 2. Adds the customer(s) as participants in the escrow transaction.
- * 3. Creates an account for the user, if necessary.
- * 4. Deletes the escrow request after the transaction is completed.
+ * 3. Deletes the escrow request after the transaction is completed.
  */
-export const updateEscrowStatus = (params: Record<string, string>) => {
+export const updateEscrowStatus = (
+  params: TSuccessPaymentMetaData & { paymentDetails: TPaymentDetails },
+) => {
   return Effect.gen(function* (_) {
-    // Implementation
+    const escrowTransactionRepo = yield* EscrowTransactionRepoLayer.tag;
+    const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
+    const escrowRequestRepo = yield* EscrowRequestRepoLayer.tag;
+    const escrowPaymentRepo = yield* EscrowPaymentRepoLayer.tag;
+
+    //update the escrowRequest status to accepted otherwise it can be deleted
+    yield* _(
+      escrowRequestRepo.update(
+        { escrowId: params.escrowId },
+        { status: "accepted" },
+      ),
+    );
+
+    //add the customer as participant
+    yield* escrowParticipantRepo.create({
+      escrowId: params.escrowId,
+      role: params.customerDetails.role,
+      userId: params.customerDetails.userId,
+    });
+
+    //update the payment table
+    yield* escrowPaymentRepo.update(
+      { escrowId: params.escrowId },
+      {
+        status: params.paymentDetails.status,
+        userId: params.customerDetails.userId,
+        method: params.paymentDetails.paymentMethod,
+        //fees can be calculated and update here
+      },
+    );
+
+    //update the esrow transaction to deposit.success
+    yield* escrowTransactionRepo.update(
+      { id: params.escrowId },
+      { status: "deposit.success" },
+    );
   });
 };

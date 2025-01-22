@@ -11,7 +11,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."escrow_status" AS ENUM('created', 'deposit pending', 'deposit confirmed', 'awaiting service', 'service completed', 'service confirmation', 'completed', 'dispute', 'refunded', 'cancelled', 'expired');
+ CREATE TYPE "public"."escrow_status" AS ENUM('created', 'deposit.pending', 'deposit.success', 'service.pending', 'service.confirmed', 'completed', 'dispute', 'refunded', 'cancelled', 'expired');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -135,10 +135,11 @@ CREATE TABLE IF NOT EXISTS "addresses" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "escrow_participants" (
-	"escrow_id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"escrow_id" uuid,
 	"user_id" uuid,
 	"role" "roles",
-	"status" "escrow_participants_status"
+	"status" "escrow_participants_status" DEFAULT 'active'
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "escrow_payment" (
@@ -146,7 +147,7 @@ CREATE TABLE IF NOT EXISTS "escrow_payment" (
 	"escrow_id" uuid,
 	"user_id" uuid,
 	"amount" numeric(10, 2) NOT NULL,
-	"fee" numeric(10, 2),
+	"fee" numeric(10, 2) DEFAULT '0',
 	"status" "payment_status" DEFAULT 'pending',
 	"method" "payment_method",
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -157,14 +158,15 @@ CREATE TABLE IF NOT EXISTS "escrow_request" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"escrow_id" uuid NOT NULL,
 	"sender_id" uuid,
-	"customer_id" uuid,
 	"amount" numeric(10, 2) NOT NULL,
 	"customer_role" "roles",
 	"customer_name" varchar,
 	"customer_phone" varchar,
 	"customer_email" varchar,
-	"expires_at" timestamp,
 	"status" "invitation_status" DEFAULT 'pending',
+	"access-code" varchar,
+	"authorization_url" text,
+	"expires_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

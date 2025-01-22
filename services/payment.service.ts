@@ -1,10 +1,25 @@
 import { Effect } from "effect";
 import { UnknownException } from "effect/Cause";
 import { CheckoutManager } from "~/layers/payment/checkout-manager";
-import { PaymentEvent, PaymentEventService } from "~/layers/payment/payment-events";
+import {
+  PaymentEvent,
+  PaymentEventService,
+} from "~/layers/payment/payment-events";
 import { updateEscrowStatus } from "./transaction/escrowTransactionServices";
 
-export const handlePaymentEvents = (res: Record<string,unknown>, paystackSignature: string) => {
+export const handlePaymentEvents = (
+  res: {
+    event: string;
+    data: {
+      amount: string;
+      reference: string;
+      status: string;
+      channel: string;
+      metadata: TSuccessPaymentMetaData;
+    };
+  },
+  paystackSignature: string,
+) => {
   return Effect.gen(function* (_) {
     const manager = yield* CheckoutManager;
     const paymentEvents = yield* PaymentEventService;
@@ -14,13 +29,12 @@ export const handlePaymentEvents = (res: Record<string,unknown>, paystackSignatu
       paystackSignature,
     );
     if (!isVerifiedWebhook) {
-      yield* new UnknownException(
-      "Signature mismatch: Invalid signature.",
-      );
+      yield* new UnknownException("Signature mismatch: Invalid signature.");
     }
-    const event = paymentEvents.resolve(res)
+    const event = paymentEvents.resolve(res);
 
-    const metadata = yield* paymentEvents.getMetadata<Record<string,unknown>>(event);
+    const metadata =
+      yield* paymentEvents.getMetadata<TSuccessPaymentMetaData>(event);
 
     if (PaymentEvent.$is("Chargefailed")(event)) {
       // do something when the payment fails
@@ -28,11 +42,38 @@ export const handlePaymentEvents = (res: Record<string,unknown>, paystackSignatu
     }
 
     if (!PaymentEvent.$is("ChargeSuccess")(event)) {
-      yield* Effect.logDebug("Ignoring payment event");
+      yield* Effect.logDebug("Payment failed: Ignoring payment event");
       return;
     }
 
-    yield* Effect.logDebug(`Payment successful for (${res?.reference})`);
+    yield* Effect.logDebug(`Payment successful for (${res?.data.reference})`);
 
+    yield* updateEscrowStatus({
+      escrowId: metadata.escrowId,
+      customerDetails: metadata.customerDetails,
+      paymentDetails: {
+        amount: Number(res.data.amount),
+        status: res.data.status,
+        paymentMethod: res.data.channel,
+      },
+    });
+
+    console.log(res,"====== Payment successful ======")
   });
+};
+
+export type TSuccessPaymentMetaData = {
+  escrowId: string;
+  customerDetails: {
+    userId: string;
+    email: string;
+    username: string;
+    role: "buyer" | "seller";
+  };
+};
+
+export type TPaymentDetails = {
+  amount: number;
+  status: string;
+  paymentMethod: string;
 };

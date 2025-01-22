@@ -1,6 +1,6 @@
 {
-  "id": "70966273-f6a8-49f0-8bbb-8899898993db",
-  "prevId": "d0c988dc-b795-4453-9eab-6ba9c978b436",
+  "id": "d09fdeb9-3c6f-4cb9-8b1c-4e6ded95e4b7",
+  "prevId": "33671e81-4344-449e-8c34-c37e04ff9254",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -543,11 +543,18 @@
       "name": "escrow_participants",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "escrow_id": {
           "name": "escrow_id",
           "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
+          "primaryKey": false,
+          "notNull": false
         },
         "user_id": {
           "name": "user_id",
@@ -567,7 +574,8 @@
           "type": "escrow_participants_status",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'active'"
         }
       },
       "indexes": {},
@@ -608,7 +616,8 @@
           "name": "fee",
           "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'0'"
         },
         "status": {
           "name": "status",
@@ -664,12 +673,6 @@
         },
         "sender_id": {
           "name": "sender_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "customer_id": {
-          "name": "customer_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -918,11 +921,10 @@
       "schema": "public",
       "values": [
         "created",
-        "deposit pending",
-        "deposit confirmed",
-        "awaiting service",
-        "service completed",
-        "service confirmation",
+        "deposit.pending",
+        "deposit.success",
+        "service.pending",
+        "service.confirmed",
         "completed",
         "dispute",
         "refunded",
@@ -951,8 +953,8 @@
       "name": "payment_method",
       "schema": "public",
       "values": [
-        "credit card",
-        "bank transfer"
+        "card",
+        "transfer"
       ]
     },
     "public.payment_status": {

@@ -1,0 +1,1 @@
+ALTER TABLE "escrow_payment" ALTER COLUMN "method" SET DATA TYPE varchar;
