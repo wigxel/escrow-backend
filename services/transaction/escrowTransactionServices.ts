@@ -139,9 +139,9 @@ export const initializeEscrowDeposit = (
     );
 
     //make sure the escrow transaction hasn't expired
-    // if (isBefore(escrowRequestDetails.expires_at, new Date())) {
-    //   yield* new ExpectedError("Escrow transaction request has expired");
-    // }
+    if (isBefore(escrowRequestDetails.expires_at, new Date())) {
+      yield* new ExpectedError("Escrow transaction request has expired");
+    }
 
     if (escrowRequestDetails.accessCode) {
       return {

@@ -57,8 +57,6 @@ export const handlePaymentEvents = (
         paymentMethod: res.data.channel,
       },
     });
-
-    console.log(res,"====== Payment successful ======")
   });
 };
 
