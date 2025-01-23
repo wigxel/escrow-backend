@@ -5,8 +5,10 @@ import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransact
 import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
+  escrowStatusRules,
 } from "~/validationRules/escrowTransactions.rules";
 import {
+  participantStatus,
   sessionUser,
   type TEscrowRequest,
   type TUser,
@@ -25,6 +27,10 @@ import type {
   TPaymentDetails,
   TSuccessPaymentMetaData,
 } from "../payment.service";
+import {
+  canTransitionEscrowStatus,
+  getBuyerAndSellerFromParticipants,
+} from "~/utils/escrow.utils";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -264,7 +270,86 @@ export const getEscrowTransactionDetails = (params: {
           ),
       ),
     );
+    return escrowDetails;
+  });
+};
 
-    return escrowDetails
+export const updateEscrowTransactionStatus = (params: {
+  escrowId: string;
+  status: z.infer<typeof escrowStatusRules>["status"];
+  currentUser: SessionUser;
+}) => {
+  return Effect.gen(function* (_) {
+    const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
+
+    const escrowDetails = yield* _(
+      escrowRepo.firstOrThrow({ id: params.escrowId }),
+      Effect.mapError(
+        () =>
+          new NoSuchElementException(
+            "invalid escrow id: no escrow transaction found",
+          ),
+      ),
+    );
+
+    if (!canTransitionEscrowStatus(escrowDetails.status, params.status)) {
+      yield* new ExpectedError(
+        `Cannot transition from ${escrowDetails.status} to ${params.status}`,
+      );
+    }
+
+    // makes certain the expected user is making the update
+    yield* validateUserStatusUpdate({
+      escrowId: escrowDetails.id,
+      status: params.status,
+      currentUser: params.currentUser,
+    });
+
+    yield* escrowRepo.update(
+      { id: params.escrowId },
+      { status: params.status },
+    );
+  });
+};
+
+const validateUserStatusUpdate = (params: {
+  escrowId: string;
+  status: string;
+  currentUser: SessionUser;
+}) => {
+  return Effect.gen(function* (_) {
+    const escrowParticipantRepo = yield* _(EscrowParticipantRepoLayer.tag);
+    
+    const partcipants = yield* escrowParticipantRepo.getParticipants(
+      params.escrowId,
+    );
+
+    const { seller, buyer } =
+      yield* getBuyerAndSellerFromParticipants(partcipants);
+
+    /**
+     * only the service provider should be able to make this update
+     */
+    if (
+      params.status === "service.pending" &&
+      params.currentUser.id !== seller.userId
+    ) {
+      yield* new ExpectedError(
+        "Unauthorized operation: service provider operation",
+      );
+    }
+
+    /**
+     * only the service consumer should be able to make this update
+     */
+
+    if (
+      params.status === "service.confirmed" &&
+      params.currentUser.id !== buyer.userId
+    ) {
+      yield* new ExpectedError(
+        "Unauthorized operation: service consumer operation",
+      );
+    }
   });
 };

@@ -19,3 +19,7 @@ export const confirmEscrowRequestRules = z.object({
   customerPhone:z.number({coerce:true}),
   customerEmail:z.string().email()
 })
+
+export const escrowStatusRules = z.object({
+  status:z.enum(["service.pending", "service.confirmed"])
+})
