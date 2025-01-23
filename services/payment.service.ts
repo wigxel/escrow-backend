@@ -57,6 +57,8 @@ export const handlePaymentEvents = (
         paymentMethod: res.data.channel,
       },
     });
+
+    //TODO: in-app notification or email for successful payment
   });
 };
 

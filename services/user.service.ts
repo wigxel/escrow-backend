@@ -240,6 +240,6 @@ export const handleUserCreationFromEscrow = (
       Effect.flatMap(head),
     );
 
-    //send an email to the user to notify of newly created account
+    //TODO: send an email to the user to notify of newly created account
   });
 };

@@ -1,16 +1,20 @@
 import { Effect } from "effect";
 import type { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
-import { EscrowTransactionRepoLayer } from "~/repositories/transaction/escrowTransaction.repo";
+import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
 } from "~/validationRules/escrowTransactions.rules";
-import type { TEscrowRequest, TUser } from "~/migrations/schema";
+import {
+  sessionUser,
+  type TEscrowRequest,
+  type TUser,
+} from "~/migrations/schema";
 import { UserRepoLayer } from "~/repositories/user.repository";
-import { EscrowRequestRepoLayer } from "~/repositories/transaction/escrowRequest.repo";
-import { EscrowParticipantRepoLayer } from "~/repositories/transaction/escrowParticipant.repo";
-import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment.repo";
+import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
+import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
+import { EscrowPaymentRepoLayer } from "~/repositories/escrow/escrowPayment.repo";
 import { addHours, isBefore } from "date-fns";
 import { ExpectedError } from "~/config/exceptions";
 import { NoSuchElementException } from "effect/Cause";
@@ -123,13 +127,17 @@ export const initializeEscrowDeposit = (
 
     const escrowTransactionDetails = yield* _(
       escrowTransactionRepo.firstOrThrow({ id: input.escrowId }),
-      Effect.mapError(() => new NoSuchElementException("Invalid escrow transaction id")),
+      Effect.mapError(
+        () => new NoSuchElementException("Invalid escrow transaction id"),
+      ),
     );
 
-    if(escrowTransactionDetails.status !== "deposit.pending"){
-      yield* new ExpectedError("Please click the link sent to you to proceed with payment")
+    if (escrowTransactionDetails.status !== "deposit.pending") {
+      yield* new ExpectedError(
+        "Please click the link sent to you to proceed with payment",
+      );
     }
-    
+
     const escrowRequestDetails = yield* _(
       escrowRequestRepo.firstOrThrow({
         escrowId: input.escrowId,
@@ -197,11 +205,6 @@ export const initializeEscrowDeposit = (
 
 /**
  * Handles the necessary updates and actions after a successful deposit.
- *
- * This method performs the following tasks:
- * 1. Updates the status of the escrow transaction to 'deposit_received'.
- * 2. Adds the customer(s) as participants in the escrow transaction.
- * 3. Deletes the escrow request after the transaction is completed.
  */
 export const updateEscrowStatus = (
   params: TSuccessPaymentMetaData & { paymentDetails: TPaymentDetails },
@@ -243,5 +246,25 @@ export const updateEscrowStatus = (
       { id: params.escrowId },
       { status: "deposit.success" },
     );
+  });
+};
+
+export const getEscrowTransactionDetails = (params: {
+  escrowId: string;
+}) => {
+  return Effect.gen(function* (_) {
+    const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
+
+    const escrowDetails = yield* _(
+      escrowRepo.getEscrowDetails(params.escrowId),
+      Effect.mapError(
+        () =>
+          new NoSuchElementException(
+            "invalid escrow id: no escrow transaction found",
+          ),
+      ),
+    );
+
+    return escrowDetails
   });
 };

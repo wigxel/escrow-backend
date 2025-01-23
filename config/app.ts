@@ -6,14 +6,14 @@ import { NotificationRepoLayer } from "~/repositories/notification.repo";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { UserLocationRepoLive } from "~/repositories/userLocation.repo";
 import { LogDebugLayer } from "./logger";
-import { EscrowTransactionRepoLayer} from "~/repositories/transaction/escrowTransaction.repo";
-import { EscrowParticipantRepoLayer } from "~/repositories/transaction/escrowParticipant.repo";
+import { EscrowTransactionRepoLayer} from "~/repositories/escrow/escrowTransaction.repo";
+import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
 import { MailLive } from "~/layers/mailing/mail";
 import { NotificationLive } from "~/layers/notification/layer";
 import { Mailer } from "~/layers/mailing";
 import { NodeMailer } from "~/services/mailing/node-mailer";
-import { EscrowRequestRepoLayer } from "~/repositories/transaction/escrowRequest.repo";
-import { EscrowPaymentRepoLayer } from "~/repositories/transaction/escrowPayment.repo";
+import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
+import { EscrowPaymentRepoLayer } from "~/repositories/escrow/escrowPayment.repo";
 import { PaystackCheckoutLive } from "~/layers/payment/adapters/paystack";
 import { PaystackEventLive } from "~/layers/payment/adapters/paystack-events";
 
