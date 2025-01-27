@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { validateBody } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
-import { createEscrowTransaction } from "~/services/transaction/escrowTransactionServices";
+import { createEscrowTransaction } from "~/services/escrowTransactionServices";
 import { createEscrowTransactionRules } from "~/validationRules/escrowTransactions.rules";
 
 export default eventHandler(async (event) => {

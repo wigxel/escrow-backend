@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
 import { validateBody, validateParams } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
-import { initializeEscrowDeposit } from "~/services/transaction/escrowTransactionServices";
+import { initializeEscrowDeposit } from "~/services/escrowTransactionServices";
 import { confirmEscrowRequestRules } from "~/validationRules/escrowTransactions.rules";
 
 export default eventHandler((event) => {

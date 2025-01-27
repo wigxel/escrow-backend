@@ -5,7 +5,7 @@ import {
   PaymentEvent,
   PaymentEventService,
 } from "~/layers/payment/payment-events";
-import { updateEscrowStatus } from "./transaction/escrowTransactionServices";
+import { updateEscrowStatus } from "./escrowTransactionServices";
 
 export const handlePaymentEvents = (
   res: {

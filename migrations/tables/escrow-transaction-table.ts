@@ -7,7 +7,6 @@ import {
   index,
   numeric,
   varchar,
-  integer,
 } from "drizzle-orm/pg-core";
 import { userTable } from "./user-table";
 
@@ -22,6 +21,12 @@ export const escrowStatus = pgEnum("escrow_status", [
   "refunded",
   "cancelled",
   "expired",
+]);
+
+export const statementType = pgEnum("statement_type", [
+  "escrow.deposit",
+  "wallet.deposit",
+  "wallet.withdraw",
 ]);
 
 export const paymentStatus = pgEnum("payment_status", [
@@ -42,7 +47,7 @@ export const invitationStatus = pgEnum("invitation_status", [
   "declined",
 ]);
 
-const timestamps = {
+export const timestamps = {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 };
@@ -83,7 +88,7 @@ export const escrowTermsTable = pgTable(
 );
 
 export const escrowParticipantsTable = pgTable("escrow_participants", {
-  id:uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().defaultRandom(),
   escrowId: uuid("escrow_id"),
   userId: uuid("user_id"),
   role: roles("role"),
@@ -106,11 +111,24 @@ export const escrowRequestTable = pgTable("escrow_request", {
   ...timestamps,
 });
 
-export const escrowWalletTable = pgTable("escrow_wallet",{
-  id:uuid("id").primaryKey().defaultRandom(),
-  escrowId:uuid("escrow_id"),
-  
-})
-export const userWalletTable = pgTable("userWallet_wallet",{})
-export const bankAccountTable = pgTable("bank_account",{})
-export const AccountStatementTable = pgTable("account_statement",{})
+export const escrowWalletTable = pgTable("escrow_wallet", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  escrowId: uuid("escrow_id"),
+  tigerbeetleAccountId: varchar("tigerbeetle_account_id"),
+  ...timestamps,
+});
+export const userWalletTable = pgTable("userWallet_wallet", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"),
+  tigerbeetleAccountId: varchar("tigerbeetle_account_id"),
+});
+
+export const AccountStatementTable = pgTable("account_statement", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  creatorId: uuid("creator_id"),
+  relatedUserId: uuid("related_user_id"),
+  amount: numeric("balance", { precision: 10, scale: 2 }),
+  type: statementType("type"),
+  metadata:text("metadata"),
+  ...timestamps,
+});

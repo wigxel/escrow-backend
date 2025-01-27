@@ -4,7 +4,7 @@ import { validateParams } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
 import {
   getEscrowTransactionDetails,
-} from "~/services/transaction/escrowTransactionServices";
+} from "~/services/escrowTransactionServices";
 
 export default eventHandler(async (event) => {
   const escrowId = getRouterParam(event, "escrowid");

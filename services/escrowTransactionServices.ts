@@ -22,15 +22,16 @@ import { ExpectedError } from "~/config/exceptions";
 import { NoSuchElementException } from "effect/Cause";
 import { head } from "effect/Array";
 import { CheckoutManager } from "~/layers/payment/checkout-manager";
-import { findOrCreateUser } from "../user.service";
+import { findOrCreateUser } from "./user.service";
 import type {
   TPaymentDetails,
   TSuccessPaymentMetaData,
-} from "../payment.service";
+} from "./payment.service";
 import {
   canTransitionEscrowStatus,
   getBuyerAndSellerFromParticipants,
 } from "~/utils/escrow.utils";
+import { id } from "tigerbeetle-node";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -42,6 +43,7 @@ export const createEscrowTransaction = (
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
     const escrowPaymentRepo = yield* _(EscrowPaymentRepoLayer.tag);
     const userRepo = yield* _(UserRepoLayer.Tag);
+    const newAccountId = id()
 
     const customer: TUser = yield* _(
       userRepo.firstOrThrow({
@@ -63,6 +65,10 @@ export const createEscrowTransaction = (
       }),
       Effect.flatMap(head),
     );
+
+    //create the escrow Wallet for the escrow transaction
+
+    // create an account in tigerbeetle to track the escrow wallet transaction
 
     //add the creator to the participant table
     yield* escrowParticipantRepo.create({
