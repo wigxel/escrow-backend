@@ -16,6 +16,7 @@ import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo
 import { EscrowPaymentRepoLayer } from "~/repositories/escrow/escrowPayment.repo";
 import { PaystackCheckoutLive } from "~/layers/payment/adapters/paystack";
 import { PaystackEventLive } from "~/layers/payment/adapters/paystack-events";
+import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserLocationRepoLive),
@@ -53,7 +54,9 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(UserModule),
   Layer.provideMerge(EscrowModule),
   Layer.provideMerge(PaystackCheckoutLive),
-  Layer.provideMerge(PaystackEventLive)
+  Layer.provideMerge(PaystackEventLive),
+  Layer.provideMerge(TigerBeetleRepoLayer.Repo.Live)
+  
 );
 
 // const DevToolsLive = DevTools.layerWebSocket().pipe(

@@ -105,3 +105,12 @@ export const escrowRequestTable = pgTable("escrow_request", {
   expires_at: timestamp("expires_at"),
   ...timestamps,
 });
+
+export const escrowWalletTable = pgTable("escrow_wallet",{
+  id:uuid("id").primaryKey().defaultRandom(),
+  escrowId:uuid("escrow_id"),
+  
+})
+export const userWalletTable = pgTable("userWallet_wallet",{})
+export const bankAccountTable = pgTable("bank_account",{})
+export const AccountStatementTable = pgTable("account_statement",{})

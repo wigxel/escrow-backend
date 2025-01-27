@@ -1,30 +1,24 @@
 import { Config, Context, Effect, Layer, pipe } from "effect";
 import type { UnknownException } from "effect/Cause";
-import {
-  type Client,
-  type Account,
-  type Transfer,
-  type AccountID,
-  type TransferID,
-  createClient,
+import type {
+  Transfer,
+  AccountID,
+  TransferID,
 } from "tigerbeetle-node";
+import { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
+import type {TTBAccount } from "~/utils/tigerBeetle/type/type";
 
 export class TigerBeetleRepository {
-  private client: Client;
-
-  constructor(address: string | number, clusterId = 0n) {
-    this.client = createClient({
-      cluster_id: clusterId,
-      replica_addresses: [address || "3000"],
-    });
+  constructor(private client: TigerBeetleAdapter) {
+    this.client = client;
   }
   run<T>(
-    fn: (client: Client) => Promise<T>,
+    fn: (client: TigerBeetleAdapter) => Promise<T>,
   ): Effect.Effect<T, UnknownException> {
     return Effect.tryPromise(() => fn(this.client));
   }
 
-  createAccounts(account: Account[]) {
+  createAccounts(account: TTBAccount) {
     return this.run((client) => {
       return client.createAccounts(account);
     });
@@ -61,7 +55,9 @@ export const TigerBeetleRepoLayer = {
       TigerBeetleRepo,
       pipe(
         Config.string("TB_ADDRESS"),
-        Effect.map((addr) => new TigerBeetleRepository(addr)),
+        Effect.map(
+          (addr) => new TigerBeetleRepository(new TigerBeetleAdapter(addr)),
+        ),
       ),
     ),
   },
