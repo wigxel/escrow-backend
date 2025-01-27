@@ -32,6 +32,9 @@ import {
   getBuyerAndSellerFromParticipants,
 } from "~/utils/escrow.utils";
 import { id } from "tigerbeetle-node";
+import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
+import { createAccount as createTBAccount } from "./tigerbeetle.service";
+import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -43,7 +46,9 @@ export const createEscrowTransaction = (
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
     const escrowPaymentRepo = yield* _(EscrowPaymentRepoLayer.tag);
     const userRepo = yield* _(UserRepoLayer.Tag);
-    const newAccountId = id()
+    const escrowWalletRepo = yield* _(EscrowWalletRepoLayer.tag);
+    // generate unique bigint id for tigerbeetle_account_id
+    const tbAccountId = String(id());
 
     const customer: TUser = yield* _(
       userRepo.firstOrThrow({
@@ -66,9 +71,24 @@ export const createEscrowTransaction = (
       Effect.flatMap(head),
     );
 
-    //create the escrow Wallet for the escrow transaction
+    /**
+     * create the escrow Wallet for the escrow transaction
+     *  create an account in tigerbeetle to track the escrow wallet transaction
+     */
+    yield* _(
+      Effect.all([
+        escrowWalletRepo.create({
+          escrowId: escrowTransaction.id,
+          tigerbeetleAccountId: String(tbAccountId),
+        }),
 
-    // create an account in tigerbeetle to track the escrow wallet transaction
+        createTBAccount({
+          accountId: tbAccountId,
+          code: TBAccountCode.ESCROW_WALLET,
+          ledger: "ngnLedger",
+        }),
+      ]),
+    );
 
     //add the creator to the participant table
     yield* escrowParticipantRepo.create({
@@ -325,7 +345,7 @@ const validateUserStatusUpdate = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowParticipantRepo = yield* _(EscrowParticipantRepoLayer.tag);
-    
+
     const partcipants = yield* escrowParticipantRepo.getParticipants(
       params.escrowId,
     );

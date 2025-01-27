@@ -1,7 +1,7 @@
 import type { compoundLedger } from "../tigerbeetle";
 
 export type TTBAccount = {
-  accountId: number;
+  accountId: number|string;
   user_data_128?: number;
   user_data_64?: number;
   user_data_32?: number;

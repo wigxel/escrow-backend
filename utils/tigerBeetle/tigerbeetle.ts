@@ -9,6 +9,7 @@ import {
   type Account,
   type Client,
   type CreateAccountsError,
+  AccountFlags,
   CreateAccountError,
   CreateTransferError,
 } from "tigerbeetle-node";
@@ -47,7 +48,9 @@ export class TigerBeetleAdapter {
         reserved: account.reserved || 0,
         ledger: ledger?.ledgerId || compoundLedger.ngnLedger.ledgerId,
         code: account.code || TBAccountCode.BANK_ACCOUNT,
-        flags: account.flags || 0,
+        flags:
+          account.flags ||
+          AccountFlags.debits_must_not_exceed_credits | AccountFlags.history,
         timestamp: BigInt(0),
       };
       return data;
