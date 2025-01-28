@@ -45,6 +45,13 @@ export const runLive = <
                   message: permission_err.message,
                 });
               }),
+              Match.tag("UnknownException", (error) => {
+                return createError({
+                  status: 401,
+                  statusMessage: "UnknownException",
+                  message: error.message,
+                });
+              }),
               Match.orElse((err) => {
                 return createError({
                   status: 400,

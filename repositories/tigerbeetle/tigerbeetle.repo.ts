@@ -1,12 +1,8 @@
 import { Config, Context, Effect, Layer, pipe } from "effect";
 import type { UnknownException } from "effect/Cause";
-import type {
-  Transfer,
-  AccountID,
-  TransferID,
-} from "tigerbeetle-node";
+import type { Transfer, AccountID, TransferID } from "tigerbeetle-node";
 import { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
-import type {TTBAccount } from "~/utils/tigerBeetle/type/type";
+import type { TTBAccount, TTBTransfer } from "~/utils/tigerBeetle/type/type";
 
 export class TigerBeetleRepository {
   constructor(private client: TigerBeetleAdapter) {
@@ -24,7 +20,7 @@ export class TigerBeetleRepository {
     });
   }
 
-  createTransfers(transfer: Transfer[]) {
+  createTransfers(transfer: TTBTransfer) {
     return this.run((client) => {
       return client.createTransfers(transfer);
     });

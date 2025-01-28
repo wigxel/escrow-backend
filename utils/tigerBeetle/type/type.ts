@@ -1,7 +1,7 @@
-import type { compoundLedger } from "../tigerbeetle";
+import type { compoundLedger } from "../utils";
 
 export type TTBAccount = {
-  accountId: number|string;
+  accountId: string;
   user_data_128?: number;
   user_data_64?: number;
   user_data_32?: number;
@@ -19,13 +19,36 @@ export type TTBAccount = {
   flags?: number;
 };
 
-export type TCompoundLedger = keyof typeof compoundLedger
+export type TTBTransfer = {
+  transferId: string;
+  debit_account_id: string;
+  credit_account_id: string;
+  amount: number;
+  pending_id?: bigint;
+  user_data_128?: number;
+  user_data_64?: number;
+  user_data_32?: number;
+  timeout?: number;
+  /**
+   * Ledger partition accounts into groups that may represent a currency or asset type
+   * Only accounts on the same ledger can transact directly
+   */
+  ledger?: TCompoundLedger;
+  /**
+   * This is a user-defined enum denoting the category of the account.
+   * eg. 1001 is Bank Account and 1002 is Money Market Account
+   */
+  code?:TBTransferReason
+  flags?: number;
+};
+
+export type TCompoundLedger = keyof typeof compoundLedger;
 
 interface Ledger {
   ledgerId: number;
   type: LedgerType;
-  name: string; 
-  metadata: unknown; 
+  name: string;
+  metadata: unknown;
 }
 
 // ==== ENUMS =====
@@ -40,3 +63,9 @@ export enum LedgerType {
   Currency = "Currency",
 }
 
+export enum TBTransferReason{
+  ESCROW_PAYMENT = 300,
+  RELEASE_ESCROW_FUNDS = 400,
+  WALLET_WITHDRAWAL = 500
+
+}

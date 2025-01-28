@@ -3,19 +3,14 @@ import {
   type AccountBalance,
   type AccountFilter,
   type AccountID,
-  type CreateTransfersError,
   type Transfer,
   type TransferID,
   type Account,
   type Client,
-  type CreateAccountsError,
   AccountFlags,
-  CreateAccountError,
-  CreateTransferError,
 } from "tigerbeetle-node";
-import { LedgerType, TBAccountCode, type TTBAccount } from "./type/type";
-import { Effect } from "effect";
-import { ExpectedError } from "~/config/exceptions";
+import { TBAccountCode, type TTBTransfer, type TTBAccount, TBTransferReason } from "./type/type";
+import { compoundLedger, isValidBigIntString } from "./utils";
 
 export class TigerBeetleAdapter {
   private client: Client;
@@ -32,6 +27,17 @@ export class TigerBeetleAdapter {
 
     const modAccounts = accounts.map((account) => {
       const ledger = compoundLedger[account.ledger];
+
+      // Validate and convert accountId to BigInt
+      if (
+        typeof account.accountId === "string" &&
+        !isValidBigIntString(account.accountId)
+      ) {
+        throw new Error(
+          `Invalid accountId: ${account.accountId}. It must be a valid numeric string.`,
+        );
+      }
+
       const data = {
         id: BigInt(account.accountId),
         debits_pending: BigInt(0),
@@ -59,7 +65,49 @@ export class TigerBeetleAdapter {
     return await this.client.createAccounts(modAccounts);
   }
 
-  createTransfers: (batch: Transfer[]) => Promise<CreateTransfersError[]>;
+  async createTransfers(params: TTBTransfer[] | TTBTransfer) {
+    const transfers = Array.isArray(params) ? params : [params];
+
+    const modTransfers = transfers.map((transfer) => {
+      const ledger = compoundLedger[transfer.ledger];
+
+      // Validate and convert accountId to BigInt
+      if (
+        typeof transfer.transferId === "string" &&
+        !isValidBigIntString(transfer.transferId)
+      ) {
+        throw new Error(
+          `Invalid transferId: ${transfer.transferId}. It must be a valid numeric string.`,
+        );
+      }
+
+      const data = {
+        id: BigInt(transfer.transferId),
+        debit_account_id: BigInt(transfer.debit_account_id),
+        credit_account_id: BigInt(transfer.credit_account_id),
+        /**
+         * convert to the smallest currency unit Kobo
+         */
+        amount: BigInt(transfer.amount * 100),
+        user_data_128: transfer.user_data_128
+          ? BigInt(transfer.user_data_128)
+          : BigInt(0),
+        user_data_64: transfer.user_data_64
+          ? BigInt(transfer.user_data_64)
+          : BigInt(0),
+        user_data_32: transfer.user_data_32 || 0,
+        timeout: 0,
+        pending_id: transfer.pending_id || BigInt(0),
+        ledger: ledger?.ledgerId || compoundLedger.ngnLedger.ledgerId,
+        code: transfer.code || TBTransferReason.WALLET_WITHDRAWAL,
+        flags: transfer.flags || 0,
+        timestamp: BigInt(0),
+      };
+      return data;
+    });
+
+    return await this.client.createTransfers(modTransfers);
+  }
 
   getAccountTransfers: (filter: AccountFilter) => Promise<Transfer[]>;
 
@@ -67,43 +115,3 @@ export class TigerBeetleAdapter {
   lookupTransfers: (batch: TransferID[]) => Promise<Transfer[]>;
   getAccountBalances: (filter: AccountFilter) => Promise<AccountBalance[]>;
 }
-
-//======= LEDGER DATA =====
-export const compoundLedger = {
-  ngnLedger: {
-    ledgerId: 10,
-    type: LedgerType.Currency,
-    name: "NGN ledger",
-    metadata: {
-      description: "Primary ledger for Nigeria Naira transaction",
-    },
-  },
-};
-
-export const handleCreateAccountErrors = (errors: CreateAccountsError[]) => {
-  return Effect.gen(function* (_) {
-    for (const error of errors) {
-      yield* _(
-        new ExpectedError(
-          `Account at ${error.index} failed to create: ${
-            CreateAccountError[error.result]
-          }.`,
-        ),
-      );
-    }
-  });
-};
-
-export const handleCreateTransferErrors = (errors: CreateTransfersError[]) => {
-  return Effect.gen(function* (_) {
-    for (const error of errors) {
-      yield* _(
-        new ExpectedError(
-          `Transfer at ${error.index} failed to create: ${
-            CreateTransferError[error.result]
-          }.`,
-        ),
-      );
-    }
-  });
-};
