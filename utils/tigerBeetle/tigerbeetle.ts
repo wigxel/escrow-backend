@@ -14,12 +14,21 @@ import { compoundLedger, isValidBigIntString } from "./utils";
 
 export class TigerBeetleAdapter {
   private client: Client;
+  public static instance:TigerBeetleAdapter
 
-  constructor(address: number | string, clusterId = 0) {
+  private constructor(address: number | string, clusterId = 0) {
     this.client = createClient({
       cluster_id: BigInt(clusterId),
       replica_addresses: [address],
     });
+  }
+
+  static getInstance(address: number | string, clusterId = 0){
+    if(!TigerBeetleAdapter.instance){
+      TigerBeetleAdapter.instance = new TigerBeetleAdapter(address,clusterId)
+    }
+
+    return TigerBeetleAdapter.instance
   }
 
   async createAccounts(params: TTBAccount[] | TTBAccount) {

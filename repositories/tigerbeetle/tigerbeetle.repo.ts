@@ -52,7 +52,8 @@ export const TigerBeetleRepoLayer = {
       pipe(
         Config.string("TB_ADDRESS"),
         Effect.map(
-          (addr) => new TigerBeetleRepository(new TigerBeetleAdapter(addr)),
+          (addr) =>
+            new TigerBeetleRepository(TigerBeetleAdapter.getInstance(addr)),
         ),
       ),
     ),
