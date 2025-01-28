@@ -200,7 +200,7 @@ export const findOrCreateUser = (
   const userRepo = UserRepoLayer.Tag;
   return userRepo.pipe(
     Effect.flatMap((repo) =>
-      Effect.matchEffect(repo.firstOrThrow({ email: input.customerEmail }), {
+      Effect.matchEffect(repo.firstOrThrow({ username: input.customerUsername }), {
         onSuccess: (user) => Effect.succeed(user),
         onFailure: (e) => handleUserCreationFromEscrow(input),
       }),
@@ -214,15 +214,15 @@ export const handleUserCreationFromEscrow = (
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
     const mail = yield* Mail;
-    const [existingUserByUsername, existingUserByPhone] = yield* _(
+    const [existingUserByEmail, existingUserByPhone] = yield* _(
       Effect.all([
-        userRepo.count(SearchOps.eq("username", input.customerUsername)),
+        userRepo.count(SearchOps.eq("email", input.customerEmail)),
         userRepo.count(SearchOps.eq("phone", input.customerPhone)),
       ]),
     );
 
-    if (existingUserByUsername) {
-      yield* new ExpectedError("Username is already taken");
+    if (existingUserByEmail) {
+      yield* new ExpectedError("Email is already taken");
     }
     if (existingUserByPhone) {
       yield* new ExpectedError("Phone is already taken");

@@ -88,7 +88,7 @@ export class TigerBeetleAdapter {
         /**
          * convert to the smallest currency unit Kobo
          */
-        amount: BigInt(transfer.amount * 100),
+        amount: BigInt(transfer.amount),
         user_data_128: transfer.user_data_128
           ? BigInt(transfer.user_data_128)
           : BigInt(0),

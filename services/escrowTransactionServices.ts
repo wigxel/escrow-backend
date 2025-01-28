@@ -7,12 +7,7 @@ import type {
   createEscrowTransactionRules,
   escrowStatusRules,
 } from "~/validationRules/escrowTransactions.rules";
-import {
-  participantStatus,
-  sessionUser,
-  type TEscrowRequest,
-  type TUser,
-} from "~/migrations/schema";
+import type { TEscrowRequest, TUser } from "~/migrations/schema";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
@@ -50,6 +45,9 @@ export const createEscrowTransaction = (
     // generate unique bigint id for tigerbeetle_account_id
     const tbAccountId = String(id());
 
+    /**
+     * the user the escrow is created for
+     */
     const customer: TUser = yield* _(
       userRepo.firstOrThrow({
         username: input.customerUsername,
@@ -73,7 +71,7 @@ export const createEscrowTransaction = (
 
     /**
      * create the escrow Wallet for the escrow transaction
-     *  create an account in tigerbeetle to track the escrow wallet transaction
+     * create an account in tigerbeetle to track the escrow wallet transaction
      */
     yield* _(
       Effect.all([
@@ -103,7 +101,7 @@ export const createEscrowTransaction = (
       amount: String(input.amount),
     });
 
-    const escrowReqData: TEscrowRequest = {
+    const escrowRequestData: TEscrowRequest = {
       escrowId: escrowTransaction.id,
       senderId: currentUser.id,
       amount: String(input.amount),
@@ -114,8 +112,27 @@ export const createEscrowTransaction = (
       expires_at: addHours(new Date(), 1),
     };
 
-    yield* escrowRequestRepo.create(escrowReqData);
+    yield* escrowRequestRepo.create(escrowRequestData);
     return { escrowTransactionId: escrowTransaction.id };
+  });
+};
+
+export const getEscrowTransactionDetails = (params: {
+  escrowId: string;
+}) => {
+  return Effect.gen(function* (_) {
+    const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
+
+    const escrowDetails = yield* _(
+      escrowRepo.getEscrowDetails(params.escrowId),
+      Effect.mapError(
+        () =>
+          new NoSuchElementException(
+            "invalid escrow id: no escrow transaction found",
+          ),
+      ),
+    );
+    return escrowDetails;
   });
 };
 
@@ -213,12 +230,13 @@ export const initializeEscrowDeposit = (
       metadata: {
         customerDetails: {
           userId: customerDetails.id,
-          email: input.customerEmail,
-          username: input.customerUsername,
-          phone: input.customerPhone,
+          email: customerDetails.email,
+          username: customerDetails.username,
+          phone: customerDetails.phone,
           role: escrowRequestDetails.customerRole,
         },
         escrowId: escrowRequestDetails.escrowId,
+        relatedUserId: escrowRequestDetails.senderId,
       },
     });
 
@@ -226,6 +244,9 @@ export const initializeEscrowDeposit = (
     yield* escrowRequestRepo.update(
       { escrowId: escrowRequestDetails.escrowId },
       {
+        customerUsername: input.customerUsername,
+        customerEmail: input.customerEmail,
+        customerPhone: String(input.customerPhone),
         accessCode: checkoutSession.data.access_code,
         authorizationUrl: checkoutSession.data.authorization_url,
       },
@@ -246,7 +267,7 @@ export const updateEscrowStatus = (
     const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
     const escrowRequestRepo = yield* EscrowRequestRepoLayer.tag;
     const escrowPaymentRepo = yield* EscrowPaymentRepoLayer.tag;
-
+    
     //update the escrowRequest status to accepted otherwise it can be deleted
     yield* _(
       escrowRequestRepo.update(
@@ -269,7 +290,7 @@ export const updateEscrowStatus = (
         status: params.paymentDetails.status,
         userId: params.customerDetails.userId,
         method: params.paymentDetails.paymentMethod,
-        //fees can be calculated and update here
+        //fees can be calculated and updated here
       },
     );
 
@@ -278,25 +299,7 @@ export const updateEscrowStatus = (
       { id: params.escrowId },
       { status: "deposit.success" },
     );
-  });
-};
 
-export const getEscrowTransactionDetails = (params: {
-  escrowId: string;
-}) => {
-  return Effect.gen(function* (_) {
-    const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
-
-    const escrowDetails = yield* _(
-      escrowRepo.getEscrowDetails(params.escrowId),
-      Effect.mapError(
-        () =>
-          new NoSuchElementException(
-            "invalid escrow id: no escrow transaction found",
-          ),
-      ),
-    );
-    return escrowDetails;
   });
 };
 

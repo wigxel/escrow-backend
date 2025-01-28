@@ -1,0 +1,1 @@
+ALTER TABLE "account_statement" ADD COLUMN "tigerbeetle_account_id" varchar;

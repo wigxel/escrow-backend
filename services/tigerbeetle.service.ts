@@ -1,5 +1,4 @@
 import { Effect } from "effect";
-import { mapError } from "effect/Exit";
 import { ExpectedError } from "~/config/exceptions";
 import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import type { TTBAccount, TTBTransfer } from "~/utils/tigerBeetle/type/type";

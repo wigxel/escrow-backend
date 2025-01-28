@@ -1,5 +1,4 @@
 import type { Address } from "nodemailer/lib/mailer";
-import type { Product } from "~/migrations/schema";
 
 export type ApiResponse<T = null> = {
   success: boolean;
@@ -19,6 +18,9 @@ type ShapeOf<T> = Record<keyof T, unknown>;
 
 export type AssertKeysEqual<X extends ShapeOf<Y>, Y extends ShapeOf<X>> = never;
 
-export type searchResult = Product & {
-  image_url: string;
-};
+export type TAccountStatementMetadata = {
+  escrowId?:string,
+  from:string,
+  to:string,
+  description:string
+}
