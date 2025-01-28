@@ -1,0 +1,1 @@
+ALTER TABLE "escrow_request" RENAME COLUMN "customer_name" TO "customer_username";

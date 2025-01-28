@@ -101,7 +101,7 @@ export const escrowRequestTable = pgTable("escrow_request", {
   senderId: uuid("sender_id"),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   customerRole: roles("customer_role"),
-  customerUsername: varchar("customer_name"),
+  customerUsername: varchar("customer_username"),
   customerPhone: varchar("customer_phone"),
   customerEmail: varchar("customer_email"),
   status: invitationStatus("status").default("pending"),

@@ -73,7 +73,8 @@ export const handlePaymentEvents = (
 
     //add transaction statement entry;
     yield* accountStatementRepo.create({
-      amount: String(res.data.amount),
+      //convert from kobo to naira
+      amount: String(+res.data.amount / 100),
       type: "escrow.deposit",
       creatorId: metadata.customerDetails.userId,
       tigerbeetleAccountId: transactionId,

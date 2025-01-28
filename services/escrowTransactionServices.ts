@@ -223,8 +223,9 @@ export const initializeEscrowDeposit = (
     }
 
     const checkoutSession = yield* checkoutManager.createSession({
+      //convert to smallest currency unit kobo
       amount: String(Number(escrowRequestDetails.amount) * 100),
-      email: input.customerEmail,
+      email: customerDetails.email,
       reference: escrowRequestDetails.escrowId,
       callback_url: "",
       metadata: {
@@ -244,9 +245,9 @@ export const initializeEscrowDeposit = (
     yield* escrowRequestRepo.update(
       { escrowId: escrowRequestDetails.escrowId },
       {
-        customerUsername: input.customerUsername,
-        customerEmail: input.customerEmail,
-        customerPhone: String(input.customerPhone),
+        customerEmail: customerDetails.email,
+        customerUsername: customerDetails.username,
+        customerPhone: customerDetails.phone,
         accessCode: checkoutSession.data.access_code,
         authorizationUrl: checkoutSession.data.authorization_url,
       },
@@ -267,7 +268,7 @@ export const updateEscrowStatus = (
     const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
     const escrowRequestRepo = yield* EscrowRequestRepoLayer.tag;
     const escrowPaymentRepo = yield* EscrowPaymentRepoLayer.tag;
-    
+
     //update the escrowRequest status to accepted otherwise it can be deleted
     yield* _(
       escrowRequestRepo.update(
@@ -299,7 +300,6 @@ export const updateEscrowStatus = (
       { id: params.escrowId },
       { status: "deposit.success" },
     );
-
   });
 };
 
