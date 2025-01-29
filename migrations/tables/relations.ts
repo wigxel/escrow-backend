@@ -7,7 +7,7 @@ import {
 
 import { userTable } from "~/migrations/tables/user-table";
 import { addressTable } from "./address-table";
-import { escrowParticipantsTable, escrowPaymentTable, escrowTransactionTable } from "./escrow-transaction-table";
+import { escrowParticipantsTable, escrowPaymentTable, escrowTransactionTable, escrowWalletTable } from "./escrow-transaction-table";
 
 export const userRelations = relations(userTable, ({ one,many }) => ({
   address:one(addressTable,{
@@ -21,7 +21,12 @@ export const escrowRelations = relations(escrowTransactionTable,({one,many})=>({
     fields:[escrowTransactionTable.id],
     references:[escrowPaymentTable.escrowId]
   }),
-  participants:many(escrowParticipantsTable)
+  escrowWalletDetails:one(escrowWalletTable,{
+    fields:[escrowTransactionTable.id],
+    references:[escrowWalletTable.escrowId]
+  }),
+  participants:many(escrowParticipantsTable),
+
 }))
 
 export const participantRelations = relations(escrowParticipantsTable,({one})=>({

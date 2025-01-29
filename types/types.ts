@@ -24,3 +24,34 @@ export type TAccountStatementMetadata = {
   to:string,
   description:string
 }
+
+export type TSuccessPaymentMetaData = {
+  escrowId: string;
+  customerDetails: {
+    userId: string;
+    email: string;
+    username: string;
+    role: "buyer" | "seller";
+  };
+  relatedUserId: string;
+};
+
+export type TPaymentDetails = {
+  amount: number;
+  status: string;
+  paymentMethod: string;
+};
+
+export type TPaystackPaymentEventResponse = {
+  event: string;
+  data: {
+    amount: string;
+    reference: string;
+    status: string;
+    channel: string;
+    metadata: TSuccessPaymentMetaData;
+  };
+};
+
+export type CurrencyUnit = "naira-kobo" | "kobo-naira";
+

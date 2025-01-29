@@ -18,10 +18,6 @@ import { NoSuchElementException } from "effect/Cause";
 import { head } from "effect/Array";
 import { CheckoutManager } from "~/layers/payment/checkout-manager";
 import { findOrCreateUser } from "./user.service";
-import type {
-  TPaymentDetails,
-  TSuccessPaymentMetaData,
-} from "./payment.service";
 import {
   canTransitionEscrowStatus,
   getBuyerAndSellerFromParticipants,
@@ -30,6 +26,7 @@ import { id } from "tigerbeetle-node";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
 import { createAccount as createTBAccount } from "./tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -341,13 +338,15 @@ export const updateEscrowTransactionStatus = (params: {
   });
 };
 
-const validateUserStatusUpdate = (params: {
+export const validateUserStatusUpdate = (params: {
   escrowId: string;
   status: string;
   currentUser: SessionUser;
 }) => {
   return Effect.gen(function* (_) {
     const escrowParticipantRepo = yield* _(EscrowParticipantRepoLayer.tag);
+    const sellerStatus = ["service.pending"];
+    const buyerStatus = ["service.confirmed", "completed"];
 
     const partcipants = yield* escrowParticipantRepo.getParticipants(
       params.escrowId,
@@ -360,7 +359,7 @@ const validateUserStatusUpdate = (params: {
      * only the service provider should be able to make this update
      */
     if (
-      params.status === "service.pending" &&
+      sellerStatus.includes(params.status) &&
       params.currentUser.id !== seller.userId
     ) {
       yield* new ExpectedError(
@@ -371,14 +370,15 @@ const validateUserStatusUpdate = (params: {
     /**
      * only the service consumer should be able to make this update
      */
-
     if (
-      params.status === "service.confirmed" &&
+      buyerStatus.includes(params.status) &&
       params.currentUser.id !== buyer.userId
     ) {
       yield* new ExpectedError(
         "Unauthorized operation: service consumer operation",
       );
     }
+
+    return { seller, buyer };
   });
 };

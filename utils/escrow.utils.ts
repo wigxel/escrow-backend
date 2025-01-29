@@ -1,14 +1,13 @@
 import { safeArray } from "@repo/shared/src/data.helpers";
 import { Effect } from "effect";
-import type { z } from "zod";
 import { ExpectedError } from "~/config/exceptions";
 import type { TEscrowParticipant } from "~/migrations/schema";
-import type { escrowStatusRules } from "~/validationRules/escrowTransactions.rules";
+import type { CurrencyUnit } from "~/types/types";
 
 const escrowStatusTransitions = {
   created: ["deposit.pending", "cancelled"],
   "deposit.pending": ["deposit.success", "cancelled"],
-  "deposit.success": ["service.pending", "service.confirmed"],
+  "deposit.success": ["service.pending", "service.confirmed", "completed"],
   cancelled: [],
 } as const;
 
@@ -20,7 +19,7 @@ const escrowStatusTransitions = {
  */
 export const canTransitionEscrowStatus = (
   currentStatus: string,
-  status: z.infer<typeof escrowStatusRules>["status"],
+  status: string,
 ) => {
   // Check if the transition is valid
   const match = safeArray(escrowStatusTransitions[currentStatus]);
@@ -44,3 +43,17 @@ export const getBuyerAndSellerFromParticipants = (
     return { seller, buyer };
   });
 };
+
+export const convertCurrencyUnit = (
+  amount: number | string,
+  type: CurrencyUnit,
+): number => {
+  const nairaToKobo = 100; // 1 Naira = 100 Kobo
+  const koboToNaira = 1 / nairaToKobo;
+
+  if (type === "naira-kobo") {
+    return Number(amount) * nairaToKobo;
+  }
+  return Number(amount) * koboToNaira;
+};
+

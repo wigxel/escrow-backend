@@ -12,7 +12,11 @@ export class EscrowTransactionRepository extends DrizzleRepo(
     return runDrizzleQuery((db) => {
       return db.query.escrowTransactionTable.findFirst({
         where: eq(escrowTransactionTable.id, escrowId),
-        with: { paymentDetails: true, participants: true },
+        with: {
+          paymentDetails: true,
+          participants: true,
+          escrowWalletDetails: true,
+        },
       });
     }).pipe(Effect.flatMap(notNil));
   }

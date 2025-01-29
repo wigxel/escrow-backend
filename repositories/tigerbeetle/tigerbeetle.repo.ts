@@ -1,6 +1,6 @@
 import { Config, Context, Effect, Layer, pipe } from "effect";
 import type { UnknownException } from "effect/Cause";
-import type { Transfer, AccountID, TransferID } from "tigerbeetle-node";
+import type { AccountID, TransferID } from "tigerbeetle-node";
 import { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
 import type { TTBAccount, TTBTransfer } from "~/utils/tigerBeetle/type/type";
 

@@ -1,0 +1,1 @@
+ALTER TABLE "account_statement" RENAME COLUMN "tigerbeetle_account_id" TO "tigerbeetle_transfer_id";

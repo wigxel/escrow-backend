@@ -117,7 +117,7 @@ export const escrowWalletTable = pgTable("escrow_wallet", {
   tigerbeetleAccountId: varchar("tigerbeetle_account_id"),
   ...timestamps,
 });
-export const userWalletTable = pgTable("userWallet_wallet", {
+export const userWalletTable = pgTable("user_wallet", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id"),
   tigerbeetleAccountId: varchar("tigerbeetle_account_id"),
@@ -129,7 +129,7 @@ export const AccountStatementTable = pgTable("account_statement", {
   relatedUserId: uuid("related_user_id"),
   amount: numeric("balance", { precision: 10, scale: 2 }),
   type: statementType("type"),
-  tigerbeetleAccountId: varchar("tigerbeetle_account_id"),
+  tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
   metadata:text("metadata"),
   ...timestamps,
 });

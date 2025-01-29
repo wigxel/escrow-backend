@@ -1,0 +1,1 @@
+ALTER TABLE "userWallet_wallet" RENAME TO "user_wallet";
