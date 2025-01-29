@@ -1,16 +1,11 @@
 import { Config, Effect } from "effect";
-import { CheckoutManager } from "~/layers/payment/checkout-manager";
-import {
-  PaymentEvent,
-  PaymentEventService,
-} from "~/layers/payment/payment-events";
 import {
   updateEscrowStatus,
   validateUserStatusUpdate,
-} from "./escrowTransactionServices";
+} from "../escrowTransactionServices";
 import { ExpectedError } from "~/config/exceptions";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
-import { createTransfer as createTBTransfer } from "./tigerbeetle.service";
+import { createTransfer as createTBTransfer } from "../tigerbeetle.service";
 import { id } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
 import { TBTransferReason } from "~/utils/tigerBeetle/type/type";
@@ -25,39 +20,13 @@ import type {
   TSuccessPaymentMetaData,
 } from "~/types/types";
 
-export const handlePaymentEvents = (
+export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentEventResponse,
-  paystackSignature: string,
+  metadata: TSuccessPaymentMetaData,
 ) => {
   return Effect.gen(function* (_) {
-    const manager = yield* CheckoutManager;
-    const paymentEvents = yield* PaymentEventService;
     const escrowWalletRepo = yield* EscrowWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
-
-    const isVerifiedWebhook = yield* manager.verifyWebhook(
-      res,
-      paystackSignature,
-    );
-    if (!isVerifiedWebhook) {
-      yield* new ExpectedError("Signature mismatch: Invalid signature.");
-    }
-    const event = paymentEvents.resolve(res);
-
-    const metadata =
-      yield* paymentEvents.getMetadata<TSuccessPaymentMetaData>(event);
-
-    if (PaymentEvent.$is("Chargefailed")(event)) {
-      // do something when the payment fails
-      yield* Effect.logDebug("Failed payment event");
-    }
-
-    if (!PaymentEvent.$is("ChargeSuccess")(event)) {
-      yield* Effect.logDebug("Payment failed: Ignoring payment event");
-      return;
-    }
-
-    yield* Effect.logDebug(`Payment successful for (${res?.data.reference})`);
 
     const escrowWallet = yield* _(
       escrowWalletRepo.firstOrThrow({ escrowId: metadata.escrowId }),
@@ -132,15 +101,13 @@ export const releaseFunds = (params: {
       ),
     );
 
-    if(escrowDetails.status === "completed"){
-      yield* new ExpectedError(
-        "This transaction has already been completed.",
-      );
+    if (escrowDetails.status === "completed") {
+      yield* new ExpectedError("This transaction has already been completed.");
     }
 
     if (!canTransitionEscrowStatus(escrowDetails.status, "completed")) {
       yield* new ExpectedError(
-        `Cannot transition from ${escrowDetails.status} to complete`,
+        `Cannot transition from ${escrowDetails.status} to completed`,
       );
     }
 
@@ -201,6 +168,6 @@ export const releaseFunds = (params: {
     );
 
     //mark the escrow transaction as completed
-    yield* escrowRepo.update({id:escrowDetails.id},{status:"completed"})
+    yield* escrowRepo.update({ id: escrowDetails.id }, { status: "completed" });
   });
 };

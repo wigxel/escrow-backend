@@ -14,7 +14,7 @@ import { Mailer } from "~/layers/mailing";
 import { NodeMailer } from "~/services/mailing/node-mailer";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
 import { EscrowPaymentRepoLayer } from "~/repositories/escrow/escrowPayment.repo";
-import { PaystackCheckoutLive } from "~/layers/payment/adapters/paystack";
+import { PaystackGatewayLive } from "~/layers/payment/adapters/paystack";
 import { PaystackEventLive } from "~/layers/payment/adapters/paystack-events";
 import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
@@ -57,7 +57,7 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoLayer.Repo.Live),
   Layer.provideMerge(UserModule),
   Layer.provideMerge(EscrowModule),
-  Layer.provideMerge(PaystackCheckoutLive),
+  Layer.provideMerge(PaystackGatewayLive),
   Layer.provideMerge(PaystackEventLive),
   Layer.provideMerge(TigerBeetleRepoLayer.Repo.Live),
   Layer.provideMerge(AccountStatementRepoLayer.live),

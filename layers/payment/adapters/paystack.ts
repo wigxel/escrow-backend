@@ -1,10 +1,10 @@
 import { Paystack } from "~/utils/paystack/paystack";
-import { CheckoutManager, type TCheckoutManager } from "../checkout-manager";
+import { PaymentGateway, type TPaymentGateway } from "../payment-gateway";
 import type { TInitializeTransactionData } from "~/utils/paystack/type/data";
 import { Config, Effect, Layer, pipe, Redacted } from "effect";
 import { PaystackEventLive } from "./paystack-events";
 
-class PaystackCheckout implements TCheckoutManager {
+class PaystackGateway implements TPaymentGateway {
   provider = "Paystack";
 
   constructor(private paystack: Paystack) {}
@@ -27,15 +27,15 @@ class PaystackCheckout implements TCheckoutManager {
   }
 }
 
-export const PaystackCheckoutLive = pipe(
+export const PaystackGatewayLive = pipe(
   Config.redacted("PSK_PUBLIC_KEY"),
   Effect.map((redacted_secret) => {
     const paystack = new Paystack(Redacted.value(redacted_secret));
 
     return Layer.effect(
-      CheckoutManager,
+      PaymentGateway,
       pipe(
-        Effect.suspend(() => Effect.succeed(new PaystackCheckout(paystack))),
+        Effect.suspend(() => Effect.succeed(new PaystackGateway(paystack))),
         Effect.provide(PaystackEventLive),
       ),
     );

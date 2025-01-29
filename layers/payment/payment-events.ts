@@ -1,24 +1,25 @@
 import { Context, Data, type Option } from "effect";
 
-export type PaymentEvents = Data.TaggedEnum<{
+export type PaymentGatewayEvents = Data.TaggedEnum<{
   ChargeSuccess: { readonly data: object };
-  Chargefailed:{readonly data: object};
+  Chargefailed: { readonly data: object };
   UnknownPaymentEvent: { readonly data: unknown };
 }>;
 
-export const PaymentEvent = Data.taggedEnum<PaymentEvents>();
-
 export interface PaymentEventServiceImpl {
   /** Resolves the event object to a PaymentEvent struct **/
-  resolve(object: unknown): PaymentEvents;
+  resolve(object: unknown): PaymentGatewayEvents;
 
   /** Extracts Metadata from the payment event **/
   getMetadata<T extends Record<string, unknown>>(
-    event: PaymentEvents,
+    event: PaymentGatewayEvents,
   ): Option.Option<T>;
 }
 
-export class PaymentEventService extends Context.Tag("PaymentEventService")<
-  PaymentEventService,
+export class PaymentGatewayEventService extends Context.Tag("PaymentGatewayEventService")<
+  PaymentGatewayEventService,
   PaymentEventServiceImpl
 >() {}
+
+export const PaymentGatewayEvent = Data.taggedEnum<PaymentGatewayEvents>();
+

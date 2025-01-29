@@ -1,24 +1,24 @@
 import { Layer, Match, Option, pipe } from "effect";
 import {
-  PaymentEvent,
-  PaymentEventService,
-  type PaymentEvents,
+  PaymentGatewayEvent,
+  type PaymentGatewayEvents,
+  PaymentGatewayEventService,
 } from "~/layers/payment/payment-events";
 
-export const PaystackEvent = PaymentEventService.of({
+export const PaystackEvent = PaymentGatewayEventService.of({
   resolve(ev: object) {
     return pipe(
       Match.value(ev),
-      Match.when({ event: "charge.success" }, PaymentEvent.ChargeSuccess),
-      Match.when({ event: "charge.failed" }, PaymentEvent.Chargefailed),
-      Match.orElse((data) => PaymentEvent.UnknownPaymentEvent({ data })),
+      Match.when({ event: "charge.success" }, PaymentGatewayEvent.ChargeSuccess),
+      Match.when({ event: "charge.failed" }, PaymentGatewayEvent.Chargefailed),
+      Match.orElse((data) => PaymentGatewayEvent.UnknownPaymentEvent({ data })),
     );
   },
 
-  getMetadata(event: PaymentEvents) {
+  getMetadata(event: PaymentGatewayEvents) {
     return pipe(
       event,
-      PaymentEvent.$match({
+      PaymentGatewayEvent.$match({
         /* @ts-expect-error*/
         ChargeSuccess: (x) => x.data?.metadata,
         /* @ts-expect-error*/
@@ -31,6 +31,6 @@ export const PaystackEvent = PaymentEventService.of({
 });
 
 export const PaystackEventLive = Layer.succeed(
-  PaymentEventService,
+  PaymentGatewayEventService,
   PaystackEvent,
 );

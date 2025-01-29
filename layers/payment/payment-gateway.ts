@@ -1,17 +1,17 @@
 import { type ConfigError, Context, type Effect } from "effect";
 import type { UnknownException } from "effect/Cause";
 import { TaggedError } from "effect/Data";
-import type { PaymentEventService } from "./payment-events";
+import type { PaymentGatewayEventService } from "./payment-events";
 import type { TInitializeTransactionData } from "~/utils/paystack/type/data";
 import type { TinitializeResponse } from "~/utils/paystack/type/types";
 
-type CheckoutErrors =
+type TPaymentGateWayErrors =
   | ConfigError.ConfigError
   | PaymentVerificationError
-  | CheckoutError
+  | PaymentGatewayError
   | UnknownException;
 
-export type TCheckoutManager = {
+export type TPaymentGateway = {
   readonly provider: string;
 
   readonly createSession: (
@@ -21,9 +21,12 @@ export type TCheckoutManager = {
   readonly verifyPayment: (
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     params: any,
-  ) => Effect.Effect<void, CheckoutErrors, PaymentEventService>;
+  ) => Effect.Effect<void, TPaymentGateWayErrors, PaymentGatewayEventService>;
 
-  verifyWebhook: (payload:unknown, signature:string) => Effect.Effect<boolean,never>;
+  verifyWebhook: (
+    payload: unknown,
+    signature: string,
+  ) => Effect.Effect<boolean, never>;
 
   /** Verifies the state of a payment event **/
   // cashout: () => void;
@@ -31,14 +34,12 @@ export type TCheckoutManager = {
   // getTransactions: () => Promise<void>;
 };
 
-
-export class CheckoutManager extends Context.Tag("CheckoutManager")<
-  CheckoutManager,
-  TCheckoutManager
+export class PaymentGateway extends Context.Tag("PaymentGateway")<
+  PaymentGateway,
+  TPaymentGateway
 >() {}
 
-
-export class CheckoutError extends TaggedError("CheckoutError") {
+export class PaymentGatewayError extends TaggedError("PaymentGatewayError") {
   constructor(
     public message: string,
     public originalError: unknown,

@@ -16,7 +16,7 @@ import { addHours, isBefore } from "date-fns";
 import { ExpectedError } from "~/config/exceptions";
 import { NoSuchElementException } from "effect/Cause";
 import { head } from "effect/Array";
-import { CheckoutManager } from "~/layers/payment/checkout-manager";
+import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import { findOrCreateUser } from "./user.service";
 import {
   canTransitionEscrowStatus,
@@ -168,7 +168,7 @@ export const initializeEscrowDeposit = (
 ) => {
   return Effect.gen(function* (_) {
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
-    const checkoutManager = yield* _(CheckoutManager);
+    const paymentGateway = yield* _(PaymentGateway);
     const escrowTransactionRepo = yield* _(EscrowTransactionRepoLayer.tag);
 
     const escrowTransactionDetails = yield* _(
@@ -219,7 +219,7 @@ export const initializeEscrowDeposit = (
       yield* new ExpectedError("Account associated with the escrow creation");
     }
 
-    const checkoutSession = yield* checkoutManager.createSession({
+    const checkoutSession = yield* paymentGateway.createSession({
       //convert to smallest currency unit kobo
       amount: String(Number(escrowRequestDetails.amount) * 100),
       email: customerDetails.email,

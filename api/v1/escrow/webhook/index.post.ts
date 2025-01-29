@@ -1,4 +1,4 @@
-import { handlePaymentEvents } from "~/services/payment.service";
+import { handlePaystackWebhook } from "~/services/webhook.service";
 
 export default eventHandler(async (event) => {
   const body = await readBody(event);
@@ -6,6 +6,6 @@ export default eventHandler(async (event) => {
 
   return runLive(
     event,
-    handlePaymentEvents(body, sig),
+    handlePaystackWebhook(body, sig),
   );
 });
