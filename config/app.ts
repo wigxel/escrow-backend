@@ -14,17 +14,21 @@ import { Mailer } from "~/layers/mailing";
 import { NodeMailer } from "~/services/mailing/node-mailer";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
 import { EscrowPaymentRepoLayer } from "~/repositories/escrow/escrowPayment.repo";
-import { PaystackGatewayLive } from "~/layers/payment/adapters/paystack";
+import { PaystackGatewayLive } from "~/layers/payment/adapters/paystackAdapter";
 import { PaystackEventLive } from "~/layers/payment/adapters/paystack-events";
 import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
+import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
+import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserLocationRepoLive),
   Layer.provideMerge(UserRepoLayer.Repo.Live),
   Layer.provideMerge(UserWalletRepoLayer.live),
+  Layer.provideMerge(BankAccountRepoLayer.live),
+  Layer.provideMerge(BankAccountVerificationRepoLayer.live),
 );
 
 export const EscrowModule = Layer.empty.pipe(

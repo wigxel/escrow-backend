@@ -9,7 +9,7 @@ import { Mail } from "~/layers/mailing/mail";
 import { Session } from "~/layers/session";
 import type { TUser } from "~/migrations/tables/interfaces";
 import { OtpRepo } from "~/repositories/otp.repository";
-import { UserRepoLayer, UserRepository } from "~/repositories/user.repository";
+import { UserRepoLayer } from "~/repositories/user.repository";
 import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
 import type { confirmEscrowRequestRules } from "~/validationRules/escrowTransactions.rules";

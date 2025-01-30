@@ -2,8 +2,18 @@ import { type ConfigError, Context, type Effect } from "effect";
 import type { UnknownException } from "effect/Cause";
 import { TaggedError } from "effect/Data";
 import type { PaymentGatewayEventService } from "./payment-events";
-import type { TInitializeTransactionData } from "~/utils/paystack/type/data";
-import type { TinitializeResponse } from "~/utils/paystack/type/types";
+import type {
+  TCreateTransferRecipientData,
+  TInitializeTransactionData,
+  TInitiateTransferData,
+} from "~/utils/paystack/type/data";
+import type {
+  TBankListResponse,
+  TCreateTransferRecipientResponse,
+  TinitializeResponse,
+  TInitiateTransferResponse,
+  TResolveAccountResponse,
+} from "~/utils/paystack/type/types";
 
 type TPaymentGateWayErrors =
   | ConfigError.ConfigError
@@ -28,10 +38,22 @@ export type TPaymentGateway = {
     signature: string,
   ) => Effect.Effect<boolean, never>;
 
-  /** Verifies the state of a payment event **/
-  // cashout: () => void;
-  // setupPayout: () => void;
-  // getTransactions: () => Promise<void>;
+  bankLists(
+    currency?: string,
+  ): Effect.Effect<TBankListResponse, UnknownException, never>;
+
+  resolveBankAccount(
+    accountNumber: string,
+    bankCode: string,
+  ): Effect.Effect<TResolveAccountResponse, UnknownException, never>;
+
+  createTransferRecipient(
+    payload: TCreateTransferRecipientData,
+  ): Effect.Effect<TCreateTransferRecipientResponse, UnknownException, never>;
+
+  initiateTransfer(
+    payload: TInitiateTransferData,
+  ): Effect.Effect<TInitiateTransferResponse, UnknownException, never>;
 };
 
 export class PaymentGateway extends Context.Tag("PaymentGateway")<

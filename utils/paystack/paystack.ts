@@ -58,7 +58,8 @@ export class Paystack {
       const response = await this.axiosInstance.post<T>(url, payload);
       return response.data;
     } catch (e) {
-      errorHandler(e);
+      const { message } = errorHandler(e);
+      throw new Error(message);
     }
   }
 
@@ -78,7 +79,9 @@ export class Paystack {
       const response = await this.axiosInstance.get<T>(url, { params });
       return response.data;
     } catch (e) {
-      errorHandler(e);
+      const { message } = errorHandler(e);
+      console.error(message);
+      throw new Error(message);
     }
   }
 
@@ -97,7 +100,7 @@ export class Paystack {
   /**
    * Used for the confirmation of personal bank accounts
    */
-  async resolveAccountNumber(accountNumber: number, bankCode: number) {
+  async resolveAccountNumber(accountNumber: string, bankCode: string) {
     const url = "/bank/resolve";
     return await this.getRequest<TResolveAccountResponse>(url, {
       account_number: accountNumber,
@@ -131,8 +134,8 @@ export class Paystack {
 
   /**
    * Initiate money transfer to customer
-   * @param payload 
-   * @returns 
+   * @param payload
+   * @returns
    */
   async initiateTransfer(payload: TInitiateTransferData) {
     const url = "/transfer";
