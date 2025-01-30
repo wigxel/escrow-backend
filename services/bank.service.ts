@@ -20,6 +20,15 @@ export const getBankList = () => {
   });
 };
 
+export const getUserBankAccounts = (currentUser: SessionUser) => {
+  return Effect.gen(function* (_) {
+    const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
+    return yield* bankAccountRepo.all({
+      where: SearchOps.eq("userId", currentUser.id),
+    });
+  });
+};
+
 export const resolveAccountNumber = (
   params: z.infer<typeof resolveAccountNumberRules>,
   currentUser: SessionUser,
@@ -127,6 +136,5 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
     yield* bankVerificationRepo.delete(
       SearchOps.eq("verificationToken", token),
     );
-
   });
 };
