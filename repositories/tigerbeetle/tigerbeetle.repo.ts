@@ -8,7 +8,7 @@ export class TigerBeetleRepository {
   constructor(private client: TigerBeetleAdapter) {
     this.client = client;
   }
-  run<T>(
+  private run<T>(
     fn: (client: TigerBeetleAdapter) => Promise<T>,
   ): Effect.Effect<T, UnknownException> {
     return Effect.tryPromise(() => fn(this.client));

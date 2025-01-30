@@ -18,10 +18,13 @@ export type TInitiateTransferData = {
 export type TCreateTransferRecipientData =
   | {
       type: "nuban";
+      /**
+       * bank account name
+       */
       name: string;
-      account_number: number;
-      bank_code: number;
-      currency?: "NGN";
+      account_number: string;
+      bank_code: string;
+      currency: "NGN";
     }
   | {
       type: "authorization";

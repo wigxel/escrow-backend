@@ -1,4 +1,6 @@
 import { Effect } from "effect";
+import { NoSuchElementException } from "effect/Cause";
+import { id } from "tigerbeetle-node";
 import { randomUUID } from "uncrypto";
 import type { z } from "zod";
 import { ExpectedError } from "~/config/exceptions";
@@ -6,7 +8,10 @@ import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import type { SessionUser } from "~/layers/session-provider";
 import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
+import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
+import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { resolveAccountNumberRules } from "~/validationRules/accountNumber.rules";
+import { SearchOps } from "./search/sql-search-resolver";
 
 export const getBankList = () => {
   return Effect.gen(function* (_) {
@@ -66,3 +71,62 @@ export const resolveAccountNumber = (
   });
 };
 
+export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
+  return Effect.gen(function* (_) {
+    const paystackGateway = yield* PaymentGateway;
+    const bankVerificationRepo = yield* _(BankAccountVerificationRepoLayer.tag);
+    const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
+    const tigerbeetleRepo = yield* _(TigerBeetleRepoLayer.Tag);
+
+    const bankDetails = yield* _(
+      bankVerificationRepo.firstOrThrow({ verificationToken: token }),
+      Effect.mapError(
+        () => new NoSuchElementException("Invalid bank account token"),
+      ),
+    );
+
+    //create recipient code for this account
+    const response = yield* _(
+      paystackGateway.createTransferRecipient({
+        type: "nuban",
+        account_number: bankDetails.accountNumber,
+        bank_code: bankDetails.bankCode,
+        name: bankDetails.accountName,
+        currency: "NGN",
+      }),
+      Effect.mapError(
+        (e) =>
+          new ExpectedError(
+            `couldn't create transfer recipient: account details are wrong`,
+          ),
+      ),
+    );
+
+    const tigerbeetleAccountId = String(id());
+    yield* _(
+      Effect.all([
+        bankAccountRepo.create({
+          userId: currentUser.id,
+          accountNumber: bankDetails.accountNumber,
+          accountName: bankDetails.accountName,
+          bankName: response.data.details.bank_name,
+          bankCode: bankDetails.bankCode,
+          paystackRecipientCode: response.data.recipient_code,
+          tigerbeetleAccountId,
+        }),
+
+        // add a tigerbeetle account for bank account
+        tigerbeetleRepo.createAccounts({
+          accountId: tigerbeetleAccountId,
+          code: TBAccountCode.BANK_ACCOUNT,
+        }),
+      ]),
+    );
+
+    //delete the temporary bank details
+    yield* bankVerificationRepo.delete(
+      SearchOps.eq("verificationToken", token),
+    );
+
+  });
+};
