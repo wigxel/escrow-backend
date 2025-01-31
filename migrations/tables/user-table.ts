@@ -1,5 +1,6 @@
 import {
   boolean,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -70,3 +71,13 @@ export const bankAccountVerificationTable = pgTable(
     };
   },
 );
+
+export const withdrawalTable = pgTable("withdrawal", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"),
+  amount: numeric("amount", { precision: 10, scale: 2 }),
+  status: varchar("status"),
+  referenceCode:varchar("reference_code"),
+  tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
+  ...timestamps,
+});

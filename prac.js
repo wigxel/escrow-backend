@@ -1,3 +1,4 @@
-const {id} = require('tigerbeetle-node')
+const amount = 100000n
+const amount2 = 500000000
 
-console.log(String(id()))
+console.log(Number(amount) / amount2)

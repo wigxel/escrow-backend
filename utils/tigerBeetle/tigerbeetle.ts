@@ -2,19 +2,21 @@ import {
   createClient,
   type AccountBalance,
   type AccountFilter,
-  type AccountID,
   type Transfer,
-  type TransferID,
-  type Account,
   type Client,
   AccountFlags,
 } from "tigerbeetle-node";
-import { TBAccountCode, type TTBTransfer, type TTBAccount, TBTransferReason } from "./type/type";
+import {
+  TBAccountCode,
+  type TTBTransfer,
+  type TTBAccount,
+  TBTransferCode,
+} from "./type/type";
 import { compoundLedger, isValidBigIntString } from "./utils";
 
 export class TigerBeetleAdapter {
   private client: Client;
-  public static instance:TigerBeetleAdapter
+  public static instance: TigerBeetleAdapter;
 
   private constructor(address: number | string, clusterId = 0) {
     this.client = createClient({
@@ -23,12 +25,12 @@ export class TigerBeetleAdapter {
     });
   }
 
-  static getInstance(address: number | string, clusterId = 0){
-    if(!TigerBeetleAdapter.instance){
-      TigerBeetleAdapter.instance = new TigerBeetleAdapter(address,clusterId)
+  static getInstance(address: number | string, clusterId = 0) {
+    if (!TigerBeetleAdapter.instance) {
+      TigerBeetleAdapter.instance = new TigerBeetleAdapter(address, clusterId);
     }
 
-    return TigerBeetleAdapter.instance
+    return TigerBeetleAdapter.instance;
   }
 
   async createAccounts(params: TTBAccount[] | TTBAccount) {
@@ -108,7 +110,7 @@ export class TigerBeetleAdapter {
         timeout: 0,
         pending_id: transfer.pending_id || BigInt(0),
         ledger: ledger?.ledgerId || compoundLedger.ngnLedger.ledgerId,
-        code: transfer.code || TBTransferReason.WALLET_WITHDRAWAL,
+        code: transfer.code || TBTransferCode.WALLET_WITHDRAWAL,
         flags: transfer.flags || 0,
         timestamp: BigInt(0),
       };
@@ -118,9 +120,38 @@ export class TigerBeetleAdapter {
     return await this.client.createTransfers(modTransfers);
   }
 
-  getAccountTransfers: (filter: AccountFilter) => Promise<Transfer[]>;
+  async lookupAccounts(accountId: string | string[]) {
+    const accountIds = Array.isArray(accountId) ? accountId : [accountId];
 
-  lookupAccounts: (batch: AccountID[]) => Promise<Account[]>;
-  lookupTransfers: (batch: TransferID[]) => Promise<Transfer[]>;
+    const modAccountIds = accountIds.map((acctId) => {
+      // Validate and convert accountId to BigInt
+      if (typeof acctId === "string" && !isValidBigIntString(acctId)) {
+        throw new Error(
+          `Invalid account id: ${acctId}. It must be a valid numeric string.`,
+        );
+      }
+      return BigInt(acctId);
+    });
+
+    return await this.client.lookupAccounts(modAccountIds);
+  }
+
+  async lookupTransfers(transferId: string | string[]) {
+    const transferIds = Array.isArray(transferId) ? transferId : [transferId];
+
+    const modtransferIds = transferIds.map((transId) => {
+      // Validate and convert accountId to BigInt
+      if (typeof transId === "string" && !isValidBigIntString(transId)) {
+        throw new Error(
+          `Invalid account id: ${transId}. It must be a valid numeric string.`,
+        );
+      }
+      return BigInt(transId);
+    });
+
+    return await this.client.lookupTransfers(modtransferIds);
+  }
+
+  getAccountTransfers: (filter: AccountFilter) => Promise<Transfer[]>;
   getAccountBalances: (filter: AccountFilter) => Promise<AccountBalance[]>;
 }

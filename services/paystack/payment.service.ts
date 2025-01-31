@@ -3,12 +3,18 @@ import {
   updateEscrowStatus,
   validateUserStatusUpdate,
 } from "../escrowTransactionServices";
-import { ExpectedError } from "~/config/exceptions";
+import {
+  ExpectedError,
+  InsufficientBalanceException,
+} from "~/config/exceptions";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
-import { createTransfer as createTBTransfer } from "../tigerbeetle.service";
-import { id } from "tigerbeetle-node";
+import {
+  createTransfer as createTBTransfer,
+  getAccountBalance,
+} from "../tigerbeetle.service";
+import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
-import { TBTransferReason } from "~/utils/tigerBeetle/type/type";
+import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
 import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
@@ -19,6 +25,12 @@ import type {
   TPaystackPaymentEventResponse,
   TSuccessPaymentMetaData,
 } from "~/types/types";
+import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
+import { PaymentGateway } from "~/layers/payment/payment-gateway";
+import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
+import type { z } from "zod";
+import type { withdrawalRules } from "~/validationRules/withdrawal.rules";
+import { randomUUID } from "uncrypto";
 
 export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentEventResponse,
@@ -45,7 +57,7 @@ export const handleSuccessPaymentEvents = (
         debit_account_id: orgAccountId,
         //note amount is in smallet currency unit eg Kobo set by paystack data
         amount: Number(res.data.amount),
-        code: TBTransferReason.ESCROW_PAYMENT,
+        code: TBTransferCode.ESCROW_PAYMENT,
         ledger: "ngnLedger",
       }),
     );
@@ -169,5 +181,71 @@ export const releaseFunds = (params: {
 
     //mark the escrow transaction as completed
     yield* escrowRepo.update({ id: escrowDetails.id }, { status: "completed" });
+  });
+};
+
+export const withdrawFromWallet = (
+  params: z.infer<typeof withdrawalRules> & {
+    currentUser: SessionUser;
+  },
+) => {
+  return Effect.gen(function* (_) {
+    const withdrawalRepo = yield* _(WithdrawalRepoLayer.tag);
+    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
+    const userWalletRepo = yield* UserWalletRepoLayer.tag;
+    const paystack = yield* PaymentGateway;
+    const bankAccountRepo = yield* BankAccountRepoLayer.tag;
+ 
+    const bankAccountDetails = yield* _(
+      bankAccountRepo.firstOrThrow({ id: params.accountNumberId }),
+      Effect.mapError(
+        () => new NoSuchElementException("Invalid account number id"),
+      ),
+    );
+
+    const wallet = yield* _(
+      userWalletRepo.firstOrThrow({ userId: params.currentUser.id }),
+      Effect.mapError(() => new NoSuchElementException("wallet not found")),
+    );
+
+    const amount = convertCurrencyUnit(params.amount, "naira-kobo");
+    const balance = yield* getAccountBalance(wallet.tigerbeetleAccountId);
+    const referenceCode = randomUUID();
+    const tigerbeetleTransferId = String(id())
+
+    if (Number(balance) < amount) {
+      yield* new InsufficientBalanceException();
+    }
+
+    /**
+     * initiates a transfer from paystack account to users bank account
+     */
+    const transferResponse = yield* _(paystack.initiateTransfer({
+      amount,
+      recipientCode: bankAccountDetails.paystackRecipientCode,
+      referenceCode,
+    }), Effect.mapError(()=>new ExpectedError("Unable to initiate transfer")));
+
+    yield* _(
+      Effect.all([
+        withdrawalRepo.create({
+          amount: String(params.amount),
+          referenceCode,
+          userId: params.currentUser.id,
+          status: transferResponse.data.status,
+          tigerbeetleTransferId
+        }),
+
+        tigerBeetleRepo.createTransfers({
+          amount,
+          credit_account_id:bankAccountDetails.tigerbeetleAccountId,
+          debit_account_id:wallet.tigerbeetleAccountId,
+          transferId:tigerbeetleTransferId,
+          code:TBTransferCode.WALLET_WITHDRAWAL,
+          flags:TransferFlags.pending
+        })
+      ]),
+    );
+
   });
 };

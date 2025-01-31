@@ -1,0 +1,1 @@
+ALTER TABLE "account_statement" ADD COLUMN "amount" numeric(10, 2);

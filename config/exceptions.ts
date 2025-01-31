@@ -67,6 +67,12 @@ export class PermissionError extends TaggedError("PermissionError") {
   }
 }
 
+export class InsufficientBalanceException extends TaggedError("InsufficientBalanceException") {
+  constructor(public message = "Insufficient account balance") {
+    super();
+  }
+}
+
 export type AppExceptions =
   | PermissionError
   | ValidationError
