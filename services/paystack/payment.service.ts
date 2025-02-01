@@ -2,7 +2,7 @@ import { Config, Effect } from "effect";
 import {
   updateEscrowStatus,
   validateUserStatusUpdate,
-} from "../escrowTransactionServices";
+} from "../escrow/escrowTransactionServices";
 import {
   ExpectedError,
   InsufficientBalanceException,
@@ -20,7 +20,7 @@ import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { NoSuchElementException } from "effect/Cause";
 import type { SessionUser } from "~/layers/session-provider";
-import { convertCurrencyUnit } from "~/utils/escrow.utils";
+import { convertCurrencyUnit } from "~/services/escrow/escrow.utils";
 import type {
   TSuccessPaymentMetaData,
 } from "~/types/types";
@@ -28,7 +28,7 @@ import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import type { z } from "zod";
-import type { withdrawalRules } from "~/validationRules/withdrawal.rules";
+import type { withdrawalRules } from "~/dto/withdrawal.rules";
 import { randomUUID } from "uncrypto";
 import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
 

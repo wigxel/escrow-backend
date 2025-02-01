@@ -12,7 +12,7 @@ import { OtpRepo } from "~/repositories/otp.repository";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
-import type { confirmEscrowRequestRules } from "~/validationRules/escrowTransactions.rules";
+import type { confirmEscrowRequestRules } from "~/dto/escrowTransactions.rules";
 import type { z } from "zod";
 
 export function createUser(data: TUser) {

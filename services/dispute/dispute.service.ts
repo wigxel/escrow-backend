@@ -21,7 +21,7 @@ import { OrderRepoLayer } from "~/repositories/order.repository";
 import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
 import { ChatService } from "~/services/chat/dispute";
 import { PaginationService } from "~/services/search/pagination.service";
-import { canTransitionDisputeStatus } from "~/utils/dispute.util";
+import { canTransitionDisputeStatus } from "~/services/dispute/dispute.util";
 import { sendNotification } from "./notification.service";
 import { SearchOps } from "./search/sql-search-resolver";
 

@@ -6,7 +6,7 @@ import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
   escrowStatusRules,
-} from "~/validationRules/escrowTransactions.rules";
+} from "~/dto/escrowTransactions.rules";
 import type { TEscrowRequest, TUser } from "~/migrations/schema";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
@@ -17,14 +17,14 @@ import { ExpectedError } from "~/config/exceptions";
 import { NoSuchElementException } from "effect/Cause";
 import { head } from "effect/Array";
 import { PaymentGateway } from "~/layers/payment/payment-gateway";
-import { handleUserCreationFromEscrow } from "./user.service";
+import { handleUserCreationFromEscrow } from "../user.service";
 import {
   canTransitionEscrowStatus,
   getBuyerAndSellerFromParticipants,
-} from "~/utils/escrow.utils";
+} from "~/services/escrow/escrow.utils";
 import { id } from "tigerbeetle-node";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
-import { createAccount as createTBAccount } from "./tigerbeetle.service";
+import { createAccount as createTBAccount } from "../tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 

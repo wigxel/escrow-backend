@@ -45,7 +45,7 @@ export type TTBTransfer = {
 
 export type TCompoundLedger = keyof typeof compoundLedger;
 
-interface Ledger {
+export interface ILedger {
   ledgerId: number;
   type: LedgerType;
   name: string;

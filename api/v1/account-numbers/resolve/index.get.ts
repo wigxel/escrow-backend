@@ -2,7 +2,7 @@ import { Effect } from "effect"
 import { validateBody, validateQuery } from "~/libs/request.helpers"
 import { getSessionInfo } from "~/libs/session.helpers"
 import { resolveAccountNumber } from "~/services/bank.service"
-import { resolveAccountNumberRules } from "~/validationRules/accountNumber.rules"
+import { resolveAccountNumberRules } from "~/dto/accountNumber.rules"
 
 export default eventHandler(async (event)=>{
   const program = Effect.gen(function*(_){
