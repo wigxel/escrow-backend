@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { validateBody, validateParams } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
 import { updateEscrowTransactionStatus } from "~/services/escrow/escrowTransactionServices";
-import { escrowStatusRules } from "~/dto/escrowTransactions.rules";
+import { escrowStatusRules } from "~/dto/escrowTransactions.dto";
 
 export default eventHandler(async (event) => {
   const escrowId = getRouterParam(event, "escrowid");

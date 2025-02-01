@@ -6,7 +6,7 @@ import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
   escrowStatusRules,
-} from "~/dto/escrowTransactions.rules";
+} from "~/dto/escrowTransactions.dto";
 import type { TEscrowRequest, TUser } from "~/migrations/schema";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";

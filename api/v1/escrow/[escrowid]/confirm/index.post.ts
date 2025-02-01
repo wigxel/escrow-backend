@@ -4,7 +4,7 @@ import type { SessionUser } from "~/layers/session-provider";
 import { validateBody, validateParams } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
 import { initializeEscrowDeposit } from "~/services/escrow/escrowTransactionServices";
-import { confirmEscrowRequestRules } from "~/dto/escrowTransactions.rules";
+import { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
 
 export default eventHandler((event) => {
   const escrowId = getRouterParam(event, "escrowid");

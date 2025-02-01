@@ -10,7 +10,7 @@ import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
 import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
-import type { resolveAccountNumberRules } from "~/dto/accountNumber.rules";
+import type { resolveAccountNumberRules } from "~/dto/accountNumber.dto";
 import { SearchOps } from "./search/sql-search-resolver";
 
 export const getBankList = () => {

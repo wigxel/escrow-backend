@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { validateBody } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
 import { createEscrowTransaction } from "~/services/escrow/escrowTransactionServices";
-import { createEscrowTransactionRules } from "~/dto/escrowTransactions.rules";
+import { createEscrowTransactionRules } from "~/dto/escrowTransactions.dto";
 
 export default eventHandler(async (event) => {
   const program = Effect.gen(function* (_) {

@@ -7,3 +7,4 @@ export * from "./tables/notification-table";
 export * from "./tables/dispute-table";
 export * from "./tables/address-table";
 export * from "./tables/escrow-transaction-table";
+export * from "./tables/activitylog.table";

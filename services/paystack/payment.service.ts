@@ -28,7 +28,7 @@ import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import type { z } from "zod";
-import type { withdrawalRules } from "~/dto/withdrawal.rules";
+import type { withdrawalRules } from "~/dto/withdrawal.dto";
 import { randomUUID } from "uncrypto";
 import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
 
