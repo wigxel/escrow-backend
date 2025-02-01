@@ -1,4 +1,4 @@
-import { safeArray } from "@repo/shared/src/data.helpers";
+import { safeArray } from "~/libs/data.helpers";
 const disputeStatusTransitions = {
   pending: ["open"],
   open: ["resolved"],

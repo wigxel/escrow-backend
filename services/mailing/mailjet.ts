@@ -1,4 +1,4 @@
-import { safeArray, safeObj } from "@repo/shared/src/data.helpers";
+import { safeArray, safeObj } from "~/libs/data.helpers";
 import type { AxiosError } from "axios";
 import { Config, Effect, Layer, pipe } from "effect";
 import Mailjet from "node-mailjet";

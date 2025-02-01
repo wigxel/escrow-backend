@@ -1,4 +1,4 @@
-import { safeArray } from "@repo/shared/src/data.helpers";
+import { safeArray } from "~/libs/data.helpers";
 import { Effect } from "effect";
 import { ExpectedError } from "~/config/exceptions";
 import type { TEscrowParticipant } from "~/migrations/schema";
@@ -56,4 +56,3 @@ export const convertCurrencyUnit = (
   }
   return Number(amount) * koboToNaira;
 };
-

@@ -1,4 +1,4 @@
-import { safeObj } from "@repo/shared/src/data.helpers";
+import { safeObj } from "~/libs/data.helpers";
 import { getTableName } from "drizzle-orm/table";
 import { Effect, Option, pipe } from "effect";
 import { head, isArray } from "effect/Array";

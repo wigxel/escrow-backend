@@ -1,4 +1,4 @@
-import { safeObj } from "@repo/shared/src/data.helpers";
+import { safeObj } from "~/libs/data.helpers";
 import { Cause, Effect, pipe } from "effect";
 // @ts-expect-error
 import { H3Event } from "h3";
