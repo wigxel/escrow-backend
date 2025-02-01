@@ -17,7 +17,7 @@ import { ExpectedError } from "~/config/exceptions";
 import { NoSuchElementException } from "effect/Cause";
 import { head } from "effect/Array";
 import { PaymentGateway } from "~/layers/payment/payment-gateway";
-import { findOrCreateUser } from "./user.service";
+import { handleUserCreationFromEscrow } from "./user.service";
 import {
   canTransitionEscrowStatus,
   getBuyerAndSellerFromParticipants,
@@ -170,6 +170,26 @@ export const initializeEscrowDeposit = (
     const escrowRequestRepo = yield* _(EscrowRequestRepoLayer.tag);
     const paymentGateway = yield* _(PaymentGateway);
     const escrowTransactionRepo = yield* _(EscrowTransactionRepoLayer.tag);
+    const userRepo = UserRepoLayer.Tag;
+
+    let customerDetails: TUser | SessionUser;
+    if (currentUser) {
+      customerDetails = currentUser;
+    } else {
+      //create a new account if neccessary
+      customerDetails = yield* userRepo.pipe(
+        Effect.flatMap((repo) =>
+          Effect.matchEffect(
+            repo.firstOrThrow({ username: input.customerUsername }),
+            {
+              onSuccess: () =>
+                new ExpectedError("Unauthorized: signin to continue"),
+              onFailure: (e) => handleUserCreationFromEscrow(input),
+            },
+          ),
+        ),
+      );
+    }
 
     const escrowTransactionDetails = yield* _(
       escrowTransactionRepo.firstOrThrow({ id: input.escrowId }),
@@ -208,9 +228,6 @@ export const initializeEscrowDeposit = (
         },
       };
     }
-
-    //create a new account if neccessary
-    const customerDetails = yield* _(findOrCreateUser(input));
 
     /**
      * the escrow request creator shouldn't be able to proceed with the escrow
