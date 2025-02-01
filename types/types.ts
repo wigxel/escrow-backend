@@ -42,14 +42,15 @@ export type TPaymentDetails = {
   paymentMethod: string;
 };
 
-export type TPaystackPaymentEventResponse = {
+
+export type TPaystackEventResponse = {
   event: string;
   data: {
     amount: string;
     reference: string;
     status: string;
     channel: string;
-    metadata: TSuccessPaymentMetaData;
+    metadata: Record<string,unknown>;
   };
 };
 

@@ -25,7 +25,7 @@ export type TTBTransfer = {
   debit_account_id: string;
   credit_account_id: string;
   amount: number;
-  pending_id?: bigint;
+  pendingId?: string;
   user_data_128?: number;
   user_data_64?: number;
   user_data_32?: number;

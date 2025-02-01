@@ -36,6 +36,12 @@ export const paymentStatus = pgEnum("payment_status", [
   "failed",
 ]);
 
+export const AccountStatementStatus = pgEnum("account_statement_status", [
+  "pending",
+  "completed",
+  "failed",
+]);
+
 export const roles = pgEnum("roles", ["buyer", "seller", "mediator"]);
 export const participantStatus = pgEnum("escrow_participants_status", [
   "active",
@@ -131,6 +137,7 @@ export const AccountStatementTable = pgTable("account_statement", {
   balance: numeric("balance", { precision: 10, scale: 2 }),
   type: statementType("type"),
   tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
-  metadata:text("metadata"),
+  status:AccountStatementStatus("status").default("completed"),
+  metadata: text("metadata"),
   ...timestamps,
 });

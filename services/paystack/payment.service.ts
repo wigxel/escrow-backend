@@ -22,7 +22,6 @@ import { NoSuchElementException } from "effect/Cause";
 import type { SessionUser } from "~/layers/session-provider";
 import { convertCurrencyUnit } from "~/utils/escrow.utils";
 import type {
-  TPaystackPaymentEventResponse,
   TSuccessPaymentMetaData,
 } from "~/types/types";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
@@ -31,14 +30,13 @@ import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import type { z } from "zod";
 import type { withdrawalRules } from "~/validationRules/withdrawal.rules";
 import { randomUUID } from "uncrypto";
+import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
 
-export const handleSuccessPaymentEvents = (
-  res: TPaystackPaymentEventResponse,
-  metadata: TSuccessPaymentMetaData,
-) => {
+export const handleSuccessPaymentEvents = (res: TPaystackPaymentWebhookEvent) => {
   return Effect.gen(function* (_) {
     const escrowWalletRepo = yield* EscrowWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
+    const metadata = res.data.metadata as TSuccessPaymentMetaData
 
     const escrowWallet = yield* _(
       escrowWalletRepo.firstOrThrow({ escrowId: metadata.escrowId }),
@@ -195,7 +193,8 @@ export const withdrawFromWallet = (
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const paystack = yield* PaymentGateway;
     const bankAccountRepo = yield* BankAccountRepoLayer.tag;
- 
+    const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
+    
     const bankAccountDetails = yield* _(
       bankAccountRepo.firstOrThrow({ id: params.accountNumberId }),
       Effect.mapError(
@@ -209,22 +208,27 @@ export const withdrawFromWallet = (
     );
 
     const amount = convertCurrencyUnit(params.amount, "naira-kobo");
-    const balance = yield* getAccountBalance(wallet.tigerbeetleAccountId);
-    const referenceCode = randomUUID();
-    const tigerbeetleTransferId = String(id())
-
-    if (Number(balance) < amount) {
+    const accountBalance = yield* getAccountBalance(wallet.tigerbeetleAccountId);
+   
+    if (Number(accountBalance) < amount) {
       yield* new InsufficientBalanceException();
     }
+
+    const currentBalance = convertCurrencyUnit(Number(accountBalance) - amount,"kobo-naira")
+    const referenceCode = randomUUID();
+    const tigerbeetleTransferId = String(id());
 
     /**
      * initiates a transfer from paystack account to users bank account
      */
-    const transferResponse = yield* _(paystack.initiateTransfer({
-      amount,
-      recipientCode: bankAccountDetails.paystackRecipientCode,
-      referenceCode,
-    }), Effect.mapError(()=>new ExpectedError("Unable to initiate transfer")));
+    const transferResponse = yield* _(
+      paystack.initiateTransfer({
+        amount,
+        recipientCode: bankAccountDetails.paystackRecipientCode,
+        referenceCode,
+      }),
+      Effect.mapError(() => new ExpectedError("Unable to initiate transfer")),
+    );
 
     yield* _(
       Effect.all([
@@ -233,19 +237,38 @@ export const withdrawFromWallet = (
           referenceCode,
           userId: params.currentUser.id,
           status: transferResponse.data.status,
-          tigerbeetleTransferId
+          tigerbeetleTransferId,
         }),
 
         tigerBeetleRepo.createTransfers({
           amount,
-          credit_account_id:bankAccountDetails.tigerbeetleAccountId,
-          debit_account_id:wallet.tigerbeetleAccountId,
-          transferId:tigerbeetleTransferId,
-          code:TBTransferCode.WALLET_WITHDRAWAL,
-          flags:TransferFlags.pending
-        })
+          credit_account_id: bankAccountDetails.tigerbeetleAccountId,
+          debit_account_id: wallet.tigerbeetleAccountId,
+          transferId: tigerbeetleTransferId,
+          code: TBTransferCode.WALLET_WITHDRAWAL,
+          flags: TransferFlags.pending,
+        }),
       ]),
     );
+
+    //add statement
+    yield* accountStatementRepo.create({
+      amount: String(params.amount),
+      balance:String(currentBalance),
+      type: "wallet.withdraw",
+      creatorId: params.currentUser.id,
+      tigerbeetleTransferId: tigerbeetleTransferId,
+      status:"pending",
+      metadata: JSON.stringify({
+        escrowId:null,
+        from: { accountId: wallet.tigerbeetleAccountId, name: "user wallet" },
+        to: {
+          accountId: bankAccountDetails.id,
+          name: "user bank account",
+        },
+        description: `withdrawing N${params.amount} from wallet to bank account`,
+      }),
+    });
 
   });
 };
