@@ -1,7 +1,5 @@
-// https://nitro.unjs.io/guide/typescript
 {
   "extends": [
-    "@repo/typescript-config/base.json",
     "./.nitro/types/tsconfig.json"
   ],
   "compilerOptions": {

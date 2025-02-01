@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@repo/backend",
+  "name": "escrow-backend",
   "scripts": {
     "build": "nitro build",
     "dev": "nitro dev",
@@ -14,7 +14,8 @@
     "db:status": "drizzle-kit check:pg",
     "db:show": "drizzle-kit studio",
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "nitropack prepare"
   },
   "devDependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
@@ -35,7 +36,6 @@
     "@lucia-auth/adapter-drizzle": "^1.0.7",
     "@react-email/components": "^0.0.32",
     "@react-email/render": "^0.0.13",
-    "@repo/shared": "workspace:*",
     "axios": "^1.7.9",
     "cloudinary": "^2.2.0",
     "date-fns": "^3.6.0",
