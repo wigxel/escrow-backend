@@ -24,8 +24,41 @@ export const getUserBankAccounts = (currentUser: SessionUser) => {
   return Effect.gen(function* (_) {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
     return yield* bankAccountRepo.all({
-      where: SearchOps.eq("userId", currentUser.id),
+      where: SearchOps.and(
+        SearchOps.eq("userId", currentUser.id),
+        SearchOps.isNull("deletedAt"),
+      ),
     });
+  });
+};
+
+export const deleteBankAcounts = (params: {
+  bankAccountId: string;
+  currentUser: SessionUser;
+}) => {
+  return Effect.gen(function* (_) {
+    const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
+
+    const accountDetails = yield* _(
+      bankAccountRepo.firstOrThrow({
+        id: params.bankAccountId,
+        deletedAt: null,
+      }),
+      Effect.mapError(
+        () => new NoSuchElementException("Invalid bank account id"),
+      ),
+    );
+
+    if (params.currentUser.id !== accountDetails.userId) {
+      yield* new ExpectedError(
+        "Unathorized action: cannot delete bank account",
+      );
+    }
+
+    yield* bankAccountRepo.update(
+      { id: params.bankAccountId },
+      { deletedAt: new Date() },
+    );
   });
 };
 

@@ -47,6 +47,7 @@ export const bankAccountTable = pgTable("bank_account", {
   accountName: varchar("account_name"),
   bankCode: varchar("bank_code"),
   paystackRecipientCode: varchar("paystack_recipient_code"),
+  deletedAt:timestamp("deleted_at"),
   ...timestamps,
 });
 
