@@ -31,6 +31,8 @@ import type { z } from "zod";
 import type { withdrawalRules } from "~/dto/withdrawal.dto";
 import { randomUUID } from "uncrypto";
 import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
+import { createActivityLog } from "../activityLog/activityLog.service";
+import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 
 export const handleSuccessPaymentEvents = (res: TPaystackPaymentWebhookEvent) => {
   return Effect.gen(function* (_) {
@@ -179,6 +181,9 @@ export const releaseFunds = (params: {
 
     //mark the escrow transaction as completed
     yield* escrowRepo.update({ id: escrowDetails.id }, { status: "completed" });
+     yield* createActivityLog(
+          escrowActivityLog.completed({ id: escrowDetails.id }),
+        );
   });
 };
 

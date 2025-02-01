@@ -1,9 +1,6 @@
 import type { TActivityLogEvent } from "~/types/types";
 
-export const escrowActivityStatus: Record<
-  string,
-  (params?: ParamsWithId) => TActivityLogEvent
-> = {
+export const escrowActivityLog = {
   created(params: ParamsWithId) {
     return {
       kind: "Escrow",
@@ -59,7 +56,7 @@ export const escrowActivityStatus: Record<
       kind: "Escrow",
       entityId: params?.id,
       data: {
-        summary: "Escrow transaction completed",
+        summary: "Escrow transaction completed. Funds released",
         params,
       },
     };

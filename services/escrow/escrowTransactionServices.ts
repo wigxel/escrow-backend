@@ -27,6 +27,8 @@ import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
 import { createAccount as createTBAccount } from "../tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
+import { createActivityLog } from "../activityLog/activityLog.service";
+import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -110,6 +112,10 @@ export const createEscrowTransaction = (
     };
 
     yield* escrowRequestRepo.create(escrowRequestData);
+    //log the escrow creation
+    yield* createActivityLog(
+      escrowActivityLog.created({ id: escrowTransaction.id }),
+    );
     return { escrowTransactionId: escrowTransaction.id };
   });
 };
@@ -153,6 +159,11 @@ export const getEscrowRequestDetails = (data: {
     yield* escrowTransactionRepo.update(
       { id: escrowRequestDetails.escrowId },
       { status: "deposit.pending" },
+    );
+
+    //log the escrow creation
+    yield* createActivityLog(
+      escrowActivityLog.depositPending({ id: escrowRequestDetails.escrowId }),
     );
 
     return {
@@ -313,6 +324,11 @@ export const updateEscrowStatus = (
     yield* escrowTransactionRepo.update(
       { id: params.escrowId },
       { status: "deposit.success" },
+    );
+
+    //log the escrow creation
+    yield* createActivityLog(
+      escrowActivityLog.depositSuccess({ id: params.escrowId }),
     );
   });
 };
