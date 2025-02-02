@@ -16,7 +16,7 @@ export const disputeTable = pgTable("disputes", {
   acceptedBy: uuid("accepted_by"),
   resolvedBy: uuid("resolved_by"),
   reason: varchar("reason"),
-  orderId: uuid("order_id"),
+  escrowId: uuid("escrow_id"),
   status: varchar("status").default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
