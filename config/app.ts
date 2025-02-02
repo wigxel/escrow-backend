@@ -23,6 +23,7 @@ import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo"
 import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
+import { ReviewRepoLive } from "~/repositories/review.repository";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserLocationRepoLive),
@@ -31,6 +32,7 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(BankAccountRepoLayer.live),
   Layer.provideMerge(BankAccountVerificationRepoLayer.live),
   Layer.provideMerge(WithdrawalRepoLayer.live),
+  Layer.provideMerge(ReviewRepoLive),
 );
 
 export const EscrowModule = Layer.empty.pipe(

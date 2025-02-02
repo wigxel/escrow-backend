@@ -3,7 +3,6 @@ import type { User } from "~/migrations/schema";
 import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
 import {
   deleteResource,
-  FileDeletionException,
   FileStorage,
   FileUploadException,
 } from "~/layers/storage/layer";
@@ -12,7 +11,6 @@ import { getResource } from "./storage.service";
 export const getProfile = (userId: string) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
-
     return yield* userRepo.firstOrThrow({ id: userId });
   });
 };

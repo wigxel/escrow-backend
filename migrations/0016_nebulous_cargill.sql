@@ -1,0 +1,1 @@
+ALTER TABLE "bank_account_verification" ALTER COLUMN "bank_name" DROP NOT NULL;

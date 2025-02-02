@@ -1,139 +1,78 @@
 import { Effect, pipe } from "effect";
-import { head } from "effect/Array";
 import { NoSuchElementException } from "effect/Cause";
+import type { z } from "zod";
 import { ExpectedError, PermissionError } from "~/config/exceptions";
-import type {
-  Comment,
-  NewComments,
-  NewReview,
-  Review,
-} from "~/migrations/schema";
-import { CommentRepo } from "~/repositories/comment.repository";
-import { ProductRepo } from "~/repositories/product.repository";
+import type { createReviewDto } from "~/dto/review.dto";
+import type { SessionUser } from "~/layers/session-provider";
+import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
+import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { ReviewRepo } from "~/repositories/review.repository";
-import { SearchOps } from "~/services/search/sql-search-resolver";
+import { getBuyerAndSellerFromParticipants } from "./escrow/escrow.utils";
 
-export function readReviews(filters: Partial<Review> = {}) {
+export function createReview(
+  params: z.infer<typeof createReviewDto>,
+  currentUser: SessionUser,
+) {
   return Effect.gen(function* (_) {
     const reviewRepo = yield* ReviewRepo;
-    return yield* reviewRepo.findProductReviews(filters);
-  });
-}
+    const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
+    const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
+    
+    const escrowDetails = yield* _(
+      escrowRepo.firstOrThrow({ id: params.escrowId }),
+      Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
+    );
 
-export function createReview(data: NewReview) {
-  return Effect.gen(function* (_) {
-    const reviewRepo = yield* ReviewRepo;
-    const productRepo = yield* ProductRepo;
-
-    yield* _(
+    //check if user already reviewed
+    const r = yield* _(
       reviewRepo.firstOrThrow({
-        userId: data.userId,
-        productId: data.productId,
+        reviewerId: currentUser.id,
+        escrowId: escrowDetails.id,
       }),
-      Effect.mapError(() => new ExpectedError("Rating already given")),
+      Effect.matchEffect({
+        onSuccess: () => new ExpectedError("You already left a review"),
+        onFailure: () => Effect.succeed(1),
+      }),
     );
 
-    const response = yield* reviewRepo.create(data);
+    if (!(escrowDetails.status === "completed")) {
+      yield* new PermissionError("Cannot leave a review at this stage");
+    }
 
-    const product = yield* productRepo.find(data.productId);
-    yield* productRepo.update(
-      { ownerId: product.ownerId, id: product.id },
-      {
-        rating:
-          Number(product.rating) > 0
-            ? ((Number(product.rating) + data.rating) / 2).toString()
-            : data.rating.toString(), // get average
-      },
+    const participants = yield* escrowParticipantRepo.getParticipants(
+      escrowDetails.id,
     );
 
-    return response;
+    const { seller, buyer } =
+      yield* getBuyerAndSellerFromParticipants(participants);
+
+    if ((currentUser.id !== seller.userId) && (currentUser.id !== buyer.userId)) {
+      yield* new PermissionError(
+        "cannot leave a review on this escrow transaction",
+      );
+    }
+
+    const revieweeId =
+      currentUser.id !== seller.userId ? seller.userId : buyer.userId;
+
+    yield* reviewRepo.create({
+      escrowId: escrowDetails.id,
+      reviewerId: currentUser.id,
+      revieweeId,
+      rating: params.rating,
+      comment: params.comment,
+    });
   });
 }
 
-export function updateReview(
-  reviewId: string,
-  userId: string,
-  data: Partial<Omit<Review, "id">>,
-) {
+export function updateReview() {
   return Effect.gen(function* (_) {
     const reviewRepo = yield* ReviewRepo;
-    const review = yield* reviewRepo.firstOrThrow(reviewId);
-
-    if (review.userId !== userId)
-      return yield* new PermissionError(
-        "You are not authorized to make this request",
-      );
-    return yield* reviewRepo.update(reviewId, data);
   });
 }
 
-export function deleteReview(reviewId: string, userId: string) {
+export function deleteReview() {
   return Effect.gen(function* (_) {
     const reviewRepo = yield* ReviewRepo;
-
-    const review = yield* _(
-      reviewRepo.firstOrThrow(reviewId),
-      Effect.mapError(() => new ExpectedError("Review does not exist")),
-    );
-
-    if (review.userId !== userId)
-      return yield* new PermissionError(
-        "You are not authorized to make this request",
-      );
-
-    return yield* reviewRepo.delete(SearchOps.eq("id", reviewId));
-  });
-}
-
-export function readComments(data: Partial<Comment>) {
-  return Effect.gen(function* (_) {
-    const commentRepo = yield* CommentRepo;
-    return yield* commentRepo.findComments(data);
-  });
-}
-
-export function createComment(data: NewComments) {
-  return Effect.gen(function* (_) {
-    const commentRepo = yield* CommentRepo;
-    return yield* commentRepo.create(data).pipe(Effect.flatMap(head));
-  });
-}
-
-export function updateComment(
-  commentId: string,
-  userId: string,
-  data: Partial<Omit<Comment, "id">>,
-) {
-  return Effect.gen(function* (_) {
-    const commentRepo = yield* CommentRepo;
-    const comment = yield* pipe(
-      commentRepo.find(commentId),
-      Effect.catchTag(
-        "NoSuchElementException",
-        () => new NoSuchElementException("Comment doesn't exist"),
-      ),
-    );
-
-    if (comment.userId !== userId) {
-      yield* new PermissionError("Not authorized to perform this action");
-    }
-
-    return yield* commentRepo.update({ id: commentId }, data);
-  });
-}
-
-export function deleteComment(commentId: string, userId: string) {
-  return Effect.gen(function* (_) {
-    const commentRepo = yield* CommentRepo;
-    const comment = yield* commentRepo.find(commentId);
-
-    if (!comment) {
-      return yield* new ExpectedError("Comment doesn't exist");
-    }
-
-    if (comment.userId !== userId) {
-      return yield* new ExpectedError("Not authorized to perform this action");
-    }
-    return yield* commentRepo.deleteOne(commentId);
   });
 }

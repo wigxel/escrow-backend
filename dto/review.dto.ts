@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 export const createReviewDto = z.object({
-  productId: z.string(),
+  escrowId: z.string(),
   comment: z.string().min(3).max(20),
-  rating: z.number(),
-  images: z.string().array(),
-}).parse;
+  rating: z.number({coerce:true}),
+})
 
 export const updateReviewDto = z.object({
   reviewId: z.string(),
