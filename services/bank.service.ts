@@ -96,12 +96,12 @@ export const resolveAccountNumber = (
      * store the bank details in a temporary table
      */
     const verificationToken = randomUUID();
+
     yield* bankVerificationRepo.create({
       userId: currentUser.id,
-      accountNumber: params.accountNumber,
+      accountNumber: bankDetails.data.account_number,
       bankCode: params.bankCode,
       accountName: bankDetails.data.account_name,
-      bankName: params.bankName,
       verificationToken,
     });
 

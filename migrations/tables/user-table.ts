@@ -58,7 +58,7 @@ export const bankAccountVerificationTable = pgTable(
     userId: uuid("user_id").notNull(),
     accountNumber: varchar("account_number").notNull(),
     accountName: varchar("account_name"),
-    bankName: varchar("bank_name").notNull(),
+    bankName: varchar("bank_name"),
     bankCode: varchar("bank_code"),
     verificationToken: uuid("verificationToken"),
     expiresAt: timestamp("expires_at").defaultNow().notNull(),
