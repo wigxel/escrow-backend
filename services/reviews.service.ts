@@ -1,13 +1,14 @@
-import { Effect, pipe } from "effect";
+import { Effect } from "effect";
 import { NoSuchElementException } from "effect/Cause";
 import type { z } from "zod";
 import { ExpectedError, PermissionError } from "~/config/exceptions";
-import type { createReviewDto } from "~/dto/review.dto";
+import type { createReviewDto, reviewFilterDto } from "~/dto/review.dto";
 import type { SessionUser } from "~/layers/session-provider";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { ReviewRepo } from "~/repositories/review.repository";
 import { getBuyerAndSellerFromParticipants } from "./escrow/escrow.utils";
+import { PaginationService } from "./search/pagination.service";
 
 export function createReview(
   params: z.infer<typeof createReviewDto>,
@@ -17,7 +18,7 @@ export function createReview(
     const reviewRepo = yield* ReviewRepo;
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
-    
+
     const escrowDetails = yield* _(
       escrowRepo.firstOrThrow({ id: params.escrowId }),
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
@@ -46,7 +47,7 @@ export function createReview(
     const { seller, buyer } =
       yield* getBuyerAndSellerFromParticipants(participants);
 
-    if ((currentUser.id !== seller.userId) && (currentUser.id !== buyer.userId)) {
+    if (currentUser.id !== seller.userId && currentUser.id !== buyer.userId) {
       yield* new PermissionError(
         "cannot leave a review on this escrow transaction",
       );
@@ -65,9 +66,25 @@ export function createReview(
   });
 }
 
-export function updateReview() {
+export function getReviews(filters: z.infer<typeof reviewFilterDto>) {
   return Effect.gen(function* (_) {
     const reviewRepo = yield* ReviewRepo;
+    const paginate = yield* PaginationService;
+
+    const reviewCount = yield* reviewRepo.reviewCount(filters);
+    const reviews = yield* reviewRepo.getReviews({
+      ...filters,
+      ...paginate.query,
+    });
+
+    return {
+      data: reviews,
+      meta: {
+        ...paginate.meta,
+        total: reviewCount.count,
+        total_pages: Math.ceil(reviewCount.count / paginate.query.pageSize),
+      },
+    };
   });
 }
 

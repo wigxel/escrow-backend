@@ -1,4 +1,6 @@
-const amount = 100000n
-const amount2 = 500000000
+const f = {userId:"kadima",escrowId:"escrowid",rating:"4"}
+const b = Object.entries(f).map(([key, value])=>{
+  return value
+})
 
-console.log(Number(amount) / amount2)
+console.log(...b)
