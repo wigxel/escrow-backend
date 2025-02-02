@@ -9,6 +9,7 @@ import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransact
 import { ReviewRepo } from "~/repositories/review.repository";
 import { getBuyerAndSellerFromParticipants } from "./escrow/escrow.utils";
 import { PaginationService } from "./search/pagination.service";
+import { SearchOps } from "./search/sql-search-resolver";
 
 export function createReview(
   params: z.infer<typeof createReviewDto>,
@@ -88,8 +89,24 @@ export function getReviews(filters: z.infer<typeof reviewFilterDto>) {
   });
 }
 
-export function deleteReview() {
+export function deleteReview(params: {
+  reviewId: string;
+  currentUser: SessionUser;
+}) {
   return Effect.gen(function* (_) {
     const reviewRepo = yield* ReviewRepo;
+
+    const review = yield* _(
+      reviewRepo.firstOrThrow({
+        id: params.reviewId,
+      }),
+      Effect.mapError(() => new NoSuchElementException("Invalid review Id")),
+    );
+
+    if (params.currentUser.id !== review.reviewerId) {
+      yield* new PermissionError("Cannot delete this review");
+    }
+
+    yield* reviewRepo.delete(SearchOps.eq("id", params.reviewId));
   });
 }
