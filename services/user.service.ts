@@ -200,10 +200,13 @@ export const findOrCreateUser = (
   const userRepo = UserRepoLayer.Tag;
   return userRepo.pipe(
     Effect.flatMap((repo) =>
-      Effect.matchEffect(repo.firstOrThrow({ username: input.customerUsername }), {
-        onSuccess: (user) => Effect.succeed(user),
-        onFailure: (e) => handleUserCreationFromEscrow(input),
-      }),
+      Effect.matchEffect(
+        repo.firstOrThrow({ username: input.customerUsername }),
+        {
+          onSuccess: (user) => Effect.succeed(user),
+          onFailure: (e) => handleUserCreationFromEscrow(input),
+        },
+      ),
     ),
   );
 };
@@ -241,5 +244,18 @@ export const handleUserCreationFromEscrow = (
     );
 
     //TODO: send an email to the user to notify of newly created account
+  });
+};
+
+export const checkUsername = (username: string) => {
+  return Effect.gen(function* (_) {
+    const userRepo = yield* UserRepoLayer.Tag;
+    const userDetails = yield* _(
+      userRepo.firstOrThrow({ username }),
+      Effect.matchEffect({
+        onSuccess: () => new ExpectedError("Username taken"),
+        onFailure: () => Effect.succeed(1),
+      }),
+    );
   });
 };
