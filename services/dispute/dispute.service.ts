@@ -3,12 +3,15 @@ import { createTextMessage } from "@repo/shared/src/chat-service/utils";
 import { Effect, pipe } from "effect";
 import { head } from "effect/Array";
 import { toLower } from "ramda";
-import { NotificationSetup } from "~/app/notifications/notification.utils";
+import {
+  NotificationSetup,
+  type TNotificationMessage,
+} from "~/app/notifications/notification.utils";
 import { ExpectedError, PermissionError } from "~/config/exceptions";
 import type { SessionUser } from "~/layers/session-provider";
 import { DisputeRepoLayer } from "~/repositories/dispute.repo";
 import { DisputeMembersRepoLayer } from "~/repositories/disputeMember.repo";
-import { UserRepo } from "~/repositories/user.repository";
+import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
 import { ChatService } from "~/services/chat/dispute";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
@@ -17,6 +20,8 @@ import {
   getBuyerAndSellerFromParticipants,
 } from "../escrow/escrow.utils";
 import { sendNotification } from "../notification.service";
+import { DisputeInviteNotification } from "~/app/notifications/dispute-invite";
+import { NotificationFacade } from "~/layers/notification/layer";
 
 export const createDispute = (params: {
   disputeData: { escrowId: string; reason: string };
@@ -111,7 +116,7 @@ export const createDispute = (params: {
       }),
     ]);
 
-    //update the escrow status 
+    //update the escrow status
     yield* escrowRepo.update({ id: escrowDetails.id }, { status: "dispute" });
 
     yield* Effect.all([
@@ -227,5 +232,127 @@ export const getDisputesByUserId = (currentUserId: string) => {
     });
 
     return { data: list, status: true };
+  });
+};
+
+/**
+ * This method assigns a user as a member of a dispute
+ * or removes the user
+ */
+export const inviteMember = (data: {
+  currentUser: SessionUser;
+  disputeId: string;
+  userId: string;
+}) => {
+  return Effect.gen(function* (_) {
+    const notify = yield* NotificationFacade;
+    const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
+    const disputeRepo = yield* DisputeRepoLayer.Tag;
+    const escrowParticipantsRepo = yield* EscrowParticipantRepoLayer.tag;
+    const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
+    const userRepo = yield* UserRepoLayer.Tag;
+    const notifySetup = new NotificationSetup("escrowDispute");
+
+    if (data.currentUser.role !== "admin") {
+      yield* new PermissionError("Cannot invite user");
+    }
+
+    //make sure a dispute exist for the disputeId
+    const disputeDetails = yield* disputeRepo
+      .firstOrThrow("id", data.disputeId)
+      .pipe(
+        Effect.mapError(
+          () =>
+            new ExpectedError("Invalid disputeID: Unassociated open dispute"),
+        ),
+      );
+
+    if (disputeDetails.createdBy === data.userId) {
+      yield* new ExpectedError(
+        "Unacceptable action: cannot invite dispute creator",
+      );
+    }
+
+    const invitedUserDetails = yield* userRepo
+      .firstOrThrow({ id: data.userId })
+      .pipe(
+        Effect.mapError(
+          () => new ExpectedError("Invalid user id: Cannot invite this user"),
+        ),
+      );
+
+    const escrowDetails = yield* _(
+      escrowRepo.firstOrThrow({
+        id: disputeDetails.escrowId,
+      }),
+      Effect.mapError(
+        () => new ExpectedError("Invalid dispute id: Cannot retrieve dispute"),
+      ),
+    );
+
+    // the users in the escrow trasactions
+    const participants = yield* escrowParticipantsRepo.getParticipants(
+      escrowDetails.id,
+    );
+
+    const { seller, buyer } =
+      yield* getBuyerAndSellerFromParticipants(participants);
+
+    if (
+      !(
+        seller.userId === invitedUserDetails.id ||
+        buyer.userId === invitedUserDetails.id ||
+        invitedUserDetails.role === "admin"
+      )
+    ) {
+      yield* new ExpectedError(
+        "User must be an admin or associated with the escrow",
+      );
+    }
+
+    //if user not already a member add the user
+    yield* disputeMembersRepo
+      .firstOrThrow({ userId: data.userId, disputeId: data.disputeId })
+      .pipe(
+        Effect.matchEffect({
+          onFailure: () => {
+            return disputeMembersRepo.create({
+              disputeId: data.disputeId,
+              userId: data.userId,
+              role:
+                invitedUserDetails.role !== "admin"
+                  ? invitedUserDetails.id === seller.id
+                    ? "seller"
+                    : "buyer"
+                  : invitedUserDetails.role,
+            });
+          },
+          onSuccess: () => {
+            return new ExpectedError("User already a member");
+          },
+        }),
+      );
+
+    // notify user
+    const Notificationmsg: TNotificationMessage = {
+      title: "Invitation to Participate in Open Escrow Dispute",
+      message: `We would like to inform you that you have been invited to
+        participate in an open dispute related to an escrow. Your
+        involvement is important for resolving this matter.`,
+    };
+
+    // write notification to database
+    yield* sendNotification(
+      notifySetup.createMessage({
+        type: "new",
+        receiverId: data.userId,
+        msg: Notificationmsg,
+      }),
+    );
+
+    // send email notification
+    yield* notify
+      .route("mail", { address: invitedUserDetails.email })
+      .notify(new DisputeInviteNotification(invitedUserDetails));
   });
 };
