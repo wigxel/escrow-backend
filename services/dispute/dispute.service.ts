@@ -22,6 +22,8 @@ import {
 import { sendNotification } from "../notification.service";
 import { DisputeInviteNotification } from "~/app/notifications/dispute-invite";
 import { NotificationFacade } from "~/layers/notification/layer";
+import { DisputeLeaveNotification } from "~/app/notifications/dispute-leave";
+import { SearchOps } from "../search/sql-search-resolver";
 
 export const createDispute = (params: {
   disputeData: { escrowId: string; reason: string };
@@ -354,5 +356,67 @@ export const inviteMember = (data: {
     yield* notify
       .route("mail", { address: invitedUserDetails.email })
       .notify(new DisputeInviteNotification(invitedUserDetails));
+  });
+};
+
+export const removeMember = (data: {
+  currentUser: SessionUser;
+  userId: string;
+  disputeId: string;
+}) => {
+  return Effect.gen(function* (_) {
+    const userRepo = yield* UserRepo;
+    const notify = yield* NotificationFacade;
+    const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
+    const notifySetup = new NotificationSetup("escrowDispute");
+
+    if (data.currentUser.role !== "admin") {
+      yield* new PermissionError("Cannot remove user");
+    }
+
+    // if user already a member remove the user
+    yield* disputeMembersRepo
+      .firstOrThrow(
+        SearchOps.and(
+          SearchOps.eq("userId", data.userId),
+          SearchOps.eq("disputeId", data.disputeId),
+        ),
+      )
+      .pipe(
+        Effect.matchEffect({
+          onFailure: () => {
+            return new ExpectedError("User is not a member");
+          },
+
+          onSuccess: () => {
+            return disputeMembersRepo.delete(
+              SearchOps.and(
+                SearchOps.eq("userId", data.userId),
+                SearchOps.eq("disputeId", data.disputeId),
+              ),
+            );
+          },
+        }),
+      );
+
+    // notify user
+    const Notificationmsg: TNotificationMessage = {
+      title: "Removal from Open Dispute",
+      message:
+        "You have been removed from the open dispute you were previously involved in.",
+    };
+
+    yield* sendNotification(
+      notifySetup.createMessage({
+        type: "new",
+        receiverId: data.userId,
+        msg: Notificationmsg,
+      }),
+    );
+
+    const user = yield* userRepo.find(data.userId);
+    yield* notify
+      .route("mail", { address: user.email })
+      .notify(new DisputeLeaveNotification(data.disputeId, user));
   });
 };
