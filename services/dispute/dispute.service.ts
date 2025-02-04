@@ -24,6 +24,7 @@ import { DisputeInviteNotification } from "~/app/notifications/dispute-invite";
 import { NotificationFacade } from "~/layers/notification/layer";
 import { DisputeLeaveNotification } from "~/app/notifications/dispute-leave";
 import { SearchOps } from "../search/sql-search-resolver";
+import { canTransitionDisputeStatus } from "./dispute.util";
 
 export const createDispute = (params: {
   disputeData: { escrowId: string; reason: string };
@@ -418,5 +419,55 @@ export const removeMember = (data: {
     yield* notify
       .route("mail", { address: user.email })
       .notify(new DisputeLeaveNotification(data.disputeId, user));
+  });
+};
+
+export const updateDisputeStatus = (data: {
+  currentUser: SessionUser;
+  disputeId: string;
+  status: "open" | "resolved";
+}) => {
+  return Effect.gen(function* (_) {
+    const disputeRepo = yield* DisputeRepoLayer.Tag;
+    const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
+
+    //only customer care or admin can update dispute status
+    if (data.currentUser.role !== "admin") {
+      yield* new PermissionError("Cannot affect dispute status");
+    }
+
+    //make sure the dispute id exists
+    const disputeDetails = yield* disputeRepo
+      .firstOrThrow("id", data.disputeId)
+      .pipe(Effect.mapError(() => new ExpectedError("invalid dispute id")));
+
+    //check If you can change dispute status
+    if (!canTransitionDisputeStatus(disputeDetails.status, data.status)) {
+      yield* new ExpectedError(
+        `Cannot transition from ${disputeDetails.status} to ${data.status}`,
+      );
+    }
+
+    if (data.status === "open") {
+      //update status
+      yield* disputeRepo.update(data.disputeId, {
+        acceptedBy: data.currentUser.id,
+        status: data.status,
+      });
+
+      //add the customerCare or admin as dispute member
+      yield* disputeMembersRepo.create({
+        disputeId: disputeDetails.id,
+        userId: data.currentUser.id,
+        role: data.currentUser.role,
+      });
+    }
+
+    if (data.status === "resolved") {
+      yield* disputeRepo.update(data.disputeId, {
+        resolvedBy: data.currentUser.id,
+        status: data.status,
+      });
+    }
   });
 };
