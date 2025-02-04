@@ -24,6 +24,9 @@ import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { ReviewRepoLive } from "~/repositories/review.repository";
+import { DisputeRepoLayer } from "~/repositories/dispute.repo";
+import { DisputeMembersRepoLayer } from "~/repositories/disputeMember.repo";
+import { ChatServiceLive } from "~/services/chat/dispute";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserLocationRepoLive),
@@ -33,6 +36,12 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(BankAccountVerificationRepoLayer.live),
   Layer.provideMerge(WithdrawalRepoLayer.live),
   Layer.provideMerge(ReviewRepoLive),
+);
+
+const DisputeModule = Layer.empty.pipe(
+  Layer.provideMerge(DisputeRepoLayer.Repo.Live),
+  Layer.provideMerge(DisputeMembersRepoLayer.Repo.Live),
+  Layer.provideMerge(ChatServiceLive),
 );
 
 export const EscrowModule = Layer.empty.pipe(
@@ -65,6 +74,7 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoLayer.Repo.Live),
   Layer.provideMerge(UserModule),
   Layer.provideMerge(EscrowModule),
+  Layer.provideMerge(DisputeModule),
   Layer.provideMerge(PaystackGatewayLive),
   Layer.provideMerge(PaystackEventLive),
   Layer.provideMerge(TigerBeetleRepoLayer.Repo.Live),

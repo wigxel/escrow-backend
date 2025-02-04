@@ -1,55 +1,20 @@
 import type { Notification } from "~/migrations/schema";
 
 const notificationMessages = {
-  cancelOrder: {
-    title: "Cancelled order",
-    message: "One or more of your orders has been cancelled",
-  },
-  processOrder: {
-    title: "Order in Progress!",
+  createdDispute: {
+    title: "Escrow dispute Opened",
     message:
-      "Your order has been received and is currently being processed. We’re working hard to prepare it for you. You’ll receive an update once it’s on its way.",
+      "We’ve received your dispute regarding the recent escrow. Our team is reviewing the details and will be in touch with updates soon.",
   },
-  shippedOrder: {
-    title: "Your Order is En Route!",
+  openedDisputeForOther: {
+    title: "Dispute Opened: Customer's Concern",
     message:
-      "Good news! Your order is on its way. We’ll keep you updated on any further changes.",
-  },
-  orderDeliveredBuyer: {
-    title: "Delivery Confirmed!",
-    message:
-      "Thank you for letting us know! We're glad to hear that your order has arrived.",
-  },
-  orderDeliveredSeller: {
-    title: "Delivery Confirmed for Your Product!",
-    message:
-      "Great news! The delivery of your product has been successfully confirmed. Thank you for providing excellent service.",
-  },
-  checkout: {
-    title: "Successful checkout",
-    message:
-      "Thank you for your purchase! Your order has been successfully processed. You will receive a confirmation email shortly with the details of your order.",
-  },
-  newOrder: {
-    title: "New Order",
-    message:
-      "You have a new order. Please review the details and prepare to fulfill it",
-  },
-  buyerDispute: {
-    title: "Dispute Opened for Your Order",
-    message:
-      "We’ve received your dispute regarding the recent order. Our team is reviewing the details and will be in touch with updates soon.",
-  },
-  buyerSellerDispute: {
-    title: "Dispute Opened: Buyer Concern",
-    message:
-      "We want to inform you that the buyer has raised a dispute regarding their recent order. ",
+      "We want to inform you that the customer has raised a dispute regarding their recent escrow with you. ",
   },
 };
 
 export const MessageTags = {
-  orderStatus: "OrderStatus",
-  orderDispute: "OrderDispute",
+  escrowDispute: "EscrowDispute",
   notification: "notification",
   checkout: "checkout",
 };
@@ -112,7 +77,7 @@ export class NotificationSetup {
 export type TNotificationMsg = keyof typeof notificationMessages;
 export type TNotificationMessage = { title: string; message: string };
 export type TNotificationMeta = {
-  orderId: string | undefined;
+  escrowId: string | undefined;
   triggeredBy: {
     role: "BUYER" | "SELLER";
     id: string;

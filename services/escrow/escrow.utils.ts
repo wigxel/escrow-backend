@@ -7,7 +7,8 @@ import type { CurrencyUnit } from "~/types/types";
 const escrowStatusTransitions = {
   created: ["deposit.pending", "cancelled"],
   "deposit.pending": ["deposit.success", "cancelled"],
-  "deposit.success": ["service.pending", "service.confirmed", "completed"],
+  "deposit.success": ["service.pending", "service.confirmed", "completed","dispute"],
+  "service.confirmed":["dispute"],
   cancelled: [],
 } as const;
 
