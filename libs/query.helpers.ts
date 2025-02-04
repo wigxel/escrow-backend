@@ -27,6 +27,7 @@ import { is } from "ramda";
 import { DatabaseConnection, type DrizzlePgDatabase } from "~/config/database";
 import { QueryError } from "~/config/exceptions";
 import type { SearchableParams } from "~/services/repository/repo.types";
+import type { DrizzleTableWithColumns } from "~/services/repository/RepoHelper";
 import { PaginationService } from "~/services/search/pagination.service";
 import type {
   FilterOrLogicOperator,
@@ -38,9 +39,7 @@ export const resolveQueryError = (err: unknown) => {
   if (typeof err === "string") return new Error(err);
   if (err instanceof Error) return err;
 
-  // @ts-expect-error
   if (is(Object, err) && "message" in err) {
-    // @ts-expect-error
     return new Error(err.message);
   }
 
@@ -215,3 +214,7 @@ export function paginateQuery<A extends Readonly<[number, unknown[]]>, E, R>(
     };
   });
 }
+
+export const allColumns = (v: DrizzleTableWithColumns) =>
+  Object.fromEntries(Object.keys(v).map((key) => [key, v[key]]));
+

@@ -218,3 +218,14 @@ function createMessagingChannel({
     return dispute_chat;
   });
 }
+
+export const getDisputesByUserId = (currentUserId: string) => {
+  return Effect.gen(function* (_) {
+    const disputeRepo = yield* DisputeRepoLayer.Tag;
+    const list = yield* disputeRepo.getByUserId({
+      currentUserId,
+    });
+
+    return { data: list, status: true };
+  });
+};
