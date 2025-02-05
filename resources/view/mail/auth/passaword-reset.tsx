@@ -18,9 +18,9 @@ export function PasswordResetView({
         Hi {username}
       </TextBase>
       <TextBase>
-        We received a request to reset the password for your [Your Company Name]
-        account. To ensure your security, please use the One-Time Password (OTP)
-        below to reset your password:
+        We received a request to reset the password for your account. To ensure
+        your security, please use the One-Time Password (OTP) below to reset
+        your password:
       </TextBase>
       <TextBase style={{ fontWeight: "bold", fontSize: 16 }}>{otp}</TextBase>
       <TextBase>

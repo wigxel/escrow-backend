@@ -26,7 +26,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     const mail = yield* Mail;
     const userRepo = yield* UserRepoLayer.Tag;
     const otpRepo = yield* OtpRepo;
-    const userWalletRepo = yield* UserWalletRepoLayer.tag
+    const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const sessionManager = yield* Session;
     const encrypter = yield* ReversibleHash;
     const referralSourceRepo = yield* ReferralSourcesRepoLayer.Tag;
@@ -121,10 +121,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
   });
 }
 
-export function requestEmailVerificationOtp(
-  email: string,
-  type: "verify" | "reset",
-) {
+export function resendEmailVerificationOtp(email: string) {
   return Effect.gen(function* (_) {
     const mail = yield* Mail;
     const userRepo = yield* UserRepoLayer.Tag;
@@ -138,8 +135,7 @@ export function requestEmailVerificationOtp(
       ),
     );
 
-    if (type === "verify" && user.emailVerified)
-      return yield* new ExpectedError("Email already verified");
+    if (user.emailVerified) yield* new ExpectedError("Email already verified");
 
     const otp = yield* generateOTP();
 
@@ -153,11 +149,6 @@ export function requestEmailVerificationOtp(
     yield* mail
       .to([user.email, user.firstName])
       .send(new EmailVerificationMail(user, otp));
-
-    return {
-      success: true,
-      message: "OTP has been sent to email",
-    };
   });
 }
 
@@ -165,17 +156,15 @@ export function forgotPassword(email: string) {
   return Effect.gen(function* (_) {
     const mail = yield* Mail;
     const userRepo = yield* UserRepoLayer.Tag;
-
-    const user = yield* userRepo.firstOrThrow({ email });
-
-    if (!user) {
-      // REASON: Giving a vague response for security reasons
-      return new ExpectedError("Request is being processed");
-    }
+    const otpRepo = yield* OtpRepo;
 
     const otp = yield* generateOTP();
 
-    const otpRepo = yield* OtpRepo;
+    const user = yield* _(
+      userRepo.firstOrThrow({ email }),
+      Effect.mapError(() => new ExpectedError("Request is being processed")),
+    );
+
     yield* otpRepo.create({
       userId: user.id,
       userKind: "USER",
@@ -186,65 +175,47 @@ export function forgotPassword(email: string) {
     yield* mail
       .to([user.email, user.firstName])
       .send(new PasswordResetMail(user, otp));
-
-    return {
-      success: true,
-      message: "OTP has been sent to email",
-    };
   });
 }
 
 export function passwordReset(data: { otp: string; password: string }) {
   return Effect.gen(function* (_) {
-    yield* verifyOTP(data.otp);
-
     const otpRepo = yield* OtpRepo;
-    const storedOtp = yield* otpRepo.findOne(data.otp);
-
-    if (!storedOtp) {
-      return yield* new ExpectedError("Invalid OTP");
-    }
-
-    const hashedPassword = yield* hashPassword(data.password);
-
     const userRepo = yield* UserRepoLayer.Tag;
+
+    yield* verifyOTP(data.otp);
+    const storedOtp = yield* _(
+      otpRepo.firstOrThrow({value:data.otp}),
+      Effect.mapError(() => new ExpectedError("Invalid OTP")),
+    );
+
     yield* _(
       userRepo.update(storedOtp.userId, {
-        password: hashedPassword,
+        password: yield* hashPassword(data.password),
         emailVerified: true, // REASON: Password resets should make user verified. See: https://thecopenhagenbook.com/password-reset
       }),
       Effect.mapError((err) => new ExpectedError("Invalid user")),
     );
 
-    yield* otpRepo.deleteOne(data.otp);
-
-    return {
-      success: true,
-      message: "Password updated",
-    };
+    yield* otpRepo.delete(SearchOps.eq("value", data.otp));
   });
 }
 
 export function verifyUserEmail(otp: string) {
-  return Effect.gen(function* () {
-    yield* verifyOTP(otp);
-
-    const otpRepo = yield* OtpRepo;
-    const storedOtp = yield* otpRepo.findOne(otp);
-
-    if (!storedOtp) {
-      return yield* new ExpectedError("Invalid OTP");
-    }
-
+  return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
-    yield* userRepo.update(storedOtp.userId, { emailVerified: true });
+    const otpRepo = yield* OtpRepo;
 
-    yield* otpRepo.deleteOne(otp);
+    yield* verifyOTP(otp);
+    const storedOtp = yield* _(
+      otpRepo.firstOrThrow({ value: otp }),
+      Effect.mapError(() => new ExpectedError("Invalid OTP")),
+    );
 
-    return {
-      success: true,
-      message: "Email verified",
-    };
+    yield* Effect.all([
+      userRepo.update(storedOtp.userId, { emailVerified: true }),
+      otpRepo.delete(SearchOps.eq("value", otp)),
+    ]);
   });
 }
 

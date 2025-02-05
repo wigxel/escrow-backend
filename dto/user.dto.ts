@@ -63,7 +63,7 @@ export const verifyEmailDto = z.object({
 
 export const sendEmailDto = z.object({
   email: z.string().email(),
-}).parse;
+});
 
 export const passwordResetDto = z.object({
   password: z.string().min(6).max(16),
