@@ -6,12 +6,7 @@ export function Footer({ baseUrl = "" }) {
   return (
     <Section>
       <Row>
-        <TextBase>
-          This email was sent to voke@gmail.com. If you'd rather not receive
-          this kind of email, you can unsubscribe or manage your email
-          preferences.
-        </TextBase>
-        <TextBase>© 2024 TheYardBazzar, Ontario, Canada</TextBase>
+        <TextBase>© 2025</TextBase>
         <Column colSpan={4}>
           <TextBase
             style={{
@@ -22,9 +17,7 @@ export function Footer({ baseUrl = "" }) {
               lineHeight: "24px",
               color: "black",
             }}
-          >
-            TheYardBazaar
-          </TextBase>
+          />
         </Column>
         <Column
           align="right"

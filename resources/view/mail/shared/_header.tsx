@@ -1,8 +1,8 @@
 import { Heading } from "@react-email/components";
 import { createElement as h } from "react";
 
-export function Header() {
-  return <Heading style={h1}>Escrowr</Heading>;
+export function Header({heading="Escrow"}) {
+  return <Heading style={h1}>{heading}</Heading>;
 }
 
 const h1 = {
