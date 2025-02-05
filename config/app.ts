@@ -4,7 +4,6 @@ import { AuthLive } from "~/layers/auth-user";
 import { DatabaseLive } from "~/layers/database";
 import { NotificationRepoLayer } from "~/repositories/notification.repo";
 import { UserRepoLayer } from "~/repositories/user.repository";
-import { UserLocationRepoLive } from "~/repositories/userLocation.repo";
 import { LogDebugLayer } from "./logger";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
@@ -27,15 +26,16 @@ import { ReviewRepoLive } from "~/repositories/review.repository";
 import { DisputeRepoLayer } from "~/repositories/dispute.repo";
 import { DisputeMembersRepoLayer } from "~/repositories/disputeMember.repo";
 import { ChatServiceLive } from "~/services/chat/dispute";
+import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
 
 export const UserModule = Layer.empty.pipe(
-  Layer.provideMerge(UserLocationRepoLive),
   Layer.provideMerge(UserRepoLayer.Repo.Live),
   Layer.provideMerge(UserWalletRepoLayer.live),
   Layer.provideMerge(BankAccountRepoLayer.live),
   Layer.provideMerge(BankAccountVerificationRepoLayer.live),
   Layer.provideMerge(WithdrawalRepoLayer.live),
   Layer.provideMerge(ReviewRepoLive),
+  Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
 );
 
 const DisputeModule = Layer.empty.pipe(

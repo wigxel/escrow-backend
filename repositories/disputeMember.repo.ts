@@ -4,7 +4,7 @@ import { DrizzleRepo } from "~/services/repository/RepoHelper";
 
 export class DisputeMemberRepository extends DrizzleRepo(
   disputeMembersTable,
-  "disputeId",
+  "id",
 ) {}
 
 export class DisputeMemberRepo extends Context.Tag("DisputeMemberRepo")<
