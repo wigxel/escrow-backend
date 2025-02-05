@@ -7,26 +7,45 @@ import { PasswordHasherError } from "~/layers/encryption";
 import { hashPassword } from "~/layers/encryption/helpers";
 import { Mail } from "~/layers/mailing/mail";
 import { Session } from "~/layers/session";
-import type { TUser } from "~/migrations/tables/interfaces";
 import { OtpRepo } from "~/repositories/otp.repository";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
 import type { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
 import type { z } from "zod";
+import { ReversibleHash } from "~/layers/encryption/reversible";
+import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
+import type { createUserDto } from "~/dto/user.dto";
+import { id } from "tigerbeetle-node";
+import { createAccount } from "./tigerbeetle.service";
+import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 
-export function createUser(data: TUser) {
+export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
     const mail = yield* Mail;
     const userRepo = yield* UserRepoLayer.Tag;
+    const otpRepo = yield* OtpRepo;
+    const userWalletRepo = yield* UserWalletRepoLayer.tag
     const sessionManager = yield* Session;
-    const hashProgram = hashPassword(data.password).pipe(
+    const encrypter = yield* ReversibleHash;
+    const referralSourceRepo = yield* ReferralSourcesRepoLayer.Tag;
+
+    yield* checkUsername(data.username);
+
+    yield* _(
+      referralSourceRepo.firstOrThrow(data.referralSourceId),
+      Effect.mapError(() => new ExpectedError("invalid referral source ID")),
+    );
+
+    const hashedPassword = yield* hashPassword(data.password).pipe(
       Effect.mapError(
         () => new PasswordHasherError("Password encryption failed"),
       ),
     );
 
-    data.password = yield* hashProgram;
+    data.password = hashedPassword;
+    data.bvn = yield* encrypter.encrypt(data.bvn);
 
     const userCount = yield* userRepo.count(
       SearchOps.or(
@@ -40,10 +59,45 @@ export function createUser(data: TUser) {
         "Account already exists. Email or phone number is taken",
       );
 
-    const user = yield* _(userRepo.create(data), Effect.flatMap(head));
+    const user = yield* _(
+      userRepo.create({
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+        password: data.password,
+        phone: data.phone,
+        businessName: data.businessName,
+        hasBusiness: data.hasBusiness,
+        bvn: data.bvn,
+        referralSourceId: data.referralSourceId,
+      }),
+      Effect.flatMap(head),
+    );
+
+    /**
+     * create the user Wallet for the new user
+     * create an account in tigerbeetle to track the user wallet
+     */
+    const tbAccountId = String(id());
+
+    yield* _(
+      Effect.all([
+        userWalletRepo.create({
+          userId: user.id,
+          tigerbeetleAccountId: String(tbAccountId),
+        }),
+
+        createAccount({
+          accountId: tbAccountId,
+          code: TBAccountCode.USER_WALLET,
+          ledger: "ngnLedger",
+        }),
+      ]),
+    );
+
     const otp = yield* generateOTP();
 
-    const otpRepo = yield* OtpRepo;
     yield* otpRepo.create({
       userId: user.id,
       userKind: "USER",
@@ -53,9 +107,12 @@ export function createUser(data: TUser) {
 
     const session_data = yield* sessionManager.create(user.id);
 
-    yield* mail
-      .to([user.email, user.firstName])
-      .send(new EmailVerificationMail(user, otp));
+    yield* _(
+      mail
+        .to([user.email, user.firstName])
+        .send(new EmailVerificationMail(user, otp)),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+    );
 
     return {
       session: session_data,

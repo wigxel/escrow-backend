@@ -1,10 +1,6 @@
-import { Effect, Layer, pipe } from "effect";
+import { Effect, pipe } from "effect";
 import { createUserDto } from "~/dto/user.dto";
-import { DatabaseLive } from "~/layers/database";
-import { UserSessionLive } from "~/layers/session";
 import { validateBody } from "~/libs/request.helpers";
-import { OTPRepoLayer } from "~/repositories/otp.repository";
-import { UserRepoLayer } from "~/repositories/user.repository";
 import { createUser } from "~/services/user.service";
 import { runLive } from "~/utils/effect";
 
@@ -15,18 +11,7 @@ import { runLive } from "~/utils/effect";
 export default eventHandler(async (event) => {
   const program = pipe(
     validateBody(event, createUserDto),
-    Effect.flatMap((body) =>
-      createUser({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        password: body.password,
-        phone: body.phone,
-        role: body.role,
-        profilePicture: body.profilePicture ?? "",
-        emailVerified: false,
-      }),
-    ),
+    Effect.flatMap((body) => createUser(body)),
     Effect.map(({ session }) => {
       return {
         success: true,
@@ -39,12 +24,5 @@ export default eventHandler(async (event) => {
     }),
   );
 
-  return runLive(event, Effect.scoped(Effect.provide(program, Dependencies)));
+  return runLive(event, program);
 });
-
-const Dependencies = Layer.empty.pipe(
-  Layer.provideMerge(UserRepoLayer.Repo.Live),
-  Layer.provideMerge(OTPRepoLayer),
-  Layer.provideMerge(DatabaseLive),
-  Layer.provideMerge(UserSessionLive),
-);

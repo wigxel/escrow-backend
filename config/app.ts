@@ -27,6 +27,9 @@ import { DisputeRepoLayer } from "~/repositories/dispute.repo";
 import { DisputeMembersRepoLayer } from "~/repositories/disputeMember.repo";
 import { ChatServiceLive } from "~/services/chat/dispute";
 import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
+import { reversibleHashLive } from "~/layers/encryption/presets/reversible-hasher";
+import { OTPRepoLayer } from "~/repositories/otp.repository";
+import { UserSessionLive } from "~/layers/session";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -36,6 +39,8 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(WithdrawalRepoLayer.live),
   Layer.provideMerge(ReviewRepoLive),
   Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
+  Layer.provideMerge(OTPRepoLayer),
+  Layer.provideMerge(UserSessionLive)
 );
 
 const DisputeModule = Layer.empty.pipe(
@@ -79,6 +84,7 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(PaystackEventLive),
   Layer.provideMerge(TigerBeetleRepoLayer.Repo.Live),
   Layer.provideMerge(AccountStatementRepoLayer.live),
+  Layer.provideMerge(reversibleHashLive),
 );
 
 // const DevToolsLive = DevTools.layerWebSocket().pipe(
