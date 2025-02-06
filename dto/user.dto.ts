@@ -71,9 +71,9 @@ export const passwordResetDto = z.object({
 });
 
 export const passwordChangeDto = z.object({
-  password: z.string(),
+  oldPassword: z.string().min(6).max(16),
   newPassword: z.string().min(6).max(16),
-}).parse;
+})
 
 export const loginDto = z.object({
   email: z.string().email().min(1, "Email is required"),

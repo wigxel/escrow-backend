@@ -1,9 +1,7 @@
-import { Effect, Layer, pipe } from "effect";
+import { Effect, pipe } from "effect";
 import { updateUserDto } from "~/dto/user.dto";
-import { DatabaseLive } from "~/layers/database";
 import { validateBody } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
-import { UserRepoLayer } from "~/repositories/user.repository";
 import { editProfile } from "~/services/profile.service";
 
 export default eventHandler(async (event) => {
