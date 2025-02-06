@@ -25,6 +25,8 @@ import { NotificationFacade } from "~/layers/notification/layer";
 import { DisputeLeaveNotification } from "~/app/notifications/dispute-leave";
 import { SearchOps } from "../search/sql-search-resolver";
 import { canTransitionDisputeStatus } from "./dispute.util";
+import { CreateDisputeNotification } from "~/app/notifications/database/dispute/createDispute.notify";
+import { CreateDisputePartyNotification } from "~/app/notifications/database/dispute/createDisputeParty.notify";
 
 export const createDispute = (params: {
   disputeData: { escrowId: string; reason: string };
@@ -35,7 +37,7 @@ export const createDispute = (params: {
     const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const participantsRepo = yield* EscrowParticipantRepoLayer.tag;
-    const notifyHelper = new NotificationSetup("escrowDispute");
+    const notify = yield* NotificationFacade;
 
     // check if escrow exists
     const escrowDetails = yield* escrowRepo
@@ -121,48 +123,30 @@ export const createDispute = (params: {
 
     //update the escrow status
     yield* escrowRepo.update({ id: escrowDetails.id }, { status: "dispute" });
+    // id of the other user not the currentUser
+    const disputePartyId =
+      params.currentUser.id !== seller.userId ? seller.userId : buyer.userId;
 
-    yield* Effect.all([
-      /**
-       * notify the dispute creator of their opened escrow dispute
-       */
-      sendNotification(
-        notifyHelper.createMessage({
-          type: "preset",
-          receiverId: params.currentUser.id,
-          name: "createdDispute",
-          meta: {
-            escrowId: escrowDetails.id,
-            triggeredBy: {
-              id: params.currentUser.id,
-              role:
-                params.currentUser.id === seller.userId ? "SELLER" : "BUYER",
-            },
-          },
-        }),
-      ),
-
-      /**
-       * notify the other party of the opened dispute
-       */
-      sendNotification(
-        notifyHelper.createMessage({
-          type: "preset",
-          receiverId:
-            params.currentUser.id !== seller.userId
-              ? seller.userId
-              : buyer.userId,
-          name: "openedDisputeForOther",
-          meta: {
-            escrowId: escrowDetails.id,
-            triggeredBy: {
-              id: params.currentUser.id,
-              role: "BUYER",
-            },
-          },
-        }),
-      ),
-    ]);
+    /**
+     * notify the dispute creator of their opened escrow dispute
+     */
+    yield* notify.route("database", { userId: params.currentUser.id }).notify(
+      new CreateDisputeNotification({
+        escrowId: escrowDetails.id,
+        triggeredBy: params.currentUser.id,
+        role: params.currentUser.id === seller.userId ? "seller" : "buyer",
+      }),
+    );
+    /**
+     * notify the other party of the opened dispute
+     */
+    yield* notify.route("database", { userId: disputePartyId }).notify(
+      new CreateDisputePartyNotification({
+        escrowId: escrowDetails.id,
+        triggeredBy: params.currentUser.id,
+        role: params.currentUser.id === seller.userId ? "seller" : "buyer",
+      }),
+    );
 
     return dispute;
   });

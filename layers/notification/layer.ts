@@ -9,8 +9,13 @@ import {
   type NotificationChannel,
   type NotificationMediator,
 } from "~/layers/notification/types";
+import { DatabaseChannel } from "./DatabaseChannel";
 
-type AvailableChannels = EmailChannel | SMSChannel | PushNotificationChannel;
+type AvailableChannels =
+  | EmailChannel
+  | SMSChannel
+  | PushNotificationChannel
+  | DatabaseChannel;
 
 export class NotificationManager<TChannels extends NotificationChannel>
   implements NotificationMediator<TChannels>
@@ -89,6 +94,7 @@ export class NotificationFacade extends Context.Tag("NotificationFacade")<
 export const NotificationLive = Layer.sync(NotificationFacade, () => {
   const instance = new NotificationManager<AvailableChannels>();
   instance.registerChannel(new EmailChannel());
+  instance.registerChannel(new DatabaseChannel());
 
   return instance;
 });

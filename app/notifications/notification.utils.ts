@@ -2,9 +2,9 @@ import type { Notification } from "~/migrations/schema";
 
 const notificationMessages = {
   createdDispute: {
-    title: "Escrow dispute Opened",
+    title: "",
     message:
-      "We’ve received your dispute regarding the recent escrow. Our team is reviewing the details and will be in touch with updates soon.",
+      "",
   },
   openedDisputeForOther: {
     title: "Dispute Opened: Customer's Concern",

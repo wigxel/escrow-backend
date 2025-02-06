@@ -10,6 +10,13 @@ export interface NotificationChannel {
   ): Effect.Effect<void, unknown, unknown>;
 }
 
+export type DatabaseMessage = {
+  tag:string,
+  title: string,
+  message: string,
+  metadata: Record<string,unknown>
+};
+
 export interface NotificationEvent<Tame, T> {
   name: Tame;
   params: T;
@@ -24,6 +31,10 @@ export abstract class Notification {
 
   shouldSend(notifiable: Notifiable, channel: NotificationChannel): boolean {
     return true;
+  }
+
+  toDatabase():DatabaseMessage{
+    return 
   }
 }
 
