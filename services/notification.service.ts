@@ -8,7 +8,6 @@ import { PaginationService } from "~/services/search/pagination.service";
 import type { PaginationQuery } from "./search/primitives";
 import { SearchOps } from "./search/sql-search-resolver";
 
-
 export const getUnreadNotification = (currentUserId: string) => {
   return Effect.gen(function* (_) {
     const notificationRepo = yield* NotificationRepoLayer.Tag;
@@ -56,7 +55,6 @@ export const getNotifications = (
           totalNotifications.count / paginate.query.pageSize,
         ),
       },
-      status: true,
     };
   });
 };
@@ -77,15 +75,13 @@ export const markAsRead = (
         );
       }
 
-      return { status: true, message: "Selected notifications marked as read" };
+      return;
     }
 
     //mark all as read
     yield* notificationRepo
       .updateNotification({ userId: currentUserId }, type)
       .pipe(Effect.mapError((e) => new ExpectedError(e.toString())));
-
-    return { status: true, message: "All notifications marked as read" };
   });
 };
 
