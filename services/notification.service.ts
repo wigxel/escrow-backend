@@ -103,12 +103,10 @@ export const deleteNotification = (
         );
       }
 
-      return { status: true, message: "Selected notifications deleted" };
+      return
     }
 
     //delete all notification
     yield* notificationRepo.delete(SearchOps.eq("userId", currentUserId));
-
-    return { status: true, message: "Deleted all notification" };
   });
 };
