@@ -20,10 +20,11 @@ import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { NoSuchElementException } from "effect/Cause";
 import type { SessionUser } from "~/layers/session-provider";
-import { convertCurrencyUnit } from "~/services/escrow/escrow.utils";
-import type {
-  TSuccessPaymentMetaData,
-} from "~/types/types";
+import {
+  canTransitionEscrowStatus,
+  convertCurrencyUnit,
+} from "~/services/escrow/escrow.utils";
+import type { TSuccessPaymentMetaData } from "~/types/types";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
@@ -33,12 +34,19 @@ import { randomUUID } from "uncrypto";
 import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
+import { NotificationFacade } from "~/layers/notification/layer";
+import { UserRepoLayer } from "~/repositories/user.repository";
+import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
 
-export const handleSuccessPaymentEvents = (res: TPaystackPaymentWebhookEvent) => {
+export const handleSuccessPaymentEvents = (
+  res: TPaystackPaymentWebhookEvent,
+) => {
   return Effect.gen(function* (_) {
     const escrowWalletRepo = yield* EscrowWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
-    const metadata = res.data.metadata as TSuccessPaymentMetaData
+    const notify = yield* NotificationFacade;
+    const metadata = res.data.metadata as TSuccessPaymentMetaData;
+    const userRepo = yield* UserRepoLayer.Tag;
 
     const escrowWallet = yield* _(
       escrowWalletRepo.firstOrThrow({ escrowId: metadata.escrowId }),
@@ -92,7 +100,36 @@ export const handleSuccessPaymentEvents = (res: TPaystackPaymentWebhookEvent) =>
       relatedUserId: metadata.relatedUserId,
     });
 
-    //TODO: in-app notification or email for successful payment
+    const vendorDetails = yield* userRepo.firstOrThrow({
+      id: metadata.relatedUserId,
+    });
+    //notify vender
+    yield* notify
+      .route("in-app", { userId: vendorDetails.id })
+      .route("mail", { address: vendorDetails.email })
+      .notify(
+        new EscrowPaymentNotification(
+          { firstName: vendorDetails.firstName },
+          {
+            escrowId: metadata.escrowId,
+          },
+          "vendor",
+        ),
+      );
+
+    //notify customer
+    yield* notify
+      .route("in-app", { userId: metadata.customerDetails.userId })
+      .route("mail", { address: metadata.customerDetails.email })
+      .notify(
+        new EscrowPaymentNotification(
+          { firstName: metadata.customerDetails.username },
+          {
+            escrowId: metadata.escrowId,
+          },
+          "customer",
+        ),
+      );
   });
 };
 
@@ -105,6 +142,8 @@ export const releaseFunds = (params: {
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
     const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
+    const notify = yield* NotificationFacade;
+    const userRepo = yield* UserRepoLayer.Tag;
 
     const escrowDetails = yield* _(
       escrowRepo.getEscrowDetails(params.escrowId),
@@ -181,9 +220,40 @@ export const releaseFunds = (params: {
 
     //mark the escrow transaction as completed
     yield* escrowRepo.update({ id: escrowDetails.id }, { status: "completed" });
-     yield* createActivityLog(
-          escrowActivityLog.completed({ id: escrowDetails.id }),
-        );
+    yield* createActivityLog(
+      escrowActivityLog.completed({ id: escrowDetails.id }),
+    );
+
+    //notify vender
+    const vendorDetails = yield* userRepo.firstOrThrow({
+      id: recipient.userId,
+    });
+
+    yield* notify
+      .route("in-app", { userId: vendorDetails.id })
+      .route("mail", { address: vendorDetails.email })
+      .notify(
+        new EscrowPaymentNotification(
+          { firstName: vendorDetails.firstName },
+          {
+            escrowId: escrowDetails.id,
+            triggeredBy: params.currentUser.id,
+            role: buyer.role,
+          },
+          "vendor",
+        ),
+      );
+
+    //notify customer
+    yield* notify.route("in-app", { userId: buyer.userId }).notify(
+      new EscrowPaymentNotification(
+        { firstName: "user" },
+        {
+          escrowId: escrowDetails.id,
+        },
+        "customer",
+      ),
+    );
   });
 };
 
@@ -199,7 +269,7 @@ export const withdrawFromWallet = (
     const paystack = yield* PaymentGateway;
     const bankAccountRepo = yield* BankAccountRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
-    
+
     const bankAccountDetails = yield* _(
       bankAccountRepo.firstOrThrow({ id: params.accountNumberId }),
       Effect.mapError(
@@ -213,13 +283,18 @@ export const withdrawFromWallet = (
     );
 
     const amount = convertCurrencyUnit(params.amount, "naira-kobo");
-    const accountBalance = yield* getAccountBalance(wallet.tigerbeetleAccountId);
-   
+    const accountBalance = yield* getAccountBalance(
+      wallet.tigerbeetleAccountId,
+    );
+
     if (Number(accountBalance) < amount) {
       yield* new InsufficientBalanceException();
     }
 
-    const currentBalance = convertCurrencyUnit(Number(accountBalance) - amount,"kobo-naira")
+    const currentBalance = convertCurrencyUnit(
+      Number(accountBalance) - amount,
+      "kobo-naira",
+    );
     const referenceCode = randomUUID();
     const tigerbeetleTransferId = String(id());
 
@@ -259,13 +334,13 @@ export const withdrawFromWallet = (
     //add statement
     yield* accountStatementRepo.create({
       amount: String(params.amount),
-      balance:String(currentBalance),
+      balance: String(currentBalance),
       type: "wallet.withdraw",
       creatorId: params.currentUser.id,
       tigerbeetleTransferId: tigerbeetleTransferId,
-      status:"pending",
+      status: "pending",
       metadata: JSON.stringify({
-        escrowId:null,
+        escrowId: null,
         from: { accountId: wallet.tigerbeetleAccountId, name: "user wallet" },
         to: {
           accountId: bankAccountDetails.id,
@@ -274,6 +349,5 @@ export const withdrawFromWallet = (
         description: `withdrawing N${params.amount} from wallet to bank account`,
       }),
     });
-
   });
 };

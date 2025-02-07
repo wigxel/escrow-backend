@@ -1,5 +1,3 @@
-import type { TActivityLogEvent } from "~/types/types";
-
 export const escrowActivityLog = {
   created(params: ParamsWithId) {
     return {

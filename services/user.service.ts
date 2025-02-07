@@ -20,6 +20,8 @@ import { id } from "tigerbeetle-node";
 import { createAccount } from "./tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
+import { NotificationFacade } from "~/layers/notification/layer";
+import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.notify";
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -185,7 +187,7 @@ export function passwordReset(data: { otp: string; password: string }) {
 
     yield* verifyOTP(data.otp);
     const storedOtp = yield* _(
-      otpRepo.firstOrThrow({value:data.otp}),
+      otpRepo.firstOrThrow({ value: data.otp }),
       Effect.mapError(() => new ExpectedError("Invalid OTP")),
     );
 
@@ -244,7 +246,7 @@ export const handleUserCreationFromEscrow = (
 ) => {
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
-    const mail = yield* Mail;
+    const notify = yield* NotificationFacade;
     const [existingUserByEmail, existingUserByPhone] = yield* _(
       Effect.all([
         userRepo.count(SearchOps.eq("email", input.customerEmail)),
@@ -259,7 +261,7 @@ export const handleUserCreationFromEscrow = (
       yield* new ExpectedError("Phone is already taken");
     }
 
-    return yield* _(
+    const newUser = yield* _(
       userRepo.create({
         firstName: "",
         lastName: "",
@@ -271,7 +273,12 @@ export const handleUserCreationFromEscrow = (
       Effect.flatMap(head),
     );
 
-    //TODO: send an email to the user to notify of newly created account
+    // notify the user of the newly create account
+    yield* notify
+      .route("mail", { address: input.customerEmail })
+      .notify(new EscrowUserAccounntMail(input.customerUsername));
+
+    return newUser;
   });
 };
 

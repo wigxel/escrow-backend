@@ -10,6 +10,7 @@ import {
   type NotificationMediator,
 } from "~/layers/notification/types";
 import { InAppChannel } from "./in-app.Channel";
+import type { Mailable } from "../mailing/mailables";
 
 type AvailableChannels =
   | EmailChannel
@@ -46,7 +47,7 @@ export class NotificationManager<TChannels extends NotificationChannel>
     return this;
   }
 
-  notify(payload: Notification) {
+  notify(payload: Notification | Mailable) {
     const events = this.events;
     const reset = () => {
       this.events = [];

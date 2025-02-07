@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const USER_ROLE = ["seller", "buyer"] as const;
+export const USER_ROLE = ["seller"] as const;
 
 export const createEscrowTransactionRules = z.object({
   amount: z.number({ coerce: true }).min(1),
