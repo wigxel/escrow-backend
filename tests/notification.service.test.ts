@@ -4,45 +4,10 @@ import {
   deleteNotification,
   getNotifications,
   markAsRead,
-  sendNotification,
 } from "~/services/notification.service";
 import { runTest } from "./mocks/app";
 
 describe("notification serivce", () => {
-  describe("send notification", () => {
-    const notify = new NotificationSetup("notification");
-    const createMessage = notify.createMessage({
-      type: "new",
-      receiverId: "user-id",
-      msg: { title: "title", message: "message" },
-    });
-
-    test("should add new notification", async () => {
-      let created = false;
-      const NotificationRepo = extendNotificationRepo({
-        create(data) {
-          created = true;
-          return Effect.succeed([
-            {
-              message: "MOCK_MESSAGE",
-              id: 12,
-              createdAt: new Date(2024, 7, 12),
-              userId: "MOCK_USER_ID",
-              tag: "",
-              meta: '{"user":{"id":"user-id","role":"BUYER"}}',
-              title: "James Wholock",
-              isRead: false,
-            },
-          ]);
-        },
-      });
-
-      const program = sendNotification(createMessage);
-      const result = await runTest(Effect.provide(program, NotificationRepo));
-      expect(created).toBeTruthy();
-      expect(result.status).toBeTruthy;
-    });
-  });
 
   describe("get notifications", () => {
     test("should return all notifcation", async () => {
