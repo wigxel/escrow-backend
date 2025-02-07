@@ -3,10 +3,6 @@ import { createTextMessage } from "@repo/shared/src/chat-service/utils";
 import { Effect, pipe } from "effect";
 import { head } from "effect/Array";
 import { toLower } from "ramda";
-import {
-  NotificationSetup,
-  type TNotificationMessage,
-} from "~/app/notifications/notification.utils";
 import { ExpectedError, PermissionError } from "~/config/exceptions";
 import type { SessionUser } from "~/layers/session-provider";
 import { DisputeRepoLayer } from "~/repositories/dispute.repo";
@@ -19,14 +15,15 @@ import {
   canTransitionEscrowStatus,
   getBuyerAndSellerFromParticipants,
 } from "../escrow/escrow.utils";
-import { sendNotification } from "../notification.service";
 import { DisputeInviteNotification } from "~/app/notifications/dispute-invite";
 import { NotificationFacade } from "~/layers/notification/layer";
 import { DisputeLeaveNotification } from "~/app/notifications/dispute-leave";
 import { SearchOps } from "../search/sql-search-resolver";
 import { canTransitionDisputeStatus } from "./dispute.util";
-import { CreateDisputeNotification } from "~/app/notifications/database/dispute/createDispute.notify";
-import { CreateDisputePartyNotification } from "~/app/notifications/database/dispute/createDisputeParty.notify";
+import { CreateDisputeNotification } from "~/app/notifications/in-app/dispute/createDispute.notify";
+import { CreateDisputePartyNotification } from "~/app/notifications/in-app/dispute/createDisputeParty.notify";
+import { LeaveDisputeNotification } from "~/app/notifications/in-app/dispute/leaveDispute.notify";
+import { DisputeInviteNotify } from "~/app/notifications/in-app/dispute/disputeInvite.notify";
 
 export const createDispute = (params: {
   disputeData: { escrowId: string; reason: string };
@@ -128,9 +125,9 @@ export const createDispute = (params: {
       params.currentUser.id !== seller.userId ? seller.userId : buyer.userId;
 
     /**
-     * notify the dispute creator of their opened escrow dispute
+     * notify the creator of their opened escrow dispute
      */
-    yield* notify.route("database", { userId: params.currentUser.id }).notify(
+    yield* notify.route("in-app", { userId: params.currentUser.id }).notify(
       new CreateDisputeNotification({
         escrowId: escrowDetails.id,
         triggeredBy: params.currentUser.id,
@@ -140,7 +137,7 @@ export const createDispute = (params: {
     /**
      * notify the other party of the opened dispute
      */
-    yield* notify.route("database", { userId: disputePartyId }).notify(
+    yield* notify.route("in-app", { userId: disputePartyId }).notify(
       new CreateDisputePartyNotification({
         escrowId: escrowDetails.id,
         triggeredBy: params.currentUser.id,
@@ -238,8 +235,7 @@ export const inviteMember = (data: {
     const escrowParticipantsRepo = yield* EscrowParticipantRepoLayer.tag;
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const userRepo = yield* UserRepoLayer.Tag;
-    const notifySetup = new NotificationSetup("escrowDispute");
-
+  
     if (data.currentUser.role !== "admin") {
       yield* new PermissionError("Cannot invite user");
     }
@@ -320,20 +316,12 @@ export const inviteMember = (data: {
         }),
       );
 
-    // notify user
-    const Notificationmsg: TNotificationMessage = {
-      title: "Invitation to Participate in Open Escrow Dispute",
-      message: `We would like to inform you that you have been invited to
-        participate in an open dispute related to an escrow. Your
-        involvement is important for resolving this matter.`,
-    };
-
-    // write notification to database
-    yield* sendNotification(
-      notifySetup.createMessage({
-        type: "new",
-        receiverId: data.userId,
-        msg: Notificationmsg,
+      // in app notification
+    yield* notify.route("in-app", { userId: data.userId }).notify(
+      new DisputeInviteNotify({
+        escrowId: escrowDetails.id,
+        triggeredBy: data.currentUser.id,
+        role: data.currentUser.role,
       }),
     );
 
@@ -353,8 +341,7 @@ export const removeMember = (data: {
     const userRepo = yield* UserRepo;
     const notify = yield* NotificationFacade;
     const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
-    const notifySetup = new NotificationSetup("escrowDispute");
-
+   
     if (data.currentUser.role !== "admin") {
       yield* new PermissionError("Cannot remove user");
     }
@@ -384,18 +371,12 @@ export const removeMember = (data: {
         }),
       );
 
-    // notify user
-    const Notificationmsg: TNotificationMessage = {
-      title: "Removal from Open Dispute",
-      message:
-        "You have been removed from the open dispute you were previously involved in.",
-    };
-
-    yield* sendNotification(
-      notifySetup.createMessage({
-        type: "new",
-        receiverId: data.userId,
-        msg: Notificationmsg,
+    //in app notification
+    yield* notify.route("in-app", { userId: data.userId }).notify(
+      new LeaveDisputeNotification({
+        disputeId: data.disputeId,
+        triggeredBy: data.currentUser.id,
+        role: data.currentUser.role,
       }),
     );
 

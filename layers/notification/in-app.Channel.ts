@@ -5,14 +5,14 @@ import type {
 } from "~/layers/notification/types";
 import { NotificationRepoLayer } from "~/repositories/notification.repo";
 
-type DatabaseEvent = NotificationEvent<"database", { userId?: string }>;
+type InAppEvent = NotificationEvent<"in-app", { userId?: string }>;
 
-export class DatabaseChannel extends AbstractNotificationChannel {
-  type = "DatabaseChannel";
-  identifier = "database";
+export class InAppChannel extends AbstractNotificationChannel {
+  type = "InAppChannel";
+  identifier = "in-app";
 
 
-  send(notification: DatabaseEvent) {
+  send(notification: InAppEvent) {
     return Effect.gen(function* (_) {
       const repo = yield* NotificationRepoLayer.Tag
 
