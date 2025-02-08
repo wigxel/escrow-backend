@@ -24,6 +24,8 @@ import { CreateDisputeNotification } from "~/app/notifications/in-app/dispute/cr
 import { CreateDisputePartyNotification } from "~/app/notifications/in-app/dispute/createDisputeParty.notify";
 import { LeaveDisputeNotification } from "~/app/notifications/in-app/dispute/leaveDispute.notify";
 import { DisputeInviteNotify } from "~/app/notifications/in-app/dispute/disputeInvite.notify";
+import { createActivityLog } from "../activityLog/activityLog.service";
+import { disputeActivityLog } from "../activityLog/concreteEntityLogs/dispute.activitylog";
 
 export const createDispute = (params: {
   disputeData: { escrowId: string; reason: string };
@@ -120,6 +122,14 @@ export const createDispute = (params: {
 
     //update the escrow status
     yield* escrowRepo.update({ id: escrowDetails.id }, { status: "dispute" });
+
+    //new dispute status entry
+    yield* createActivityLog(
+      disputeActivityLog.opened({
+        id: dispute.id,
+        triggeredBy: params.currentUser.id,
+      }),
+    );
     // id of the other user not the currentUser
     const disputePartyId =
       params.currentUser.id !== seller.userId ? seller.userId : buyer.userId;
@@ -235,7 +245,7 @@ export const inviteMember = (data: {
     const escrowParticipantsRepo = yield* EscrowParticipantRepoLayer.tag;
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const userRepo = yield* UserRepoLayer.Tag;
-  
+
     if (data.currentUser.role !== "admin") {
       yield* new PermissionError("Cannot invite user");
     }
@@ -316,7 +326,7 @@ export const inviteMember = (data: {
         }),
       );
 
-      // in app notification
+    // in app notification
     yield* notify.route("in-app", { userId: data.userId }).notify(
       new DisputeInviteNotify({
         escrowId: escrowDetails.id,
@@ -341,7 +351,7 @@ export const removeMember = (data: {
     const userRepo = yield* UserRepo;
     const notify = yield* NotificationFacade;
     const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
-   
+
     if (data.currentUser.role !== "admin") {
       yield* new PermissionError("Cannot remove user");
     }
@@ -433,6 +443,13 @@ export const updateDisputeStatus = (data: {
         resolvedBy: data.currentUser.id,
         status: data.status,
       });
+
+      yield* createActivityLog(
+        disputeActivityLog.resolved({
+          id: data.disputeId,
+          resolvedBy: data.currentUser.id,
+        }),
+      );
     }
   });
 };
