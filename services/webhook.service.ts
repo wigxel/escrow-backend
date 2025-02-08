@@ -17,7 +17,7 @@ import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.rep
 import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
-import { convertCurrencyUnit } from "./escrow/escrow.utils";
+import { SearchOps } from "./search/sql-search-resolver";
 
 export const handlePaystackWebhook = (
   res: TPaystackWebookEvent,
@@ -51,6 +51,16 @@ export const handlePaystackWebhook = (
     if (PaymentGatewayEvent.$is("TransferSuccess")(event)) {
       yield* transferSuccessEvent(res as TPaystackTransferWebhookEvent);
     }
+
+    if (PaymentGatewayEvent.$is("TransferFailed")(event)) {
+      yield* unsuccessfulTransferEvent(res as TPaystackTransferWebhookEvent);
+      //code specific to failded transaction
+    }
+
+    if (PaymentGatewayEvent.$is("TransferReversed")(event)) {
+      yield* unsuccessfulTransferEvent(res as TPaystackTransferWebhookEvent);
+      //code specific to reversed transactionn
+    }
   });
 };
 
@@ -82,7 +92,7 @@ export const transferSuccessEvent = (res: TPaystackTransferWebhookEvent) => {
           pendingId: withdrawalDetails.tigerbeetleTransferId,
           credit_account_id: "0",
           debit_account_id: "0",
-          amount: convertCurrencyUnit(withdrawalDetails.amount, "naira-kobo"),
+          amount: 0,
           code: TBTransferCode.WALLET_WITHDRAWAL,
           flags: TransferFlags.post_pending_transfer,
         }),
@@ -93,6 +103,47 @@ export const transferSuccessEvent = (res: TPaystackTransferWebhookEvent) => {
     yield* accountStatementRepo.update(
       { tigerbeetleTransferId: withdrawalDetails.tigerbeetleTransferId },
       { status: "completed" },
+    );
+  });
+};
+
+export const unsuccessfulTransferEvent = (
+  res: TPaystackTransferWebhookEvent,
+) => {
+  return Effect.gen(function* (_) {
+    const withdrawalRepo = yield* _(WithdrawalRepoLayer.tag);
+    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
+    const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
+
+    const withdrawalDetails = yield* withdrawalRepo.firstOrThrow({
+      referenceCode: res.data.reference,
+    });
+
+    yield* _(
+      Effect.all([
+        withdrawalRepo.update(
+          { referenceCode: res.data.reference },
+          {
+            status: res.data.status,
+          },
+        ),
+
+        tigerBeetleRepo.createTransfers({
+          amount: 0,
+          credit_account_id: "0",
+          debit_account_id: "0",
+          transferId: withdrawalDetails.tigerbeetleTransferId,
+          code: TBTransferCode.WALLET_WITHDRAWAL,
+          flags: TransferFlags.void_pending_transfer,
+        }),
+      ]),
+    );
+
+    yield* accountStatementRepo.delete(
+      SearchOps.eq(
+        "tigerbeetleTransferId",
+        withdrawalDetails.tigerbeetleTransferId,
+      ),
     );
   });
 };

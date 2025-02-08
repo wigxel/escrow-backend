@@ -44,6 +44,8 @@ export const getAccountBalance = (accountId: string) => {
     const account = (yield* getTBAccount(accountId)).find(
       (v, i) => String(v.id) === accountId,
     );
-    return account.credits_posted - account.debits_posted
+    return (
+      account.credits_posted - account.debits_posted - account.debits_pending
+    );
   });
 };

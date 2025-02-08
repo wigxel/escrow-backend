@@ -287,6 +287,9 @@ export const withdrawFromWallet = (
       wallet.tigerbeetleAccountId,
     );
 
+    /**
+     * check account balance
+     */
     if (Number(accountBalance) < amount) {
       yield* new InsufficientBalanceException();
     }
