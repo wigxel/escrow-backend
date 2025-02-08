@@ -22,8 +22,7 @@ export const createUserDto = z
       .string({
         required_error: "Phone number required",
       })
-      .min(5)
-      .startsWith("+"),
+      .min(11),
     profilePicture: z.string().optional(),
     bvn: z
       .string()
@@ -58,6 +57,7 @@ export const updateUserDto = z.object({
 });
 
 export const verifyEmailDto = z.object({
+  email:z.string().email(),
   otp: z.string().length(6),
 });
 
@@ -67,6 +67,7 @@ export const sendEmailDto = z.object({
 
 export const passwordResetDto = z.object({
   password: z.string().min(6).max(16),
+  email:z.string().email(),
   otp: z.string().length(6),
 });
 

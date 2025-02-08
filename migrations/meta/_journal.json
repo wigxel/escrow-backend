@@ -127,6 +127,13 @@
       "when": 1738751044130,
       "tag": "0017_brave_toad_men",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1739041956162,
+      "tag": "0018_perpetual_alex_wilder",
+      "breakpoints": true
     }
   ]
 }

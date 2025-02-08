@@ -15,7 +15,11 @@ import type { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
 import type { z } from "zod";
 import { ReversibleHash } from "~/layers/encryption/reversible";
 import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
-import type { createUserDto } from "~/dto/user.dto";
+import type {
+  createUserDto,
+  passwordResetDto,
+  verifyEmailDto,
+} from "~/dto/user.dto";
 import { id } from "tigerbeetle-node";
 import { createAccount } from "./tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
@@ -25,7 +29,7 @@ import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.noti
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
-    const mail = yield* Mail;
+    const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
     const otpRepo = yield* OtpRepo;
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
@@ -102,6 +106,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
 
     yield* otpRepo.create({
       userId: user.id,
+      email: user.email,
       userKind: "USER",
       otpReason: "EMAIL_VERIFICATION",
       value: otp,
@@ -110,9 +115,9 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     const session_data = yield* sessionManager.create(user.id);
 
     yield* _(
-      mail
-        .to([user.email, user.firstName])
-        .send(new EmailVerificationMail(user, otp)),
+      notify
+        .route("mail", { address: user.email })
+        .notify(new EmailVerificationMail(user, otp)),
       Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
@@ -125,7 +130,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
 
 export function resendEmailVerificationOtp(email: string) {
   return Effect.gen(function* (_) {
-    const mail = yield* Mail;
+    const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
     const otpRepo = yield* OtpRepo;
 
@@ -141,22 +146,20 @@ export function resendEmailVerificationOtp(email: string) {
 
     const otp = yield* generateOTP();
 
-    yield* otpRepo.create({
-      userId: user.id,
-      userKind: "USER",
-      otpReason: "EMAIL_VERIFICATION",
-      value: otp,
-    });
+    yield* otpRepo.update({ email: user.email }, { value: otp });
 
-    yield* mail
-      .to([user.email, user.firstName])
-      .send(new EmailVerificationMail(user, otp));
+    yield* _(
+      notify
+        .route("mail", { address: user.email })
+        .notify(new EmailVerificationMail(user, otp)),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+    );
   });
 }
 
 export function forgotPassword(email: string) {
   return Effect.gen(function* (_) {
-    const mail = yield* Mail;
+    const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
     const otpRepo = yield* OtpRepo;
 
@@ -167,27 +170,38 @@ export function forgotPassword(email: string) {
       Effect.mapError(() => new ExpectedError("Request is being processed")),
     );
 
-    yield* otpRepo.create({
-      userId: user.id,
-      userKind: "USER",
-      otpReason: "PASSWORD_RESET",
-      value: otp,
-    });
+    yield* _(
+      otpRepo.firstOrThrow({ email: user.email }),
+      Effect.matchEffect({
+        onFailure: () =>
+          otpRepo.create({
+            userId: user.id,
+            email: user.email,
+            userKind: "USER",
+            otpReason: "PASSWORD_RESET",
+            value: otp,
+          }),
+        onSuccess: (v) => otpRepo.update({ email: user.email }, { value: otp }),
+      }),
+    );
 
-    yield* mail
-      .to([user.email, user.firstName])
-      .send(new PasswordResetMail(user, otp));
+    yield* _(
+      notify
+        .route("mail", { address: user.email })
+        .notify(new PasswordResetMail(user, otp)),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+    );
   });
 }
 
-export function passwordReset(data: { otp: string; password: string }) {
+export function passwordReset(data: z.infer<typeof passwordResetDto>) {
   return Effect.gen(function* (_) {
     const otpRepo = yield* OtpRepo;
     const userRepo = yield* UserRepoLayer.Tag;
 
     yield* verifyOTP(data.otp);
     const storedOtp = yield* _(
-      otpRepo.firstOrThrow({ value: data.otp }),
+      otpRepo.firstOrThrow({ value: data.otp, email: data.email }),
       Effect.mapError(() => new ExpectedError("Invalid OTP")),
     );
 
@@ -199,24 +213,34 @@ export function passwordReset(data: { otp: string; password: string }) {
       Effect.mapError((err) => new ExpectedError("Invalid user")),
     );
 
-    yield* otpRepo.delete(SearchOps.eq("value", data.otp));
+    yield* otpRepo.delete(
+      SearchOps.and(
+        SearchOps.eq("value", data.otp),
+        SearchOps.eq("email", data.email),
+      ),
+    );
   });
 }
 
-export function verifyUserEmail(otp: string) {
+export function verifyUserEmail(params: z.infer<typeof verifyEmailDto>) {
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
     const otpRepo = yield* OtpRepo;
 
-    yield* verifyOTP(otp);
+    yield* verifyOTP(params.otp);
     const storedOtp = yield* _(
-      otpRepo.firstOrThrow({ value: otp }),
+      otpRepo.firstOrThrow({ value: params.otp, email: params.email }),
       Effect.mapError(() => new ExpectedError("Invalid OTP")),
     );
 
     yield* Effect.all([
       userRepo.update(storedOtp.userId, { emailVerified: true }),
-      otpRepo.delete(SearchOps.eq("value", otp)),
+      otpRepo.delete(
+        SearchOps.and(
+          SearchOps.eq("value", params.otp),
+          SearchOps.eq("email", params.email),
+        ),
+      ),
     ]);
   });
 }

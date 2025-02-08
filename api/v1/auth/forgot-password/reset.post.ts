@@ -8,7 +8,7 @@ export default eventHandler(async (event) => {
   const program = pipe(
     validateBody(event, passwordResetDto),
     Effect.flatMap((body) => {
-      return passwordReset({ otp: body.otp, password: body.password });
+      return passwordReset(body);
     }),
   );
 

@@ -7,7 +7,7 @@ import { runLive } from "~/utils/effect";
 
 export default eventHandler(async (event) => {
   const program = validateBody(event, verifyEmailDto).pipe(
-    Effect.flatMap((body) => verifyUserEmail(body.otp)),
+    Effect.flatMap((body) => verifyUserEmail(body)),
   );
 
   return runLive(event, program);
