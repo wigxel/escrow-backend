@@ -141,6 +141,13 @@
       "when": 1739051537194,
       "tag": "0019_spooky_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1739093864457,
+      "tag": "0020_whole_wendigo",
+      "breakpoints": true
     }
   ]
 }

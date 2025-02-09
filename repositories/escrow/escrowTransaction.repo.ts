@@ -16,6 +16,7 @@ export class EscrowTransactionRepository extends DrizzleRepo(
           paymentDetails: true,
           participants: true,
           escrowWalletDetails: true,
+          activityLog:true
         },
       });
     }).pipe(Effect.flatMap(notNil));

@@ -25,7 +25,10 @@ import {
 } from "~/services/escrow/escrow.utils";
 import { id } from "tigerbeetle-node";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
-import { createAccount as createTBAccount } from "../tigerbeetle.service";
+import {
+  createAccount as createTBAccount,
+  getAccountBalance,
+} from "../tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
@@ -136,6 +139,22 @@ export const getEscrowTransactionDetails = (params: {
           ),
       ),
     );
+
+    if (escrowDetails.escrowWalletDetails) {
+      //get the escrow balance
+      const balance = yield* getAccountBalance(
+        escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
+      );
+
+      return {
+        ...escrowDetails,
+        escrowWalletDetails: {
+          ...escrowDetails.escrowWalletDetails,
+          balance: convertCurrencyUnit(String(balance), "kobo-naira"),
+        },
+      };
+    }
+
     return escrowDetails;
   });
 };
@@ -250,7 +269,9 @@ export const initializeEscrowDeposit = (
 
     const checkoutSession = yield* paymentGateway.createSession({
       //convert to smallest currency unit kobo
-      amount: String(convertCurrencyUnit(escrowRequestDetails.amount,"naira-kobo")),
+      amount: String(
+        convertCurrencyUnit(escrowRequestDetails.amount, "naira-kobo"),
+      ),
       email: customerDetails.email,
       reference: escrowRequestDetails.escrowId,
       callback_url: "",

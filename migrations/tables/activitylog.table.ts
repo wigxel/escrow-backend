@@ -5,7 +5,7 @@ export const activityLogTable = pgTable("activity_logs", {
   // e.g. Order, Product, Auth, Profile
   kind: varchar("entity_kind", { length: 20 }).notNull(),
   // e.g. the ide of the ORDER entity
-  entityId: varchar("entity_id", { length: 36 }).notNull(),
+  entityId: uuid("entity_id").notNull(),
   data: jsonb("data").notNull().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
