@@ -43,3 +43,13 @@ export const disputeReadReceiptTable = pgTable("dispute_read_receipt", {
   lastReadCount: integer("last_read_count"),
   readAt: timestamp("read_at").defaultNow(),
 });
+
+export const disputeCategories = pgTable("dispute_categories", {
+  id: serial("id").primaryKey(),
+  name:varchar("name")
+})
+
+export const disputePreferredResolutionTable = pgTable("dispute_preferred_resolution", {
+  id: serial("id").primaryKey(),
+  name:varchar("name")
+})
