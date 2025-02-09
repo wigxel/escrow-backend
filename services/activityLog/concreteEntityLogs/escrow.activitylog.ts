@@ -99,6 +99,35 @@ export const escrowActivityLog = {
       },
     };
   },
+
+  statusFactory(status: string): (params: ParamsWithId) => {
+    kind: string;
+    entityId: string;
+    data: {
+      summary: string;
+      params: ParamsWithId;
+    };
+  } {
+    if (!status) {
+      console.warn("Invalid status provided");
+      return undefined;
+    }
+
+    let concreteStatus = status;
+
+    // Capitalize second part after splitting by dot if it exists
+    if (status.includes(".")) {
+      let [firstPart, secondPart] = status.split(".");
+      secondPart = secondPart.charAt(0).toUpperCase() + secondPart.slice(1);
+      concreteStatus = firstPart + secondPart;
+    }
+
+    if (typeof this[concreteStatus] === "function") {
+      return this[concreteStatus];
+    }
+    console.warn(`No matching function for status: ${concreteStatus}`);
+    return undefined;
+  },
 };
 
 export type ParamsWithId = {

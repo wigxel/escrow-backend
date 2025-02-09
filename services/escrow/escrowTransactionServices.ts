@@ -355,6 +355,10 @@ export const updateEscrowStatus = (
   });
 };
 
+/**
+ * handles updating the escrow status based on the stages of the transaction
+ * between vendor and customer
+ */
 export const updateEscrowTransactionStatus = (params: {
   escrowId: string;
   status: z.infer<typeof escrowStatusRules>["status"];
@@ -389,6 +393,10 @@ export const updateEscrowTransactionStatus = (params: {
     yield* escrowRepo.update(
       { id: params.escrowId },
       { status: params.status },
+    );
+
+    yield* createActivityLog(
+      escrowActivityLog.statusFactory(params.status)({ id: params.escrowId }),
     );
   });
 };
