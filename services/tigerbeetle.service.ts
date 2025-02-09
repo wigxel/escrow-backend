@@ -21,7 +21,7 @@ export const createTransfer = (transfer: TTBTransfer) => {
     const tigerBeetleRepo = yield* _(TigerBeetleRepoLayer.Tag);
     const errors = yield* _(
       tigerBeetleRepo.createTransfers(transfer),
-      Effect.mapError((e) => new ExpectedError(e.message)),
+      Effect.mapError((e) => new ExpectedError(`error occurred ${e.cause}`)),
     );
     yield* handleCreateTransferErrors(errors);
   });

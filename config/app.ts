@@ -30,6 +30,7 @@ import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
 import { reversibleHashLive } from "~/layers/encryption/presets/reversible-hasher";
 import { OTPRepoLayer } from "~/repositories/otp.repository";
 import { UserSessionLive } from "~/layers/session";
+import { ActivityLogRepoLayer } from "~/repositories/activityLog.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -85,6 +86,7 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(TigerBeetleRepoLayer.Repo.Live),
   Layer.provideMerge(AccountStatementRepoLayer.live),
   Layer.provideMerge(reversibleHashLive),
+  Layer.provideMerge(ActivityLogRepoLayer.live),
 );
 
 // const DevToolsLive = DevTools.layerWebSocket().pipe(

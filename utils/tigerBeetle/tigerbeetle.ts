@@ -108,7 +108,7 @@ export class TigerBeetleAdapter {
           : BigInt(0),
         user_data_32: transfer.user_data_32 || 0,
         timeout: 0,
-        pending_id: BigInt(transfer.pendingId) || BigInt(0),
+        pending_id: transfer.pendingId ? BigInt(transfer.pendingId) : BigInt(0),
         ledger: ledger?.ledgerId || compoundLedger.ngnLedger.ledgerId,
         code: transfer.code || TBTransferCode.WALLET_WITHDRAWAL,
         flags: transfer.flags || 0,

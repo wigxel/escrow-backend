@@ -20,6 +20,7 @@ import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import { handleUserCreationFromEscrow } from "../user.service";
 import {
   canTransitionEscrowStatus,
+  convertCurrencyUnit,
   getBuyerAndSellerFromParticipants,
 } from "~/services/escrow/escrow.utils";
 import { id } from "tigerbeetle-node";
@@ -249,7 +250,7 @@ export const initializeEscrowDeposit = (
 
     const checkoutSession = yield* paymentGateway.createSession({
       //convert to smallest currency unit kobo
-      amount: String(Number(escrowRequestDetails.amount) * 100),
+      amount: String(convertCurrencyUnit(escrowRequestDetails.amount,"naira-kobo")),
       email: customerDetails.email,
       reference: escrowRequestDetails.escrowId,
       callback_url: "",
