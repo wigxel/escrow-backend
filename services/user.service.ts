@@ -21,11 +21,13 @@ import type {
   verifyEmailDto,
 } from "~/dto/user.dto";
 import { id } from "tigerbeetle-node";
-import { createAccount } from "./tigerbeetle.service";
+import { createAccount, getAccountBalance } from "./tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { NotificationFacade } from "~/layers/notification/layer";
 import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.notify";
+import type { SessionUser } from "~/layers/session-provider";
+import { convertCurrencyUnit } from "./escrow/escrow.utils";
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -316,5 +318,19 @@ export const checkUsername = (username: string) => {
         onFailure: () => Effect.succeed(1),
       }),
     );
+  });
+};
+
+export const UserWalletBalance = (currentUser: SessionUser) => {
+  return Effect.gen(function* (_) {
+    const walletRepo = yield* UserWalletRepoLayer.tag;
+    const walletDetails = yield* walletRepo.firstOrThrow({
+      userId: currentUser.id,
+    });
+
+    const balance = yield* getAccountBalance(walletDetails.tigerbeetleAccountId);
+    return {
+      walletBalance: convertCurrencyUnit(String(balance), "kobo-naira"),
+    };
   });
 };
