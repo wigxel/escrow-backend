@@ -37,6 +37,7 @@ import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.acti
 import { NotificationFacade } from "~/layers/notification/layer";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
+import { UserWalletPaymentNotification } from "~/app/notifications/in-app/escrow/userWallet-payment.notify";
 
 export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentWebhookEvent,
@@ -233,7 +234,7 @@ export const releaseFunds = (params: {
       .route("in-app", { userId: vendorDetails.id })
       .route("mail", { address: vendorDetails.email })
       .notify(
-        new EscrowPaymentNotification(
+        new UserWalletPaymentNotification(
           { firstName: vendorDetails.firstName },
           {
             escrowId: escrowDetails.id,
@@ -246,7 +247,7 @@ export const releaseFunds = (params: {
 
     //notify customer
     yield* notify.route("in-app", { userId: buyer.userId }).notify(
-      new EscrowPaymentNotification(
+      new UserWalletPaymentNotification(
         { firstName: "user" },
         {
           escrowId: escrowDetails.id,

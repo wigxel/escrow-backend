@@ -7,8 +7,14 @@ import type { CurrencyUnit } from "~/types/types";
 const escrowStatusTransitions = {
   created: ["deposit.pending", "cancelled"],
   "deposit.pending": ["deposit.success", "cancelled"],
-  "deposit.success": ["service.pending", "service.confirmed", "completed","dispute"],
-  "service.confirmed":["dispute"],
+  "deposit.success": [
+    "service.pending",
+    "service.confirmed",
+    "completed",
+    "dispute",
+  ],
+  "service.pending": ["service.confirmed"],
+  "service.confirmed": ["dispute", "completed"],
   cancelled: [],
 } as const;
 
@@ -57,4 +63,3 @@ export const convertCurrencyUnit = (
   }
   return Number(amount) * koboToNaira;
 };
-
