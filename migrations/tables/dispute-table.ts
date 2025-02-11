@@ -44,12 +44,12 @@ export const disputeReadReceiptTable = pgTable("dispute_read_receipt", {
   readAt: timestamp("read_at").defaultNow(),
 });
 
-export const disputeCategories = pgTable("dispute_categories", {
+export const disputeCategoriesTable = pgTable("dispute_categories", {
   id: serial("id").primaryKey(),
   name:varchar("name")
 })
 
-export const disputePreferredResolutionTable = pgTable("dispute_preferred_resolution", {
+export const disputeResolutionTable = pgTable("dispute_resolutions", {
   id: serial("id").primaryKey(),
   name:varchar("name")
 })

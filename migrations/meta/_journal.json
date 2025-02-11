@@ -148,6 +148,13 @@
       "when": 1739093864457,
       "tag": "0020_whole_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1739266117213,
+      "tag": "0021_cold_bloodaxe",
+      "breakpoints": true
     }
   ]
 }
