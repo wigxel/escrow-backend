@@ -1,6 +1,7 @@
 import type { Effect } from "effect";
 import { MailMessage } from "~/layers/notification/MailMessage";
 import type { InferError, InferRequirements } from "~/services/effect.util";
+import type { Mailable } from "../mailing/mailables";
 
 export interface NotificationChannel {
   type: string;
@@ -10,10 +11,17 @@ export interface NotificationChannel {
   ): Effect.Effect<void, unknown, unknown>;
 }
 
+export type DatabaseMessage = {
+  tag:string,
+  title: string,
+  message: string,
+  metadata: Record<string,unknown>
+};
+
 export interface NotificationEvent<Tame, T> {
   name: Tame;
   params: T;
-  entity: Notification;
+  entity: Notification | Mailable;
   notifiable: Notifiable;
 }
 
@@ -24,6 +32,10 @@ export abstract class Notification {
 
   shouldSend(notifiable: Notifiable, channel: NotificationChannel): boolean {
     return true;
+  }
+
+  toDatabase():DatabaseMessage{
+    return 
   }
 }
 
@@ -61,7 +73,7 @@ interface NotificationFacadeInterface<
 
   // emits a notification
   notify(
-    data: Notification,
+    data: Notification | Mailable,
   ): Effect.Effect<
     void,
     InferInvokedErrors<TChannels, TInvokedRoutes>,

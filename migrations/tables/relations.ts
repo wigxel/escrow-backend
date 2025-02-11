@@ -7,35 +7,53 @@ import {
 
 import { userTable } from "~/migrations/tables/user-table";
 import { addressTable } from "./address-table";
-import { escrowParticipantsTable, escrowPaymentTable, escrowTransactionTable, escrowWalletTable } from "./escrow-transaction-table";
+import {
+  escrowParticipantsTable,
+  escrowPaymentTable,
+  escrowTransactionTable,
+  escrowWalletTable,
+} from "./escrow-transaction-table";
+import { activityLogTable } from "./activitylog.table";
 
-export const userRelations = relations(userTable, ({ one,many }) => ({
-  address:one(addressTable,{
-    fields:[userTable.id],
-    references:[addressTable.userId]
+export const userRelations = relations(userTable, ({ one, many }) => ({
+  address: one(addressTable, {
+    fields: [userTable.id],
+    references: [addressTable.userId],
   }),
 }));
 
-export const escrowRelations = relations(escrowTransactionTable,({one,many})=>({
-  paymentDetails:one(escrowPaymentTable, {
-    fields:[escrowTransactionTable.id],
-    references:[escrowPaymentTable.escrowId]
+export const escrowRelations = relations(
+  escrowTransactionTable,
+  ({ one, many }) => ({
+    paymentDetails: one(escrowPaymentTable, {
+      fields: [escrowTransactionTable.id],
+      references: [escrowPaymentTable.escrowId],
+    }),
+    escrowWalletDetails: one(escrowWalletTable, {
+      fields: [escrowTransactionTable.id],
+      references: [escrowWalletTable.escrowId],
+    }),
+    participants: many(escrowParticipantsTable),
+    activityLog: many(activityLogTable),
   }),
-  escrowWalletDetails:one(escrowWalletTable,{
-    fields:[escrowTransactionTable.id],
-    references:[escrowWalletTable.escrowId]
+);
+
+export const activityLogRelations = relations(activityLogTable, ({ one }) => ({
+  escrowDetails: one(escrowTransactionTable, {
+    fields: [activityLogTable.entityId],
+    references: [escrowTransactionTable.id],
   }),
-  participants:many(escrowParticipantsTable),
+}));
 
-}))
-
-export const participantRelations = relations(escrowParticipantsTable,({one})=>({
-  transactionDetails: one(escrowTransactionTable,{
-    fields:[escrowParticipantsTable.escrowId],
-    references:[escrowTransactionTable.id]
-  })
-}))
-
+export const participantRelations = relations(
+  escrowParticipantsTable,
+  ({ one }) => ({
+    transactionDetails: one(escrowTransactionTable, {
+      fields: [escrowParticipantsTable.escrowId],
+      references: [escrowTransactionTable.id],
+    }),
+  }),
+);
 
 export const disputeTableRelations = relations(disputeTable, ({ many }) => ({
   members: many(disputeMembersTable),

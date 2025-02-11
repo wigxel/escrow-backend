@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
+    "@firebase/firestore": "4.7.3",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
     "@react-email/components": "^0.0.32",
     "@react-email/render": "^0.0.13",
@@ -43,7 +44,9 @@
     "drizzle-orm": "^0.31.2",
     "drizzle-zod": "^0.5.1",
     "effect": "^3.4.8",
+    "firebase": "10.14.0",
     "lucia": "^3.2.0",
+    "nanoid": "5.0.7",
     "nitropack": "latest",
     "nodemailer": "^6.9.14",
     "oslo": "^1.2.1",

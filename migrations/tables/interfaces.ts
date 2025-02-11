@@ -9,7 +9,13 @@ import type {
   disputeTable,
 } from "./dispute-table";
 import type { notificationTable } from "./notification-table";
-import type { escrowParticipantsTable, escrowPaymentTable, escrowRequestTable, escrowTransactionTable } from "./escrow-transaction-table";
+import type {
+  escrowParticipantsTable,
+  escrowPaymentTable,
+  escrowRequestTable,
+  escrowTransactionTable,
+} from "./escrow-transaction-table";
+import type { reviewsTable } from "./review-table";
 
 const memberRoleSchema = z.enum(memberRole.enumValues);
 
@@ -25,9 +31,8 @@ export type TDisputeMessage = typeof disputeMessageTable.$inferInsert;
 export type TDisputeReadReceipt = typeof disputeReadReceiptTable.$inferInsert;
 export type TInsertAddress = typeof addressTable.$inferInsert;
 export type TSelectAddress = typeof addressTable.$inferSelect;
-export type TEscrowTransaction = typeof escrowTransactionTable.$inferInsert
-export type TEscrowPayment = typeof escrowPaymentTable.$inferInsert
-export type TEscrowParticipant = typeof escrowParticipantsTable.$inferInsert
-export type TEscrowRequest = typeof escrowRequestTable.$inferInsert
-
-
+export type TEscrowTransaction = typeof escrowTransactionTable.$inferInsert;
+export type TEscrowPayment = typeof escrowPaymentTable.$inferInsert;
+export type TEscrowParticipant = typeof escrowParticipantsTable.$inferInsert;
+export type TEscrowRequest = typeof escrowRequestTable.$inferInsert;
+export type TReviews = typeof reviewsTable.$inferInsert;

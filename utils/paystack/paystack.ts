@@ -80,7 +80,6 @@ export class Paystack {
       return response.data;
     } catch (e) {
       const { message } = errorHandler(e);
-      console.error(message);
       throw new Error(message);
     }
   }

@@ -16,14 +16,10 @@ import { TextBase } from "~/resources/view/mail/shared/_text-base";
 const schema = z.object({
   productName: z.string(),
   username: z.string(),
-  action: z.object({
-    link: z.string().url(),
-    text: z.string(),
-  }),
 });
 
 export function OrderPlaced(props: z.infer<typeof schema>) {
-  const { action, username, productName } = props;
+  const { username, productName } = props;
 
   return (
     <Html>
@@ -38,9 +34,6 @@ export function OrderPlaced(props: z.infer<typeof schema>) {
           <TextBase style={{ fontSize: 16, marginBottom: "14px" }}>
             Your order "{productName}" has been shipped.
           </TextBase>
-          <BaseButton href={action?.link} target="_blank">
-            {action.text}
-          </BaseButton>
           <Text style={{ marginBottom: 32 }} />
           <Footer />
         </Container>
@@ -52,7 +45,6 @@ export function OrderPlaced(props: z.infer<typeof schema>) {
 OrderPlaced.defaultProps = {
   username: "James",
   productName: "Some kinda wood",
-  action: { link: "https://google.com", text: "View Order" },
 } satisfies z.infer<typeof schema>;
 
 const main = {

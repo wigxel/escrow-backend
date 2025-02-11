@@ -16,7 +16,7 @@ export function Layout({ title="", children }: LayoutProps) {
       <Preview>{title}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Header/>
+          <Header heading={title}/>
           {children}
           <Footer />
         </Container>

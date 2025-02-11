@@ -3,6 +3,7 @@ import { Mailable } from "~/layers/mailing/mailables";
 import { Content } from "~/layers/mailing/mailables/Content";
 import { Envelope } from "~/layers/mailing/mailables/Envelope";
 import type { User } from "~/migrations/tables/interfaces";
+import { EmailVerifcationView } from "~/resources/view/mail/auth/email-verification";
 
 export class EmailVerificationMail extends Mailable {
   constructor(
@@ -17,16 +18,13 @@ export class EmailVerificationMail extends Mailable {
   }
 
   content(): Content {
-    // const viewTemplate = OrderPlaced({
-    //   username: this.user.lastName,
-    //   action: {
-    //     link: `https://theyardbazzar.com/seller/orders/${this.product.id}`,
-    //     text: "View Order",
-    //   },
-    // });
+    const viewTemplate = EmailVerifcationView({
+      username: this.user.firstName,
+      otp:this.otp,
+    });
 
     return new Content({
-      // html: render(viewTemplate),
+      html: render(viewTemplate),
       text: `Welcome ${this.user.firstName}\nHere's an OTP to verify your email ${this.otp}`,
     });
   }

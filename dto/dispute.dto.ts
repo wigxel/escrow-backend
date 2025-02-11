@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const newDisputeSchema = z.object({
-  orderId: z.string().uuid(),
+  escrowId: z.string().uuid(),
   reason: z.string(),
   message: z.string(),
 });

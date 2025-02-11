@@ -1,41 +1,25 @@
 import { Effect } from "effect";
 import type { z } from "zod";
-import { NotificationSetup } from "~/app/notifications/notification.utils";
+import { unserializeNotification } from "~/app/notifications/notification.utils";
 import { ExpectedError } from "~/config/exceptions";
 import type { notificationIdSchema } from "~/dto/notification.dto";
-import type { Notification } from "~/migrations/schema";
 import { NotificationRepoLayer } from "~/repositories/notification.repo";
-import { UserRepoLayer } from "~/repositories/user.repository";
 import { PaginationService } from "~/services/search/pagination.service";
 import type { PaginationQuery } from "./search/primitives";
 import { SearchOps } from "./search/sql-search-resolver";
 
-/**
- * TODO: Rename to write to database
- * TODO: Create a Channel for DatabaseNotification instead of using this.
- * See NotificationFacade class
- */
-export const sendNotification = (data: Notification) => {
-  return Effect.gen(function* (_) {
-    const notificationRepo = yield* NotificationRepoLayer.Tag;
-    yield* notificationRepo.create(data);
-
-    return { status: true };
-  });
-};
-
-export const getNotificationStatus = (currentUserId: string) => {
+export const getUnreadNotification = (currentUserId: string) => {
   return Effect.gen(function* (_) {
     const notificationRepo = yield* NotificationRepoLayer.Tag;
 
-    const read_count = yield* notificationRepo.count(
+    const unreadCount = yield* notificationRepo.count(
       SearchOps.and(
         SearchOps.eq("isRead", false),
         SearchOps.eq("userId", currentUserId),
       ),
     );
 
-    return { unread: read_count };
+    return { unreadCount };
   });
 };
 
@@ -63,7 +47,7 @@ export const getNotifications = (
         : yield* notificationRepo.getUnreadMessages(data);
 
     return {
-      data: NotificationSetup.unserializeNotification(notifications),
+      data: unserializeNotification(notifications),
       meta: {
         ...paginate.meta,
         total: totalNotifications.count,
@@ -71,7 +55,6 @@ export const getNotifications = (
           totalNotifications.count / paginate.query.pageSize,
         ),
       },
-      status: true,
     };
   });
 };
@@ -92,15 +75,13 @@ export const markAsRead = (
         );
       }
 
-      return { status: true, message: "Selected notifications marked as read" };
+      return;
     }
 
     //mark all as read
     yield* notificationRepo
       .updateNotification({ userId: currentUserId }, type)
       .pipe(Effect.mapError((e) => new ExpectedError(e.toString())));
-
-    return { status: true, message: "All notifications marked as read" };
   });
 };
 
@@ -122,12 +103,10 @@ export const deleteNotification = (
         );
       }
 
-      return { status: true, message: "Selected notifications deleted" };
+      return
     }
 
     //delete all notification
     yield* notificationRepo.delete(SearchOps.eq("userId", currentUserId));
-
-    return { status: true, message: "Deleted all notification" };
   });
 };

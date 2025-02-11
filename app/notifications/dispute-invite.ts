@@ -10,11 +10,11 @@ export class DisputeInviteNotification extends Notification {
   toMail(notifiable: Notifiable): MailMessage {
     return new MailMessage()
       .greeting(this.user.firstName)
-      .subject("Invitation to Participate in Open Order Dispute")
+      .subject("Invitation to Participate in Open Escrowo Dispute")
       .line(
         [
           "We would like to inform you that you have been invited to",
-          "participate in an open dispute related to an order.",
+          "participate in an open dispute related to an escrow.",
           "involvement is important for resolving this matter.",
         ].join("\n"),
       );

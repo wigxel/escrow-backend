@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { Effect, Layer } from "effect";
+import { Config, Effect, Layer } from "effect";
 import { HashingError, ReversibleHash } from "../reversible";
 
 export class AESAlgo {
@@ -72,25 +72,27 @@ export class AESAlgo {
   }
 }
 
-export function createReversibleHash({
-  salt,
-  hex,
-}: { salt: string; hex: string }) {
-  const hasher = new AESAlgo(salt, hex);
-  return Layer.succeed(ReversibleHash, {
-    encrypt: (value) =>
-      Effect.try({
-        try: () => hasher.encrypt(value),
-        catch() {
-          return new HashingError("Error encrypting content");
-        },
-      }),
-    decrypt: (value) =>
-      Effect.try({
-        try: () => hasher.decrypt(value),
-        catch() {
-          return new HashingError("Error decrypting content");
-        },
-      }),
-  });
-}
+export const reversibleHashLive = Layer.effect(
+  ReversibleHash,
+  Effect.gen(function* (_) {
+    const salt = yield* Config.string("SALT_HEX");
+    const iv = yield* Config.string("IV_HEX");
+    const hasher = new AESAlgo(salt, iv);
+    return {
+      encrypt: (value) =>
+        Effect.try({
+          try: () => hasher.encrypt(value),
+          catch() {
+            return new HashingError("Error encrypting content");
+          },
+        }),
+      decrypt: (value) =>
+        Effect.try({
+          try: () => hasher.decrypt(value),
+          catch() {
+            return new HashingError("Error decrypting content");
+          },
+        }),
+    };
+  }),
+);

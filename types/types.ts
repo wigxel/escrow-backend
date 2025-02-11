@@ -1,4 +1,6 @@
 import type { Address } from "nodemailer/lib/mailer";
+import type { z } from "zod";
+import type { activityLogSchema } from "~/dto/activityLog.dto";
 
 export type ApiResponse<T = null> = {
   success: boolean;
@@ -42,16 +44,17 @@ export type TPaymentDetails = {
   paymentMethod: string;
 };
 
-export type TPaystackPaymentEventResponse = {
+
+export type TPaystackEventResponse = {
   event: string;
   data: {
     amount: string;
     reference: string;
     status: string;
     channel: string;
-    metadata: TSuccessPaymentMetaData;
+    metadata: Record<string,unknown>;
   };
 };
 
 export type CurrencyUnit = "naira-kobo" | "kobo-naira";
-
+export type TActivityLogEvent = Required<z.infer<typeof activityLogSchema>>;

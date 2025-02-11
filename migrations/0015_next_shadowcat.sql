@@ -1,0 +1,1 @@
+ALTER TABLE "disputes" RENAME COLUMN "order_id" TO "escrow_id";

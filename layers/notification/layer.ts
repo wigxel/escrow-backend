@@ -9,8 +9,14 @@ import {
   type NotificationChannel,
   type NotificationMediator,
 } from "~/layers/notification/types";
+import { InAppChannel } from "./in-app.Channel";
+import type { Mailable } from "../mailing/mailables";
 
-type AvailableChannels = EmailChannel | SMSChannel | PushNotificationChannel;
+type AvailableChannels =
+  | EmailChannel
+  | SMSChannel
+  | PushNotificationChannel
+  | InAppChannel;
 
 export class NotificationManager<TChannels extends NotificationChannel>
   implements NotificationMediator<TChannels>
@@ -41,7 +47,7 @@ export class NotificationManager<TChannels extends NotificationChannel>
     return this;
   }
 
-  notify(payload: Notification) {
+  notify(payload: Notification | Mailable) {
     const events = this.events;
     const reset = () => {
       this.events = [];
@@ -89,6 +95,7 @@ export class NotificationFacade extends Context.Tag("NotificationFacade")<
 export const NotificationLive = Layer.sync(NotificationFacade, () => {
   const instance = new NotificationManager<AvailableChannels>();
   instance.registerChannel(new EmailChannel());
+  instance.registerChannel(new InAppChannel());
 
   return instance;
 });

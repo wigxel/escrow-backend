@@ -4,12 +4,12 @@ import {
   CreateTransferError,
   type CreateTransfersError,
 } from "tigerbeetle-node";
-import { LedgerType } from "./type/type";
+import { type ILedger, LedgerType } from "./type/type";
 import { ExpectedError } from "~/config/exceptions";
 import { Effect } from "effect";
 
 //======= LEDGER DATA =====
-export const compoundLedger = {
+export const compoundLedger: Record<string, ILedger> = {
   ngnLedger: {
     ledgerId: 10,
     type: LedgerType.Currency,

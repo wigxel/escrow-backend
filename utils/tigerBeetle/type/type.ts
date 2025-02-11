@@ -1,3 +1,4 @@
+import type { TransferFlags } from "tigerbeetle-node";
 import type { compoundLedger } from "../utils";
 
 export type TTBAccount = {
@@ -24,7 +25,7 @@ export type TTBTransfer = {
   debit_account_id: string;
   credit_account_id: string;
   amount: number;
-  pending_id?: bigint;
+  pendingId?: string;
   user_data_128?: number;
   user_data_64?: number;
   user_data_32?: number;
@@ -38,13 +39,13 @@ export type TTBTransfer = {
    * This is a user-defined enum denoting the category of the account.
    * eg. 1001 is Bank Account and 1002 is Money Market Account
    */
-  code?:TBTransferReason
-  flags?: number;
+  code?:TBTransferCode
+  flags?: TransferFlags;
 };
 
 export type TCompoundLedger = keyof typeof compoundLedger;
 
-interface Ledger {
+export interface ILedger {
   ledgerId: number;
   type: LedgerType;
   name: string;
@@ -63,7 +64,7 @@ export enum LedgerType {
   Currency = "Currency",
 }
 
-export enum TBTransferReason{
+export enum TBTransferCode{
   ESCROW_PAYMENT = 300,
   RELEASE_ESCROW_FUNDS = 400,
   WALLET_WITHDRAWAL = 500

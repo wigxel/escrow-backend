@@ -10,7 +10,10 @@ export const PaystackEvent = PaymentGatewayEventService.of({
     return pipe(
       Match.value(ev),
       Match.when({ event: "charge.success" }, PaymentGatewayEvent.ChargeSuccess),
-      Match.when({ event: "charge.failed" }, PaymentGatewayEvent.Chargefailed),
+      Match.when({ event: "charge.failed" }, PaymentGatewayEvent.ChargeFailed),
+      Match.when({ event: "transfer.success" }, PaymentGatewayEvent.TransferSuccess),
+      Match.when({ event: "transfer.failed" }, PaymentGatewayEvent.TransferFailed),
+      Match.when({ event: "transfer.reversed" }, PaymentGatewayEvent.TransferReversed),
       Match.orElse((data) => PaymentGatewayEvent.UnknownPaymentEvent({ data })),
     );
   },

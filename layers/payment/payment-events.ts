@@ -2,7 +2,10 @@ import { Context, Data, type Option } from "effect";
 
 export type PaymentGatewayEvents = Data.TaggedEnum<{
   ChargeSuccess: { readonly data: object };
-  Chargefailed: { readonly data: object };
+  ChargeFailed: { readonly data: object };
+  TransferSuccess:{readonly data:object}
+  TransferFailed:{readonly data:object}
+  TransferReversed:{readonly data:object}
   UnknownPaymentEvent: { readonly data: unknown };
 }>;
 

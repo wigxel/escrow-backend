@@ -1,26 +1,11 @@
-import { Effect, Layer } from "effect";
+import { Effect} from "effect";
 import { sendEmailDto } from "~/dto/user.dto";
-import { DatabaseLive } from "~/layers/database";
-import { OTPRepoLayer } from "~/repositories/otp.repository";
-import { UserRepoLayer } from "~/repositories/user.repository";
-import { requestEmailVerificationOtp } from "~/services/user.service";
+import { validateBody } from "~/libs/request.helpers";
+import { forgotPassword} from "~/services/user.service";
 
-/**
- * @description This endpoint is meant to send an OTP to provided user email for resetting password.
- *              if user account exists.
- * @argument    email - A valid email of a user
- */
 export default eventHandler(async (event) => {
-  const body = await readValidatedBody(event, sendEmailDto);
-
-  const program = requestEmailVerificationOtp(body.email, "reset");
-  return Effect.runPromise(
-    Effect.scoped(Effect.provide(program, Dependencies)),
+  const program = validateBody(event, sendEmailDto).pipe(
+    Effect.flatMap((body) => forgotPassword(body.email)),
   );
+  return runLive(event, program);
 });
-
-const Dependencies = Layer.empty.pipe(
-  Layer.provideMerge(UserRepoLayer.Repo.Live),
-  Layer.provideMerge(OTPRepoLayer),
-  Layer.provideMerge(DatabaseLive),
-);

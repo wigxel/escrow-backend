@@ -1,7 +1,10 @@
 import {
   boolean,
+  numeric,
   pgEnum,
   pgTable,
+  smallint,
+  smallserial,
   text,
   timestamp,
   uniqueIndex,
@@ -26,6 +29,10 @@ export const userTable = pgTable(
     role: memberRole("role").default("user").notNull(),
     profilePicture: text("profile_picture"),
     emailVerified: boolean("email_verified").default(false),
+    hasBusiness: boolean("has_business").default(false),
+    businessName: varchar("business_name"),
+    businessType: varchar("business-type"),
+    referralSourceId: smallint("referral_source_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -46,6 +53,7 @@ export const bankAccountTable = pgTable("bank_account", {
   accountName: varchar("account_name"),
   bankCode: varchar("bank_code"),
   paystackRecipientCode: varchar("paystack_recipient_code"),
+  deletedAt: timestamp("deleted_at"),
   ...timestamps,
 });
 
@@ -56,7 +64,7 @@ export const bankAccountVerificationTable = pgTable(
     userId: uuid("user_id").notNull(),
     accountNumber: varchar("account_number").notNull(),
     accountName: varchar("account_name"),
-    bankName: varchar("bank_name").notNull(),
+    bankName: varchar("bank_name"),
     bankCode: varchar("bank_code"),
     verificationToken: uuid("verificationToken"),
     expiresAt: timestamp("expires_at").defaultNow().notNull(),
@@ -70,3 +78,21 @@ export const bankAccountVerificationTable = pgTable(
     };
   },
 );
+
+export const withdrawalTable = pgTable("withdrawal", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"),
+  amount: numeric("amount", { precision: 10, scale: 2 }),
+  status: varchar("status"),
+  referenceCode: varchar("reference_code"),
+  tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
+  ...timestamps,
+});
+
+/**
+ * stores the various ways the company was heard of
+ */
+export const referralSourceTable = pgTable("referral_resource", {
+  id: smallserial("id"),
+  name: varchar("name"),
+});

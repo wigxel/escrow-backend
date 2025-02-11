@@ -10,7 +10,7 @@ import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
 import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
 import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
-import type { resolveAccountNumberRules } from "~/validationRules/accountNumber.rules";
+import type { resolveAccountNumberRules } from "~/dto/accountNumber.dto";
 import { SearchOps } from "./search/sql-search-resolver";
 
 export const getBankList = () => {
@@ -24,8 +24,41 @@ export const getUserBankAccounts = (currentUser: SessionUser) => {
   return Effect.gen(function* (_) {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
     return yield* bankAccountRepo.all({
-      where: SearchOps.eq("userId", currentUser.id),
+      where: SearchOps.and(
+        SearchOps.eq("userId", currentUser.id),
+        SearchOps.isNull("deletedAt"),
+      ),
     });
+  });
+};
+
+export const deleteBankAcounts = (params: {
+  bankAccountId: string;
+  currentUser: SessionUser;
+}) => {
+  return Effect.gen(function* (_) {
+    const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
+
+    const accountDetails = yield* _(
+      bankAccountRepo.firstOrThrow({
+        id: params.bankAccountId,
+        deletedAt: null,
+      }),
+      Effect.mapError(
+        () => new NoSuchElementException("Invalid bank account id"),
+      ),
+    );
+
+    if (params.currentUser.id !== accountDetails.userId) {
+      yield* new ExpectedError(
+        "Unathorized action: cannot delete bank account",
+      );
+    }
+
+    yield* bankAccountRepo.update(
+      { id: params.bankAccountId },
+      { deletedAt: new Date() },
+    );
   });
 };
 
@@ -63,12 +96,12 @@ export const resolveAccountNumber = (
      * store the bank details in a temporary table
      */
     const verificationToken = randomUUID();
+
     yield* bankVerificationRepo.create({
       userId: currentUser.id,
-      accountNumber: params.accountNumber,
+      accountNumber: bankDetails.data.account_number,
       bankCode: params.bankCode,
       accountName: bankDetails.data.account_name,
-      bankName: params.bankName,
       verificationToken,
     });
 

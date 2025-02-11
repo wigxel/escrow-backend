@@ -3,6 +3,7 @@ import { PermissionError } from "~/config/exceptions";
 import { AuthUser } from "~/layers/auth-user";
 import { hashPassword, verifyPassword } from "~/layers/encryption/helpers";
 import { Session } from "~/layers/session";
+import type { SessionUser } from "~/layers/session-provider";
 import { UserRepoLayer } from "~/repositories/user.repository";
 
 export function logout({ access_token }: { access_token: string }) {
@@ -60,20 +61,20 @@ export function login({
   });
 }
 
-export const changePassword = (
-  userId: string,
-  oldPassword: string,
-  newPassword: string,
-) => {
+export const changePassword = (params: {
+  currentUser: SessionUser;
+  oldPassword: string;
+  newPassword: string;
+}) => {
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
-    const userProfile = yield* userRepo.firstOrThrow({
-      id: userId,
+    const userDetails = yield* userRepo.firstOrThrow({
+      id: params.currentUser.id,
     });
 
-    yield* verifyPassword(oldPassword, userProfile.password);
-    const newHash = yield* hashPassword(newPassword);
-    const [user] = yield* userRepo.update(userId, { password: newHash });
+    yield* verifyPassword(params.oldPassword, userDetails.password);
+    const newHash = yield* hashPassword(params.newPassword);
+    const [user] = yield* userRepo.update(userDetails.id, { password: newHash });
 
     return user;
   });

@@ -1,85 +1,54 @@
-import { and, eq, isNotNull, not, sql } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
-import {
-  countWhere,
-  paginateQuery,
-  runDrizzleQuery,
-} from "~/libs/query.helpers";
-import {
-  type Review,
-  commentsTable,
-  productTable,
-  reviewsTable,
-} from "~/migrations/schema";
+import { head } from "effect/Array";
+import type { z } from "zod";
+import type { reviewFilterDto } from "~/dto/review.dto";
+import { runDrizzleQuery } from "~/libs/query.helpers";
+import { reviewsTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
-import { SearchOps } from "~/services/search/sql-search-resolver";
+import type { PaginationQuery } from "~/services/search/primitives";
 
 export class ReviewRepository extends DrizzleRepo(reviewsTable, "id") {
-  findProductReviews(filters: Partial<Review> = {}) {
+  reviewCount(filters: z.infer<typeof reviewFilterDto>) {
+    return runDrizzleQuery((db) => {
+      return db
+        .select({ count: count() })
+        .from(reviewsTable)
+        .where(
+          and(
+            ...Object.entries(filters).map(([key, value]) => {
+              if (key === "revieweeId")
+                return eq(reviewsTable.revieweeId, value as string);
+              if (key === "rating")
+                return eq(reviewsTable.rating, value as number);
+              if (key === "escrowId")
+                return eq(reviewsTable.escrowId, value as string);
+            }),
+          ),
+        );
+    }).pipe(
+      Effect.map((d) => d),
+      Effect.flatMap(head),
+    );
+  }
+
+  getReviews(filters: z.infer<typeof reviewFilterDto> & PaginationQuery) {
     return runDrizzleQuery((db) => {
       return db.query.reviewsTable.findMany({
         where: and(
           ...Object.entries(filters).map(([key, value]) => {
-            if (key === "id") return eq(reviewsTable.id, value as string);
+            if (key === "revieweeId")
+              return eq(reviewsTable.revieweeId, value as string);
             if (key === "rating")
               return eq(reviewsTable.rating, value as number);
-            if (key === "productId")
-              return eq(reviewsTable.productId, value as string);
+            if (key === "escrowId")
+              return eq(reviewsTable.escrowId, value as string);
           }),
         ),
-        with: {
-          comments: {
-            where: not(
-              isNotNull(commentsTable.parentCommentId),
-            ) /** Only load comments with no parent comment, user has to click to read replies [See Instagram Example] */,
-            with: {
-              user: {
-                columns: {
-                  firstName: true,
-                  lastName: true,
-                  profilePicture: true,
-                  emailVerified: true,
-                  id: true,
-                },
-              },
-            },
-          },
-          user: {
-            columns: {
-              firstName: true,
-              lastName: true,
-              profilePicture: true,
-              emailVerified: true,
-              id: true,
-            },
-          },
-        },
+        limit: filters.pageSize,
+        offset: filters.pageSize * filters.pageNumber,
       });
     });
-  }
-
-  sellersReviewPaginated(params: {
-    sellerId: string;
-  }) {
-    const sellerProductIds = sql`SELECT id FROM ${productTable} WHERE ${productTable.ownerId} = ${params.sellerId}`;
-    const where = sql`${reviewsTable.productId} in (${sellerProductIds})`;
-    const getAll = this.all({
-      ...params,
-      where: SearchOps.and(SearchOps.raw(() => where)),
-    });
-
-    const searchQuery = Effect.gen(function* (_) {
-      const count = yield* countWhere(
-        reviewsTable,
-        SearchOps.raw(() => where),
-      );
-
-      const reviews = yield* getAll;
-
-      return [count, reviews] as const;
-    });
-
-    return paginateQuery((params) => searchQuery);
   }
 }
 

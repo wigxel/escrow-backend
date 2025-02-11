@@ -1,0 +1,1 @@
+ALTER TABLE "activity_logs" ALTER COLUMN "created_at" SET DEFAULT now();

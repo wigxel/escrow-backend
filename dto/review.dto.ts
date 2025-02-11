@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 export const createReviewDto = z.object({
-  productId: z.string(),
+  escrowId: z.string(),
   comment: z.string().min(3).max(20),
-  rating: z.number(),
-  images: z.string().array(),
-}).parse;
+  rating: z.number({ coerce: true }),
+});
 
 export const updateReviewDto = z.object({
   reviewId: z.string(),
@@ -18,3 +17,20 @@ export const updateReviewDto = z.object({
 export const deleteReviewDto = z.object({
   reviewId: z.string(),
 }).parse;
+
+export const reviewFilterDto = z
+  .object({
+    escrowId: z.string().uuid().optional(),
+    revieweeId: z.string().uuid().optional(),
+    rating: z.number({ coerce: true }).min(0).optional(),
+  })
+  .refine(
+    (data) => {
+      // Ensure at least one field is provided
+      return data.escrowId || data.revieweeId || data.rating !== undefined;
+    },
+    {
+      message:
+        "At least one of escrowId, revieweeId, or rating must be provided",
+    },
+  );

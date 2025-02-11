@@ -1,3 +1,4 @@
-const {id} = require('tigerbeetle-node')
+const crypto = require('node:crypto');
 
-console.log(String(id()))
+console.log(crypto.randomBytes(16).toString("hex"))
+console.log(crypto.randomBytes(16).toString("hex"))
