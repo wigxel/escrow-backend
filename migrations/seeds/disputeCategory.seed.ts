@@ -1,18 +1,18 @@
 import { Effect } from "effect";
 import { createSeed } from "~/migrations/seeds/setup";
-import { CategoryRepo } from "~/repositories/category.repo";
+import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
 
 export const runSeed = createSeed(
-  "CategorySeed",
+  "DIsputeCategorySeed",
   Effect.gen(function* (_) {
-    const repo = yield* CategoryRepo;
+    const repo = yield* DisputeCategorysRepoLayer.Tag;
 
     const categories = [
-      { id: 1, name: "Gadgets" },
-      { id: 2, name: "Furnitures" },
-      { id: 3, name: "Phones" },
-      { id: 4, name: "Electronics" },
-      { id: 5, name: "Clothes" },
+      { name: "Item not received" },
+      { name: "Item different from description" },
+      { name: "Item damaged/defective" },
+      { name: "Partial delivery" },
+      { name: "Others" },
     ];
 
     return yield* Effect.all(
