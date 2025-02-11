@@ -4,6 +4,7 @@
   "scripts": {
     "build": "nitro build",
     "dev": "nitro dev",
+    "start:tigerbeetle": "tigerbeetle start --addresses=4111 --development ./resources/db/0_0_escrow_app.tigerbeetle",
     "preview": "node .output/server/index.mjs",
     "db:seed": "tsx migrations/scripts/run-seed.ts",
     "db:migrate": "tsx ./migrations/scripts/migrate.ts",
