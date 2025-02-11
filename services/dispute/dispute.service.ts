@@ -1,5 +1,5 @@
 import cuid2 from "@paralleldrive/cuid2";
-import { createTextMessage } from "@repo/shared/src/chat-service/utils";
+import { createTextMessage } from "~/services/chat/chat-service/utils";
 import { Effect, pipe } from "effect";
 import { head } from "effect/Array";
 import { toLower } from "ramda";
