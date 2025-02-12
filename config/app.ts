@@ -31,6 +31,8 @@ import { reversibleHashLive } from "~/layers/encryption/presets/reversible-hashe
 import { OTPRepoLayer } from "~/repositories/otp.repository";
 import { UserSessionLive } from "~/layers/session";
 import { ActivityLogRepoLayer } from "~/repositories/activityLog.repo";
+import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
+import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -47,6 +49,8 @@ export const UserModule = Layer.empty.pipe(
 const DisputeModule = Layer.empty.pipe(
   Layer.provideMerge(DisputeRepoLayer.Repo.Live),
   Layer.provideMerge(DisputeMembersRepoLayer.Repo.Live),
+  Layer.provideMerge(DisputeCategorysRepoLayer.Repo.Live),
+  Layer.provideMerge(DisputeResolutionssRepoLayer.Repo.Live),
   Layer.provideMerge(ChatServiceLive),
 );
 
