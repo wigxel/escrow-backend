@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
-import { runDrizzleQuery } from "~/libs/query.helpers";
+import { notNil, runDrizzleQuery } from "~/libs/query.helpers";
 import { escrowParticipantsTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
 
@@ -14,6 +14,17 @@ export class EscrowParticipantRepository extends DrizzleRepo(
         where: eq(escrowParticipantsTable.escrowId, escrowId),
       });
     });
+  }
+
+  getParticipantsWithWallet(userId: string) {
+    return runDrizzleQuery((db) => {
+      return db.query.escrowParticipantsTable.findMany({
+        where: eq(escrowParticipantsTable.userId, userId),
+        with: {
+          walletDetails:true
+        },
+      });
+    }).pipe(Effect.flatMap(notNil));
   }
 }
 

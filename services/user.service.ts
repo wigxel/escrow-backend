@@ -5,7 +5,6 @@ import { PasswordResetMail } from "~/app/mail/password-reset";
 import { ExpectedError } from "~/config/exceptions";
 import { PasswordHasherError } from "~/layers/encryption";
 import { hashPassword } from "~/layers/encryption/helpers";
-import { Mail } from "~/layers/mailing/mail";
 import { Session } from "~/layers/session";
 import { OtpRepo } from "~/repositories/otp.repository";
 import { UserRepoLayer } from "~/repositories/user.repository";
@@ -28,6 +27,7 @@ import { NotificationFacade } from "~/layers/notification/layer";
 import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.notify";
 import type { SessionUser } from "~/layers/session-provider";
 import { convertCurrencyUnit } from "./escrow/escrow.utils";
+import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -321,16 +321,38 @@ export const checkUsername = (username: string) => {
   });
 };
 
-export const UserWalletBalance = (currentUser: SessionUser) => {
+export const UserBalance = (currentUser: SessionUser) => {
   return Effect.gen(function* (_) {
     const walletRepo = yield* UserWalletRepoLayer.tag;
+    const participantsRepo = yield* EscrowParticipantRepoLayer.tag;
+
     const walletDetails = yield* walletRepo.firstOrThrow({
       userId: currentUser.id,
     });
 
-    const balance = yield* getAccountBalance(walletDetails.tigerbeetleAccountId);
+    const escrowDetails = yield* participantsRepo.getParticipantsWithWallet(
+      currentUser.id,
+    );
+
+    let totalEscrowBalance = BigInt(0);
+
+    for (const escrow of escrowDetails) {
+      const balance = yield* getAccountBalance(
+        escrow.walletDetails.tigerbeetleAccountId,
+      );
+      totalEscrowBalance += balance;
+    }
+
+    const walletbalance = yield* getAccountBalance(
+      walletDetails.tigerbeetleAccountId,
+    );
+
     return {
-      walletBalance: convertCurrencyUnit(String(balance), "kobo-naira"),
+      walletBalance: convertCurrencyUnit(String(walletbalance), "kobo-naira"),
+      totalEscrowBalance: convertCurrencyUnit(
+        String(totalEscrowBalance),
+        "kobo-naira",
+      ),
     };
   });
 };
