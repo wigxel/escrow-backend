@@ -28,6 +28,7 @@ import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.noti
 import type { SessionUser } from "~/layers/session-provider";
 import { convertCurrencyUnit } from "./escrow/escrow.utils";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
+import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -356,3 +357,10 @@ export const UserBalance = (currentUser: SessionUser) => {
     };
   });
 };
+
+export const getUserPushTokens = (userId:string)=>{
+  return Effect.gen(function*(_){
+    const repo = yield* PushTokenRepoLayer.tag
+    return yield* repo.all({where:SearchOps.eq("userId", userId)})
+  })
+}
