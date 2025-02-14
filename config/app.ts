@@ -33,6 +33,7 @@ import { UserSessionLive } from "~/layers/session";
 import { ActivityLogRepoLayer } from "~/repositories/activityLog.repo";
 import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
 import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
+import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -43,7 +44,8 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(ReviewRepoLive),
   Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
   Layer.provideMerge(OTPRepoLayer),
-  Layer.provideMerge(UserSessionLive)
+  Layer.provideMerge(UserSessionLive),
+  Layer.provideMerge(PushTokenRepoLayer.live)
 );
 
 const DisputeModule = Layer.empty.pipe(
