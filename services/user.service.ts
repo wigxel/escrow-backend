@@ -358,9 +358,24 @@ export const UserBalance = (currentUser: SessionUser) => {
   });
 };
 
-export const getUserPushTokens = (userId:string)=>{
-  return Effect.gen(function*(_){
-    const repo = yield* PushTokenRepoLayer.tag
-    return yield* repo.all({where:SearchOps.eq("userId", userId)})
-  })
-}
+export const getUserPushTokens = (userId: string) => {
+  return Effect.gen(function* (_) {
+    const repo = yield* PushTokenRepoLayer.tag;
+    return yield* repo.all({ where: SearchOps.eq("userId", userId) });
+  });
+};
+
+export const deleteUserPushToken = (params: {
+  currentUser: SessionUser;
+  token: string;
+}) => {
+  return Effect.gen(function* (_) {
+    const repo = yield* PushTokenRepoLayer.tag;
+    return yield* repo.delete(
+      SearchOps.and(
+        SearchOps.eq("userId", params.currentUser.id),
+        SearchOps.eq("token", params.token),
+      ),
+    );
+  });
+};
