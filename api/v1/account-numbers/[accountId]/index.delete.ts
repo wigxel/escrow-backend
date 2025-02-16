@@ -12,7 +12,12 @@ export default eventHandler(async (event) => {
       { bankAccountId },
     );
     const {user} = yield* getSessionInfo(event);
-    return yield* deleteBankAcounts({bankAccountId,currentUser:user});
+    yield* deleteBankAcounts({bankAccountId,currentUser:user});
+
+    return {
+      status: "success",
+      message: "Bank account deleted successfully",
+    }
   });
   return runLive(event, program);
 });

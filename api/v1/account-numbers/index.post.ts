@@ -11,7 +11,14 @@ export default eventHandler(async (event) => {
       z.object({ bankAccountToken: z.string().uuid() }),
     );
     const { user } = yield* getSessionInfo(event);
-    return yield* addNewBankAccount(data.bankAccountToken, user);
+
+    yield* Effect.logDebug(`User: ${user.id}`);
+    yield* addNewBankAccount(data.bankAccountToken, user);
+
+    return {
+      status: "success",
+      message: "Bank account added successfully"
+    };
   });
 
   return runLive(event, program);

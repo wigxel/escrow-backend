@@ -4,7 +4,6 @@ import type { TCreateTransferRecipientData, TInitializeTransactionData, TInitiat
 import { Config, Effect, Layer, pipe, Redacted } from "effect";
 import { PaystackEventLive } from "./paystack-events";
 import type { UnknownException } from "effect/Cause";
-import { ExpectedError } from "~/config/exceptions";
 
 class PaystackGateway implements TPaymentGateway {
   provider = "Paystack";
@@ -51,7 +50,7 @@ class PaystackGateway implements TPaymentGateway {
   initiateTransfer(payload:TInitiateTransferData){
     return this.run((gateway)=>gateway.initiateTransfer(payload))
   }
- 
+
 }
 
 export const PaystackGatewayLive = pipe(

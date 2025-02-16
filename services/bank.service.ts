@@ -39,15 +39,20 @@ export const deleteBankAcounts = (params: {
   return Effect.gen(function* (_) {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
 
+    const whereQuery = SearchOps.and(
+      SearchOps.eq("id", params.bankAccountId),
+      SearchOps.isNull("deletedAt")
+    );
+
     const accountDetails = yield* _(
-      bankAccountRepo.firstOrThrow({
-        id: params.bankAccountId,
-        deletedAt: null,
-      }),
+      bankAccountRepo.find(whereQuery),
       Effect.mapError(
         () => new NoSuchElementException("Invalid bank account id"),
       ),
     );
+
+
+    yield* Effect.logDebug("Reading bank details")
 
     if (params.currentUser.id !== accountDetails.userId) {
       yield* new ExpectedError(
@@ -78,7 +83,7 @@ export const resolveAccountNumber = (
       }),
       Effect.match({
         onSuccess: (v) => new ExpectedError("Account already exists"),
-        onFailure: () => {},
+        onFailure: () => { },
       }),
     );
 
@@ -120,6 +125,8 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
     const tigerbeetleRepo = yield* _(TigerBeetleRepoLayer.Tag);
 
+    yield* Effect.logDebug("Finding token record")
+
     const bankDetails = yield* _(
       bankVerificationRepo.firstOrThrow({ verificationToken: token }),
       Effect.mapError(
@@ -127,6 +134,7 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
       ),
     );
 
+    yield* Effect.logDebug("Creating transfer recipient")
     //create recipient code for this account
     const response = yield* _(
       paystackGateway.createTransferRecipient({
@@ -145,6 +153,7 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
     );
 
     const tigerbeetleAccountId = String(id());
+    yield* Effect.logDebug("Creating Bank account Record")
     yield* _(
       Effect.all([
         bankAccountRepo.create({
@@ -165,7 +174,8 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
       ]),
     );
 
-    //delete the temporary bank details
+    yield* Effect.logDebug("Deleting token")
+    // delete the temporary bank details
     yield* bankVerificationRepo.delete(
       SearchOps.eq("verificationToken", token),
     );

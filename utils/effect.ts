@@ -62,16 +62,29 @@ export const runLive = <
             );
           }),
           Effect.match({
-            onSuccess: (d) =>
-              ({ data: d ?? null, status: 200, message: "" }) as unknown as {
-                data: A;
-                status: number;
-                message: string;
-              },
+            onSuccess: (d) => {
+              const struct = new Set(['data', 'status', 'message']);
+              const payloadStruct = new Set(Object.keys(d));
+
+              if (typeof (d) === "undefined") {
+                return {
+                  status: 200,
+                  message: "Request successful",
+                }
+              }
+
+              if (Array.isArray(d)) {
+                return ({ data: d, status: 200, message: "Every response should have a message" })
+              }
+
+              if (struct.isSupersetOf(payloadStruct)) return d;
+
+              return ({ data: d ?? null, status: 200, message: "" })
+            },
             onFailure: resolveErrorResponse,
           }),
         ),
-        AppLive,
+AppLive,
       ),
     ),
   );

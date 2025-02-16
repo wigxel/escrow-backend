@@ -30,8 +30,8 @@ export const generateOTP = () => {
     Effect.flatMap((secret) =>
       Effect.tryPromise({
         try: () => otpService.generate(secret),
-        catch: () => {
-          return new OTPError("Error generating OTP");
+        catch: (err) => {
+          return new OTPError(String(err));
         },
       }),
     ),
