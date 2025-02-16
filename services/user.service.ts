@@ -312,7 +312,7 @@ export const handleUserCreationFromEscrow = (
 export const checkUsername = (username: string) => {
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
-    const userDetails = yield* _(
+    yield* _(
       userRepo.firstOrThrow({ username }),
       Effect.matchEffect({
         onSuccess: () => new ExpectedError("Username taken"),
