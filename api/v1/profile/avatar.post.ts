@@ -34,7 +34,7 @@ export default eventHandler((event) => {
   return runLive(event, updateProfileProgram);
 });
 
-function validateFile(file: File) {
+export function validateFile(file: File) {
   return ["image/jpeg", "image/png", "image/jpg"].includes(file.type)
     ? Effect.succeed(file)
     : new ExpectedError(`Invalid photo file upload ${file.type}`);

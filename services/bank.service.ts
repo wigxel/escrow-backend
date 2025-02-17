@@ -40,10 +40,12 @@ export const deleteBankAcounts = (params: {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
 
     const accountDetails = yield* _(
-      bankAccountRepo.firstOrThrow({
-        id: params.bankAccountId,
-        deletedAt: null,
-      }),
+      bankAccountRepo.firstOrThrow(
+        SearchOps.and(
+          SearchOps.eq("id", params.bankAccountId),
+          SearchOps.isNull("deletedAt"),
+        ),
+      ),
       Effect.mapError(
         () => new NoSuchElementException("Invalid bank account id"),
       ),

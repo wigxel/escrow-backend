@@ -26,17 +26,25 @@ import { LeaveDisputeNotification } from "~/app/notifications/in-app/dispute/lea
 import { DisputeInviteNotify } from "~/app/notifications/in-app/dispute/disputeInvite.notify";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { disputeActivityLog } from "../activityLog/concreteEntityLogs/dispute.activitylog";
+import { FileStorage } from "~/layers/storage/layer";
+import type { z } from "zod";
+import type { newDisputeSchema } from "~/dto/dispute.dto";
+import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
+import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
 
 export const createDispute = (params: {
-  disputeData: { escrowId: string; reason: string };
+  disputeData: z.infer<typeof newDisputeSchema>;
   currentUser: SessionUser;
 }) => {
   return Effect.gen(function* (_) {
     const disputeRepo = yield* DisputeRepoLayer.Tag;
+    const disputeCategoryRepo = yield* DisputeCategorysRepoLayer.Tag;
+    const disputeResolutionRepo = yield* DisputeResolutionssRepoLayer.Tag;
     const disputeMembersRepo = yield* DisputeMembersRepoLayer.Tag;
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const participantsRepo = yield* EscrowParticipantRepoLayer.tag;
     const notify = yield* NotificationFacade;
+    const fileManager = yield* FileStorage;
 
     // check if escrow exists
     const escrowDetails = yield* escrowRepo
@@ -44,6 +52,19 @@ export const createDispute = (params: {
         id: params.disputeData.escrowId,
       })
       .pipe(Effect.mapError(() => new ExpectedError("Invalid Escrow ID")));
+
+    // check for dispute category id
+    yield* _(
+      disputeCategoryRepo.firstOrThrow({ id: params.disputeData.categoryId }),
+      Effect.mapError(() => new ExpectedError("Invalid Dispute Category ID")),
+    );
+    // make sure the resolution id exists
+    yield* _(
+      disputeResolutionRepo.firstOrThrow({
+        id: params.disputeData.resolutionId,
+      }),
+      Effect.mapError(() => new ExpectedError("Invalid Dispute Resolution ID")),
+    );
 
     const participants = yield* participantsRepo.getParticipants(
       escrowDetails.id,
@@ -78,6 +99,8 @@ export const createDispute = (params: {
               reason: params.disputeData.reason,
               createdBy: params.currentUser.id,
               escrowId: params.disputeData.escrowId,
+              categoryId:params.disputeData.categoryId,
+              resolutionId:params.disputeData.resolutionId,
               creatorRole:
                 params.currentUser.id === seller.userId
                   ? seller.role
@@ -93,17 +116,36 @@ export const createDispute = (params: {
       userIds: [seller.userId, buyer.userId],
     });
 
+    //upload the image to cloudinary and
+    const uploadResult = yield* Effect.tryPromise(()=>fileManager.uploadFile(params.disputeData.file,{
+      mimeType:params.disputeData.file.type,
+      fileName:params.disputeData.file.name,
+      folder:"dispute",
+      tags:["chat",`dispute:${escrowDetails.id}`]
+    }))
+
     yield* _(
-      Effect.tryPromise(() =>
-        channel.sendMessage({
-          channel_id: channel_id,
-          message: createTextMessage({
-            content: params.disputeData.reason,
-            senderId: params.currentUser.id,
+      Effect.all([
+        Effect.tryPromise(() =>
+          channel.sendMessage({
+            channel_id: channel_id,
+            message: createTextMessage({
+              content: uploadResult.fileUrl,
+              senderId: params.currentUser.id,
+              type: "image",
+            }),
           }),
-        }),
-      ),
-      Effect.tap(Effect.logDebug("Dispute: Initial message sent!")),
+        ),
+        Effect.tryPromise(() =>
+          channel.sendMessage({
+            channel_id: channel_id,
+            message: createTextMessage({
+              content: params.disputeData.reason,
+              senderId: params.currentUser.id,
+            }),
+          }),
+        ),
+      ]),
     );
 
     // add the buyer and seller to the dispute members table
