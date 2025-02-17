@@ -76,9 +76,9 @@ export const resolveAccountNumber = (
         userId: currentUser.id,
         accountNumber: params.accountNumber,
       }),
-      Effect.match({
+      Effect.matchEffect({
         onSuccess: (v) => new ExpectedError("Account already exists"),
-        onFailure: () => {},
+        onFailure: () => Effect.succeed(1),
       }),
     );
 

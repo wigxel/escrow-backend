@@ -35,6 +35,7 @@ import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo
 import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
 import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 import { PushServiceLive } from "~/services/pushNotification/push";
+import { CloudinaryStorageLive } from "~/layers/storage/presets/cloudinary";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -95,8 +96,5 @@ export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(reversibleHashLive),
   Layer.provideMerge(ActivityLogRepoLayer.live),
   Layer.provideMerge(PushServiceLive),
+  Layer.provideMerge(CloudinaryStorageLive),
 );
-
-// const DevToolsLive = DevTools.layerWebSocket().pipe(
-//   Layer.provide(NodeSocket.layerWebSocketConstructor),
-// );

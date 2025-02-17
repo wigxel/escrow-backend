@@ -49,7 +49,7 @@ export const runLive = <
                 return createError({
                   status: 401,
                   statusMessage: "UnknownException",
-                  message: error.message,
+                  message: error.cause as string,
                 });
               }),
               Match.orElse((err) => {
@@ -62,12 +62,7 @@ export const runLive = <
             );
           }),
           Effect.match({
-            onSuccess: (d) =>
-              ({ data: d ?? null, status: 200, message: "" }) as unknown as {
-                data: A;
-                status: number;
-                message: string;
-              },
+            onSuccess: (d) => d as unknown as A,
             onFailure: resolveErrorResponse,
           }),
         ),

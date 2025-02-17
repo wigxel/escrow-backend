@@ -27,6 +27,7 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepo;
     const resourceManager = yield* FileStorage;
+    
     const user = yield* userRepo.find(userId);
     const last_image_url = user.profilePicture;
 
@@ -36,8 +37,8 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
         return resourceManager.uploadFile(image, {
           mimeType: image.type,
           fileName: image instanceof File ? image.name : undefined,
-          folder: "display-pictures",
-          tags: ["avatar", `seller:${user.id}`],
+          folder: "profile",
+          tags: ["avatar", `user:${user.id}`],
         });
       },
       catch: (err) => {
