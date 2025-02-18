@@ -23,11 +23,8 @@ export default eventHandler((event) => {
     Effect.bind("profile", (e) => {
       return uploadAvatarImage(e.session.user.id, e.avatar);
     }),
-    Effect.map(() => {
-      return {
-        success: true,
-        message: "Avatar updated",
-      };
+    Effect.map((r) => {
+      return r.profile
     }),
   );
 

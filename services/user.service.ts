@@ -127,7 +127,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
 
     return dataResponse({
       data: {
-        session: session_data,
+        session_data,
         user,
       },
       message: "user created successfully",

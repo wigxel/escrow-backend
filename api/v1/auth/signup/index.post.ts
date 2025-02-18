@@ -12,16 +12,6 @@ export default eventHandler(async (event) => {
   const program = pipe(
     validateBody(event, createUserDto),
     Effect.flatMap((body) => createUser(body)),
-    Effect.map(({ session }) => {
-      return {
-        success: true,
-        message: "User created successfully",
-        data: {
-          access_token: session.session_id,
-          expires: session.expires_at.toISOString(),
-        },
-      };
-    }),
   );
 
   return runLive(event, program);

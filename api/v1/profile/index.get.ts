@@ -6,10 +6,6 @@ export default eventHandler(async (event) => {
   const program = pipe(
     getSessionInfo(event),
     Effect.flatMap((session) => getProfile(session.user.id)),
-    Effect.map((profile) => {
-      const { password, ...user } = profile;
-      return user;
-    }),
   );
 
   return runLive(event, program);

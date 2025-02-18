@@ -8,7 +8,7 @@ export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {
     const data = yield* validateBody(event, createReviewDto);
     const { user } = yield* getSessionInfo(event);
-    yield* createReview(
+    return yield* createReview(
       {
         escrowId: data.escrowId,
         comment: data.comment,

@@ -11,8 +11,7 @@ export default eventHandler(async (event) => {
     Effect.bind("body", () => validateBody(event, updateUserDto)),
     Effect.bind("profile", (e) => editProfile(e.session.user.id, e.body)),
     Effect.map(({ profile }) => {
-      const { password, ...user } = profile;
-      return user;
+      return profile
     }),
   );
 

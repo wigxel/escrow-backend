@@ -13,7 +13,8 @@ export const getProfile = (userId: string) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
     const profile = yield* userRepo.firstOrThrow({ id: userId });
-    return dataResponse({ data: profile });
+    const { password, ...rest } = profile;
+    return dataResponse({ data: rest });
   });
 };
 

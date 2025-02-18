@@ -17,12 +17,11 @@ export default eventHandler((event) => {
     });
     const { user } = yield* getSessionInfo(event);
 
-    const dispute = yield* createDispute({
+    return yield* createDispute({
       currentUser: user,
       disputeData: data,
     });
-
-    return { disputeId: dispute.id };
+    
   });
 
   return runLive(event, program);
