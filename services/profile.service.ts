@@ -7,11 +7,13 @@ import {
   FileUploadException,
 } from "~/layers/storage/layer";
 import { getResource } from "./storage.service";
+import { dataResponse } from "~/libs/response";
 
 export const getProfile = (userId: string) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
-    return yield* userRepo.firstOrThrow({ id: userId });
+    const profile = yield* userRepo.firstOrThrow({ id: userId });
+    return dataResponse({ data: profile });
   });
 };
 
@@ -19,7 +21,7 @@ export const editProfile = (userId: string, profileUpdate: Partial<User>) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
     const [user] = yield* userRepo.update(userId, profileUpdate);
-    return user;
+    return dataResponse({ message: "Profile edited successfully" });
   });
 };
 
@@ -27,7 +29,7 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepo;
     const resourceManager = yield* FileStorage;
-    
+
     const user = yield* userRepo.find(userId);
     const last_image_url = user.profilePicture;
 
@@ -56,6 +58,6 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
       yield* deleteResource(resource);
     }
 
-    return fileUrl;
+    return dataResponse({ data: { fileUrl } });
   });
 };

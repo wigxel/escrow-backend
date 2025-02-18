@@ -12,23 +12,27 @@ import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.rep
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { resolveAccountNumberRules } from "~/dto/accountNumber.dto";
 import { SearchOps } from "./search/sql-search-resolver";
+import { dataResponse } from "~/libs/response";
 
 export const getBankList = () => {
   return Effect.gen(function* (_) {
     const paystackGateway = yield* PaymentGateway;
-    return yield* paystackGateway.bankLists();
+    const lists = yield* paystackGateway.bankLists();
+    return dataResponse({ data: lists });
   });
 };
 
 export const getUserBankAccounts = (currentUser: SessionUser) => {
   return Effect.gen(function* (_) {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
-    return yield* bankAccountRepo.all({
+    const accounts = yield* bankAccountRepo.all({
       where: SearchOps.and(
         SearchOps.eq("userId", currentUser.id),
         SearchOps.isNull("deletedAt"),
       ),
     });
+
+    return dataResponse({ data: accounts });
   });
 };
 
@@ -107,11 +111,13 @@ export const resolveAccountNumber = (
       verificationToken,
     });
 
-    return {
-      accountName: bankDetails.data.account_name,
-      accountNumber: bankDetails.data.account_number,
-      token: verificationToken,
-    };
+    return dataResponse({
+      data: {
+        accountName: bankDetails.data.account_name,
+        accountNumber: bankDetails.data.account_number,
+        token: verificationToken,
+      },
+    });
   });
 };
 

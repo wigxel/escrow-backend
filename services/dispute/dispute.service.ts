@@ -31,6 +31,7 @@ import type { z } from "zod";
 import type { newDisputeSchema } from "~/dto/dispute.dto";
 import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
 import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
+import { dataResponse } from "~/libs/response";
 
 export const createDispute = (params: {
   disputeData: z.infer<typeof newDisputeSchema>;
@@ -99,8 +100,8 @@ export const createDispute = (params: {
               reason: params.disputeData.reason,
               createdBy: params.currentUser.id,
               escrowId: params.disputeData.escrowId,
-              categoryId:params.disputeData.categoryId,
-              resolutionId:params.disputeData.resolutionId,
+              categoryId: params.disputeData.categoryId,
+              resolutionId: params.disputeData.resolutionId,
               creatorRole:
                 params.currentUser.id === seller.userId
                   ? seller.role
@@ -117,12 +118,14 @@ export const createDispute = (params: {
     });
 
     //upload the image to cloudinary and
-    const uploadResult = yield* Effect.tryPromise(()=>fileManager.uploadFile(params.disputeData.file,{
-      mimeType:params.disputeData.file.type,
-      fileName:params.disputeData.file.name,
-      folder:"dispute",
-      tags:["chat",`dispute:${escrowDetails.id}`]
-    }))
+    const uploadResult = yield* Effect.tryPromise(() =>
+      fileManager.uploadFile(params.disputeData.file, {
+        mimeType: params.disputeData.file.type,
+        fileName: params.disputeData.file.name,
+        folder: "dispute",
+        tags: ["chat", `dispute:${escrowDetails.id}`],
+      }),
+    );
 
     yield* _(
       Effect.all([
@@ -197,7 +200,7 @@ export const createDispute = (params: {
       }),
     );
 
-    return dispute;
+    return dataResponse({ data: { dispute } });
   });
 };
 
@@ -267,7 +270,7 @@ export const getDisputesByUserId = (currentUserId: string) => {
       currentUserId,
     });
 
-    return { data: list, status: true };
+    return dataResponse({ data: list });
   });
 };
 
@@ -381,6 +384,8 @@ export const inviteMember = (data: {
     yield* notify
       .route("mail", { address: invitedUserDetails.email })
       .notify(new DisputeInviteNotification(invitedUserDetails));
+
+      return dataResponse({message:"Member invited successfully"})
   });
 };
 
@@ -436,6 +441,8 @@ export const removeMember = (data: {
     yield* notify
       .route("mail", { address: user.email })
       .notify(new DisputeLeaveNotification(data.disputeId, user));
+
+      return dataResponse({message:"Member removed successfully"})
   });
 };
 

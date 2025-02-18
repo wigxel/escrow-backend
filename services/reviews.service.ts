@@ -10,6 +10,7 @@ import { ReviewRepo } from "~/repositories/review.repository";
 import { getBuyerAndSellerFromParticipants } from "./escrow/escrow.utils";
 import { PaginationService } from "./search/pagination.service";
 import { SearchOps } from "./search/sql-search-resolver";
+import { dataResponse } from "~/libs/response";
 
 export function createReview(
   params: z.infer<typeof createReviewDto>,
@@ -64,6 +65,8 @@ export function createReview(
       rating: params.rating,
       comment: params.comment,
     });
+
+    return dataResponse({ message: "Review added successfully" });
   });
 }
 
@@ -78,14 +81,14 @@ export function getReviews(filters: z.infer<typeof reviewFilterDto>) {
       ...paginate.query,
     });
 
-    return {
+    return dataResponse({
       data: reviews,
       meta: {
         ...paginate.meta,
         total: reviewCount.count,
         total_pages: Math.ceil(reviewCount.count / paginate.query.pageSize),
       },
-    };
+    });
   });
 }
 
@@ -108,5 +111,6 @@ export function deleteReview(params: {
     }
 
     yield* reviewRepo.delete(SearchOps.eq("id", params.reviewId));
+    return dataResponse({ message: "Review deleted successfully" });
   });
 }

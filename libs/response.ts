@@ -10,3 +10,18 @@ export function resolveErrorResponse(error: any) {
     Match.orElse((unknown_err) => unknown_err),
   );
 }
+
+export function dataResponse(params?: TResponseData) {
+  return {
+    data: params?.data ? params.data : null,
+    status: params?.status ? params.status : "success",
+    ...params,
+  };
+}
+
+type TResponseData = {
+  data?: unknown;
+  meta?:unknown
+  status?: string;
+  message?: string;
+};

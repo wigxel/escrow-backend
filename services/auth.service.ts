@@ -4,6 +4,7 @@ import { AuthUser } from "~/layers/auth-user";
 import { hashPassword, verifyPassword } from "~/layers/encryption/helpers";
 import { Session } from "~/layers/session";
 import type { SessionUser } from "~/layers/session-provider";
+import { dataResponse } from "~/libs/response";
 import { UserRepoLayer } from "~/repositories/user.repository";
 
 export function logout({ access_token }: { access_token: string }) {
@@ -54,10 +55,12 @@ export function login({
 
     yield* Effect.logDebug("Session created");
 
-    return {
-      access_token: session_id,
-      expires: expires_at.toISOString(),
-    };
+    return dataResponse({
+      data: {
+        access_token: session_id,
+        expires: expires_at.toISOString(),
+      },
+    });
   });
 }
 
@@ -74,8 +77,10 @@ export const changePassword = (params: {
 
     yield* verifyPassword(params.oldPassword, userDetails.password);
     const newHash = yield* hashPassword(params.newPassword);
-    const [user] = yield* userRepo.update(userDetails.id, { password: newHash });
+    const [user] = yield* userRepo.update(userDetails.id, {
+      password: newHash,
+    });
 
-    return user;
+    return dataResponse();
   });
 };

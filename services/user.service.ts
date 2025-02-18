@@ -29,6 +29,7 @@ import type { SessionUser } from "~/layers/session-provider";
 import { convertCurrencyUnit } from "./escrow/escrow.utils";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
 import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
+import { dataResponse } from "~/libs/response";
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -124,10 +125,13 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
-    return {
-      session: session_data,
-      user,
-    };
+    return dataResponse({
+      data: {
+        session: session_data,
+        user,
+      },
+      message: "user created successfully",
+    });
   });
 }
 
@@ -157,6 +161,8 @@ export function resendEmailVerificationOtp(email: string) {
         .notify(new EmailVerificationMail(user, otp)),
       Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
+
+    return dataResponse({ message: "Email resend successful" });
   });
 }
 
@@ -222,6 +228,8 @@ export function passwordReset(data: z.infer<typeof passwordResetDto>) {
         SearchOps.eq("email", data.email),
       ),
     );
+
+    return dataResponse({ message: "Password reset successful" });
   });
 }
 
@@ -245,6 +253,8 @@ export function verifyUserEmail(params: z.infer<typeof verifyEmailDto>) {
         ),
       ),
     ]);
+
+    return dataResponse({ message: "Email verification success" });
   });
 }
 
@@ -319,6 +329,8 @@ export const checkUsername = (username: string) => {
         onFailure: () => Effect.succeed(1),
       }),
     );
+
+    return dataResponse({ message: "Username is available" });
   });
 };
 
@@ -348,20 +360,23 @@ export const UserBalance = (currentUser: SessionUser) => {
       walletDetails.tigerbeetleAccountId,
     );
 
-    return {
-      walletBalance: convertCurrencyUnit(String(walletbalance), "kobo-naira"),
-      totalEscrowBalance: convertCurrencyUnit(
-        String(totalEscrowBalance),
-        "kobo-naira",
-      ),
-    };
+    return dataResponse({
+      data: {
+        walletBalance: convertCurrencyUnit(String(walletbalance), "kobo-naira"),
+        totalEscrowBalance: convertCurrencyUnit(
+          String(totalEscrowBalance),
+          "kobo-naira",
+        ),
+      },
+    });
   });
 };
 
 export const getUserPushTokens = (userId: string) => {
   return Effect.gen(function* (_) {
     const repo = yield* PushTokenRepoLayer.tag;
-    return yield* repo.all({ where: SearchOps.eq("userId", userId) });
+    const tokens = yield* repo.all({ where: SearchOps.eq("userId", userId) });
+    return dataResponse({ data: tokens });
   });
 };
 
@@ -371,11 +386,13 @@ export const deleteUserPushToken = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const repo = yield* PushTokenRepoLayer.tag;
-    return yield* repo.delete(
+    yield* repo.delete(
       SearchOps.and(
         SearchOps.eq("userId", params.currentUser.id),
         SearchOps.eq("token", params.token),
       ),
     );
+
+    return dataResponse({ message: "User device push token deleted" });
   });
 };

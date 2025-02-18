@@ -33,6 +33,7 @@ import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
+import { dataResponse } from "~/libs/response";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -120,7 +121,9 @@ export const createEscrowTransaction = (
     yield* createActivityLog(
       escrowActivityLog.created({ id: escrowTransaction.id }),
     );
-    return { escrowTransactionId: escrowTransaction.id };
+    return dataResponse({
+      data: { escrowTransactionId: escrowTransaction.id },
+    });
   });
 };
 
@@ -146,13 +149,15 @@ export const getEscrowTransactionDetails = (params: {
         escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
       );
 
-      return {
-        ...escrowDetails,
-        escrowWalletDetails: {
-          ...escrowDetails.escrowWalletDetails,
-          balance: convertCurrencyUnit(String(balance), "kobo-naira"),
+      return dataResponse({
+        data: {
+          ...escrowDetails,
+          escrowWalletDetails: {
+            ...escrowDetails.escrowWalletDetails,
+            balance: convertCurrencyUnit(String(balance), "kobo-naira"),
+          },
         },
-      };
+      });
     }
 
     return escrowDetails;
@@ -187,8 +192,10 @@ export const getEscrowRequestDetails = (data: {
     );
 
     return {
-      requestDetails: escrowRequestDetails,
-      isAuthenticated: !!data.currentUser,
+      data: {
+        requestDetails: escrowRequestDetails,
+        isAuthenticated: !!data.currentUser,
+      },
     };
   });
 };
@@ -300,7 +307,11 @@ export const initializeEscrowDeposit = (
       },
     );
 
-    return checkoutSession;
+    return dataResponse({
+      data: checkoutSession.data,
+      status: checkoutSession.status,
+      message: checkoutSession.message,
+    });
   });
 };
 
@@ -398,6 +409,10 @@ export const updateEscrowTransactionStatus = (params: {
     yield* createActivityLog(
       escrowActivityLog.statusFactory(params.status)({ id: params.escrowId }),
     );
+
+    return dataResponse({
+      message: `Status updated from ${escrowDetails.status} to ${params.status} successfully`,
+    });
   });
 };
 
