@@ -1,38 +1,18 @@
 import { ConfigProvider, Effect, Layer, type Scope } from "effect";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
-import { resolveErrorResponse } from "~/libs/response";
 import type { InferRequirements } from "~/services/effect.util";
-import { PaginationImpl } from "~/services/search/pagination.service";
 import { DatabaseTest } from "~/tests/mocks/database";
 import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
 import { OTPRepoTest } from "~/tests/mocks/otp";
 import { SessionProviderTest } from "~/tests/mocks/session-provider";
 import { UserRepoTest } from "~/tests/mocks/user";
-import { PaymentServiceTest } from "./PaymentServiceMock";
 import { AuthUserTest } from "./auth";
-import { CartItemRepoTest } from "./cartItemsRepoMock";
-import { CartRepoTest } from "./cartRepoMock";
-import { CategoryRepoTest } from "./categoryRepoMock";
-import { CommentTest } from "./comment";
 import { DisputeMemberRepoTest } from "./disputeMembersRepo";
 import { DisputeRepoTest } from "./disputeRepoMock";
-import { DeliveryDetailsRepoTest } from "./order-shipping-repo-mock";
-import { OrderCancellationRepoTest } from "./orderCancellationRepoMock";
-import { OrderItemsRepoTest } from "./orderItemsRepoMock";
-import { OrderRepoTest } from "./orderRepoMock";
-import { OrderStatusHistoryRepoTest } from "./orderStatusHistoryMock";
-import { PaymentOrderRepoTest } from "./paymentOrderRepoMock";
-import { PaymentRepoTest } from "./paymentRepoMock";
-import { ProductImageRepoTest } from "./productImageRepoMock";
-import { ProductRepoTest } from "./productRepoMock";
 import { ReviewTest } from "./review";
 import { SesssionTest } from "./session";
-import { UserLocationRepoTest } from "./userLocationRepoMock";
 
-const ReviewModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(ReviewTest),
-  Layer.provideMerge(CommentTest),
-);
+const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
 const NotificationServiceTest = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoTest),
@@ -47,36 +27,13 @@ const AuthModuleTest = Layer.empty.pipe(
   Layer.provideMerge(Argon2dHasherLive),
 );
 
-const ProductModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(ProductRepoTest),
-  Layer.provideMerge(ProductImageRepoTest),
-  Layer.provideMerge(CategoryRepoTest),
-);
-
-const OrderModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(OrderRepoTest),
-  Layer.provideMerge(OrderItemsRepoTest),
-  Layer.provideMerge(OrderStatusHistoryRepoTest),
-  Layer.provideMerge(OrderCancellationRepoTest),
-  Layer.provideMerge(DeliveryDetailsRepoTest),
-);
-
 export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(DatabaseTest),
   Layer.provideMerge(ReviewModuleTest),
   Layer.provideMerge(AuthModuleTest),
-  Layer.provideMerge(ProductModuleTest),
-  Layer.provideMerge(CartRepoTest),
-  Layer.provideMerge(CartItemRepoTest),
   Layer.provideMerge(DisputeRepoTest),
   Layer.provideMerge(DisputeMemberRepoTest),
-  Layer.provideMerge(PaymentRepoTest),
-  Layer.provideMerge(OrderModuleTest),
-  Layer.provideMerge(PaymentOrderRepoTest),
-  Layer.provideMerge(UserLocationRepoTest),
-  Layer.provideMerge(PaymentServiceTest),
   Layer.provideMerge(NotificationServiceTest),
-  Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(
       ConfigProvider.fromJson({
@@ -117,18 +74,5 @@ export const runTest = <
     InferRequirements<typeof AppTest>
   >;
 
-  return Effect.runPromise(
-    Effect.scoped(
-      Effect.provide(
-        program.pipe(
-          Effect.tapError((reason) => Effect.logDebug("RequestError", reason)),
-          Effect.match({
-            onSuccess: (d) => d as A,
-            onFailure: resolveErrorResponse,
-          }),
-        ),
-        AppTest,
-      ),
-    ),
-  );
+  return Effect.runPromise(Effect.scoped(Effect.provide(program, AppTest)));
 };

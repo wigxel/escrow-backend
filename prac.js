@@ -1,9 +1,8 @@
-function sendResponse(params){
-  return {
-    data:params?.data ? params.data : null,
-    status:params?.status ? params.status : "success",
-    ...params
-  }
-}
+const a = {name:"him",age:25,profile:{height:"5.7ft"}}
 
-console.log(sendResponse())
+const b = Object.assign({}, a)
+
+b.name = "kadima"
+b.profile.height="5.8ft"
+
+console.log(a,b)

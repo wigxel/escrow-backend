@@ -30,13 +30,14 @@ export function login({
   return Effect.gen(function* (_) {
     const session = yield* Session;
     const auth_user = yield* AuthUser;
-    const error = new PermissionError("Invalid username or password provided");
 
     yield* _(Effect.logDebug("Getting authenticated User"));
     const user = yield* _(
       pipe(
         auth_user.getUserRecord({ email: body.email }),
-        Effect.mapError(() => error),
+        Effect.mapError(
+          () => new PermissionError("Invalid username or password provided"),
+        ),
       ),
     );
 
@@ -44,13 +45,17 @@ export function login({
 
     yield* _(
       verifyPassword(body.password, user?.password ?? ""),
-      Effect.mapError(() => error),
+      Effect.mapError(
+        () => new PermissionError("Invalid username or password provided"),
+      ),
     );
 
     yield* Effect.logDebug("Creating session");
     const { session_id, expires_at } = yield* _(
       session.create(user.user_id),
-      Effect.mapError(() => error),
+      Effect.mapError(
+        () => new PermissionError("Invalid username or password provided"),
+      ),
     );
 
     yield* Effect.logDebug("Session created");
