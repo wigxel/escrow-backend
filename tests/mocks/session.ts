@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import { randomUUID } from "uncrypto";
-import { Session, SessionImpl } from "~/layers/session";
+import { Session, type SessionImpl } from "~/layers/session";
 
 export const SesssionTest = Layer.effect(
   Session,
@@ -21,14 +21,20 @@ export const SesssionTest = Layer.effect(
             fresh: true,
             userId: randomUUID(),
           },
-          user: { id: randomUUID() },
+          user: { id: randomUUID(), email: "", phone: "", username: "" },
         });
       },
 
       getUser(_user: { id: string }) {
         return Effect.succeed({
-          role: "BUYER",
-          id: "string",
+          role: "user",
+          id: "user_id",
+          bvn: "",
+          hasBusiness: false,
+          referralSourceId: 1,
+          businessType: "",
+          businessName: "",
+          username: "",
           firstName: "string",
           lastName: "string",
           email: "string",

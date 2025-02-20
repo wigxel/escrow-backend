@@ -1,6 +1,5 @@
 // import { DevTools } from "@effect/experimental";
 import { Config, Effect, Layer } from "effect";
-import { AuthLive } from "~/layers/auth-user";
 import { DatabaseLive } from "~/layers/database";
 import { NotificationRepoLayer } from "~/repositories/notification.repo";
 import { UserRepoLayer } from "~/repositories/user.repository";
@@ -36,6 +35,8 @@ import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.r
 import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 import { PushServiceLive } from "~/services/pushNotification/push";
 import { CloudinaryStorageLive } from "~/layers/storage/presets/cloudinary";
+import { LuciaSessionProvider } from "~/services/lucia-session-provider";
+import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -45,8 +46,6 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(WithdrawalRepoLayer.live),
   Layer.provideMerge(ReviewRepoLive),
   Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
-  Layer.provideMerge(OTPRepoLayer),
-  Layer.provideMerge(UserSessionLive),
   Layer.provideMerge(PushTokenRepoLayer.live)
 );
 
@@ -74,6 +73,14 @@ const MailerLive = Layer.effect(
   }),
 );
 
+export const AuthLive = Layer.empty.pipe(
+  Layer.provideMerge(OTPRepoLayer),
+  Layer.provideMerge(UserSessionLive),
+  Layer.provideMerge(LuciaSessionProvider),
+  Layer.provideMerge(Argon2dHasherLive),
+);
+
+
 export const MailingModule = Layer.empty.pipe(
   Layer.provideMerge(NotificationLive),
   Layer.provideMerge(MailLive),
@@ -83,8 +90,8 @@ export const MailingModule = Layer.empty.pipe(
 export const AppLive = Layer.empty.pipe(
   Layer.provideMerge(DatabaseLive),
   Layer.provideMerge(LogDebugLayer),
-  Layer.provideMerge(AuthLive),
   Layer.provideMerge(MailingModule),
+  Layer.provideMerge(AuthLive),
   Layer.provideMerge(NotificationRepoLayer.Repo.Live),
   Layer.provideMerge(UserModule),
   Layer.provideMerge(EscrowModule),

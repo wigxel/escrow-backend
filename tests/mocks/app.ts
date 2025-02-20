@@ -6,11 +6,11 @@ import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
 import { OTPRepoTest } from "~/tests/mocks/otp";
 import { SessionProviderTest } from "~/tests/mocks/session-provider";
 import { UserRepoTest } from "~/tests/mocks/user";
-import { AuthUserTest } from "./auth";
 import { DisputeMemberRepoTest } from "./disputeMembersRepo";
 import { DisputeRepoTest } from "./disputeRepoMock";
 import { ReviewTest } from "./review";
 import { SesssionTest } from "./session";
+import { resolveErrorResponse } from "~/libs/response";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -20,7 +20,6 @@ const NotificationServiceTest = Layer.empty.pipe(
 
 const AuthModuleTest = Layer.empty.pipe(
   Layer.provideMerge(OTPRepoTest),
-  Layer.provideMerge(AuthUserTest),
   Layer.provideMerge(UserRepoTest),
   Layer.provideMerge(SesssionTest),
   Layer.provideMerge(SessionProviderTest),
@@ -74,5 +73,18 @@ export const runTest = <
     InferRequirements<typeof AppTest>
   >;
 
-  return Effect.runPromise(Effect.scoped(Effect.provide(program, AppTest)));
+  return Effect.runPromise(
+    Effect.scoped(
+      Effect.provide(
+        program.pipe(
+          Effect.tapError((reason) => Effect.logDebug("RequestError", reason)),
+          Effect.match({
+            onSuccess: (d) => d as A,
+            onFailure: resolveErrorResponse,
+          }),
+        ),
+        AppTest,
+      ),
+    ),
+  );
 };
