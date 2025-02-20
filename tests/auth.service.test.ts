@@ -1,7 +1,7 @@
-import { Effect, Layer } from "effect";
+import { Effect } from "effect";
 import { changePassword, login, logout } from "~/services/auth.service";
 import { extendUserRepoMock } from "~/tests/mocks/user";
-import { AppTest, runTest } from "./mocks/app";
+import { runTest } from "./mocks/app";
 
 describe("Authentication and authorization service", () => {
   describe("Login", () => {
@@ -129,7 +129,7 @@ describe("Authentication and authorization service", () => {
       );
 
       const response = await runTest(program);
-      
+
       expect(updated).toBeTruthy();
       expect(response).toMatchInlineSnapshot(`
         {
@@ -149,16 +149,15 @@ describe("Authentication and authorization service", () => {
 
       const response = runTest(program);
 
-      expect(response).resolves.toMatchInlineSnapshot(`[PasswordHasherError: Password verification failed]`);
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[PasswordHasherError: Password verification failed]`,
+      );
     });
   });
 
   describe("Logout actions", () => {
     test("a user can logout with access token", async () => {
-      const program = Effect.scoped(
-        Effect.provide(logout({ access_token: "MOCK_ACCESS_TOKEN" }), AppTest),
-      );
-
+      const program = logout({ access_token: "MOCK_ACCESS_TOKEN" });
       const response = runTest(program);
 
       expect(response).resolves.toMatchInlineSnapshot(`
@@ -167,6 +166,5 @@ describe("Authentication and authorization service", () => {
         }
       `);
     });
-    test.skip("a user can logout without access token", () => {});
   });
 });

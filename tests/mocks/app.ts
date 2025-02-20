@@ -4,12 +4,12 @@ import type { InferRequirements } from "~/services/effect.util";
 import { DatabaseTest } from "~/tests/mocks/database";
 import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
 import { OTPRepoTest } from "~/tests/mocks/otp";
-import { SessionProviderTest } from "~/tests/mocks/session-provider";
+import { SessionProviderTest } from "~/tests/mocks/authentication/session-provider";
 import { UserRepoTest } from "~/tests/mocks/user";
 import { DisputeMemberRepoTest } from "./disputeMembersRepo";
 import { DisputeRepoTest } from "./disputeRepoMock";
 import { ReviewTest } from "./review";
-import { SesssionTest } from "./session";
+import { SesssionTest } from "./authentication/session";
 import { resolveErrorResponse } from "~/libs/response";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
