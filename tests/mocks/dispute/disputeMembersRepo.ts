@@ -2,9 +2,9 @@ import { Effect, Layer } from "effect";
 import { head } from "effect/Array";
 import {
   DisputeMemberRepo,
-  DisputeMemberRepository,
+  type DisputeMemberRepository,
 } from "~/repositories/disputeMember.repo";
-import { extendMockImplementation } from "./helpers";
+import { extendMockImplementation } from "../helpers";
 
 const disputeMemberMock: DisputeMemberRepository = {
   create: (data) => {

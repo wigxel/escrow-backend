@@ -170,7 +170,7 @@ export const createDispute = (params: {
 
     //new dispute status entry
     yield* createActivityLog(
-      disputeActivityLog.opened({
+      disputeActivityLog.created({
         id: dispute.id,
         triggeredBy: params.currentUser.id,
       }),

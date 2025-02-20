@@ -1,45 +1,46 @@
 import { Effect, Layer } from "effect";
 import { notNil } from "~/libs/query.helpers";
 import {
-  getUserDisputes,
+  createDispute,
   inviteMember,
-  newDispute,
   removeMember,
   updateDisputeStatus,
-} from "~/services/dispute.service";
-import { FindArg1 } from "~/services/repository/repo.types";
+} from "~/services/dispute/dispute.service";
 import { runTest } from "./mocks/app";
-import { extendDisputeMemberRepo } from "./mocks/disputeMembersRepo";
-import { extendDisputeRepo } from "./mocks/disputeRepoMock";
-import { extendOrderRepo } from "./mocks/orderRepoMock";
+import { extendDisputeMemberRepo } from "./mocks/dispute/disputeMembersRepo";
+import { extendDisputeRepo } from "./mocks/dispute/disputeRepoMock";
 import { extendUserRepoMock } from "./mocks/user";
+import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 
 describe("Dispute service", () => {
   describe("create new dispute", () => {
     const disputeData = {
-      orderId: "order-id",
+      escrowId: "escrow-id",
       reason: "reason",
-      message: "message",
     };
-    test("should fail if invalid order id", async () => {
-      const orderRepo = extendOrderRepo({
-        getSingleOrder(where) {
+
+    const currentUser = {
+      id: "user-id",
+      email: "user@gmail.com",
+      phone: "",
+      username: "",
+    };
+
+    test("should fail if invalid escrow id", async () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow(where) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
 
-      const program = newDispute({
-        currentUser: { id: "user-id" },
-        disputeData,
-      });
+      const program = createDispute({ currentUser, disputeData });
 
-      const result = runTest(Effect.provide(program, orderRepo));
-      expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid order id]`,
-      );
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Invalid Escrow ID]`);
     });
+
     test("should fail if unauthorized user tries to open dispute", async () => {
-      const orderRepo = extendOrderRepo({
+      const escrowRepo = extendOrderRepo({
         //@ts-expect-error
         getSingleOrder(where) {
           return Effect.succeed({
@@ -54,15 +55,15 @@ describe("Dispute service", () => {
         disputeData,
       });
 
-      const result = runTest(Effect.provide(program, orderRepo));
+      const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unauthorized order: cannot open dispute]`,
+        `[ExpectedError: Unauthorized escrow: cannot open dispute]`,
       );
     });
 
-    test("should fail if order has existing dispute", async () => {
+    test("should fail if escrow has existing dispute", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({});
         },
       });
@@ -80,7 +81,7 @@ describe("Dispute service", () => {
     test("should create new dispute", async () => {
       let created = false;
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
         //@ts-expect-error
@@ -109,7 +110,7 @@ describe("Dispute service", () => {
     test("should add dispute creator to dispute members", async () => {
       let addDisputeMember = false;
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
@@ -185,7 +186,7 @@ describe("Dispute service", () => {
   describe("update dispute status", () => {
     test("should fail if dispute id doesn't exist", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
@@ -201,7 +202,7 @@ describe("Dispute service", () => {
     });
     test("should fail if cannot transition dispute status", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ status: "pending" });
         },
       });
@@ -217,7 +218,7 @@ describe("Dispute service", () => {
     });
     test("should fail updating dispute state for unauthorized user", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ status: "pending" });
         },
       });
@@ -234,7 +235,7 @@ describe("Dispute service", () => {
     test("should set dispute status to open", async () => {
       let updated = false;
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ status: "pending" });
         },
         update(where, data) {
@@ -279,7 +280,7 @@ describe("Dispute service", () => {
     test("should set dispute status to resolved", async () => {
       let updated = false;
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ status: "open" });
         },
         update(where, data) {
@@ -305,7 +306,7 @@ describe("Dispute service", () => {
   describe("Invite dispute members", () => {
     test("should fail if its not an ADMIN inviting", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ status: "pending" });
         },
       });
@@ -321,7 +322,7 @@ describe("Dispute service", () => {
     });
     test("should fail if dispute id doesn't exist", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
@@ -337,7 +338,7 @@ describe("Dispute service", () => {
     });
     test("should fail inviting the dispute creator", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ createdBy: "user-id" });
         },
       });
@@ -353,7 +354,7 @@ describe("Dispute service", () => {
     });
     test("should fail if user id does not exist", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ createdBy: "buyer-id" });
         },
       });
@@ -374,9 +375,9 @@ describe("Dispute service", () => {
         `[ExpectedError: Invalid user id: Cannot invite this user]`,
       );
     });
-    test("should fail if invitee not associated with the order", async () => {
+    test("should fail if invitee not associated with the escrow", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({
             createdBy: "buyer-id",
             sellerId: "seller-id",
@@ -399,12 +400,12 @@ describe("Dispute service", () => {
         Effect.provide(program, Layer.merge(disputeRepo, userRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: User must be an admin or associated with the order]`,
+        `[ExpectedError: User must be an admin or associated with the escrow]`,
       );
     });
     test("should fail if invitee already a dispute member", async () => {
       const disputeMemberRepo = extendDisputeMemberRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({});
         },
       });
@@ -433,7 +434,7 @@ describe("Dispute service", () => {
           created = true;
           return Effect.succeed([]);
         },
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
@@ -465,7 +466,7 @@ describe("Dispute service", () => {
   describe("remove member from dispute", () => {
     test("should fail if its not an ADMIN inviting", async () => {
       const disputeRepo = extendDisputeRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed({ status: "pending" });
         },
       });
@@ -481,7 +482,7 @@ describe("Dispute service", () => {
     });
     test("should fail if user not dispute member", async () => {
       const disputeMemberRepo = extendDisputeMemberRepo({
-        firstOrThrow(order, id) {
+        firstOrThrow(escrow, id) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
@@ -498,7 +499,7 @@ describe("Dispute service", () => {
     test("should remove a dispute member", async () => {
       let deleted = false;
       const disputeMemberRepo = extendDisputeMemberRepo({
-        delete(order) {
+        delete(escrow) {
           deleted = true;
           return Effect.succeed({});
         },

@@ -1,23 +1,32 @@
 import { Effect, Layer } from "effect";
-import { extendMockImplementation } from "./helpers";
-import { DisputeRepo, DisputeRepository } from "~/repositories/dispute.repo";
+import { extendMockImplementation } from "../helpers";
+import {
+  DisputeRepo,
+  type DisputeRepository,
+} from "~/repositories/dispute.repo";
 import { head } from "effect/Array";
 
 const disputeMock: DisputeRepository = {
   create: (data) => {
     return Effect.succeed([
       {
-        id: "id",
+        id: "test-id",
+        escrowId: "escrow-id",
         status: "pending",
-        createdAt: new Date(2024, 6, 30),
-        createdBy: "user-id",
-        creatorRole: "SELLER",
-        acceptedBy: "ADMIN-ID",
-        resolvedBy: "ADMIN-ID",
-        reason: "reason",
-        orderId: "order-id",
+        createdBy: "creator-id",
+        acceptedBy: "",
+        categoryId: 1,
+        resolutionId: 1,
+        creatorRole: "seller",
+        reason: "reason for dispute",
+        resolvedBy: "",
+        createdAt: new Date(2, 2, 2000),
       },
     ]);
+  },
+
+  getByUserId(params) {
+    return Effect.succeed([]);
   },
 
   all: (params) => {
@@ -36,7 +45,7 @@ const disputeMock: DisputeRepository = {
     throw new Error("Function not implemented.");
   },
 
-  firstOrThrow: (arg1, arg2) => {
+  firstOrThrow: (arg) => {
     return Effect.succeed([
       {
         id: "id",

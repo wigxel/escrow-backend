@@ -6,16 +6,37 @@ import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
 import { OTPRepoTest } from "~/tests/mocks/otp";
 import { SessionProviderTest } from "~/tests/mocks/authentication/session-provider";
 import { UserRepoTest } from "~/tests/mocks/user";
-import { DisputeMemberRepoTest } from "./disputeMembersRepo";
-import { DisputeRepoTest } from "./disputeRepoMock";
+import { DisputeMemberRepoTest } from "./dispute/disputeMembersRepo";
+import { DisputeRepoTest } from "./dispute/disputeRepoMock";
 import { ReviewTest } from "./review";
 import { SesssionTest } from "./authentication/session";
 import { resolveErrorResponse } from "~/libs/response";
+import { EscrowParticipantRepoTest } from "./escrow/escrowParticipantsRepoMock";
+import { EscrowTransactionRepoTest } from "./escrow/escrowTransactionRepoMock";
+import { DisputeCategoryRepoTest } from "./dispute/disputeCategoryMock";
+import { DisputeResolutionRepoTest } from "./dispute/disputeResolutionMock";
+import { NotificationFacadeTestLive } from "./notificationFacadeMock";
+import { ActivityLogRepoTest } from "./activityLogRepoMock";
+import { FileStorageTestLive } from "./filestorageMock";
+import { ChatServiceTestLive } from "./chatServiceMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
-const NotificationServiceTest = Layer.empty.pipe(
+const EscrowModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(EscrowTransactionRepoTest),
+  Layer.provideMerge(EscrowParticipantRepoTest),
+);
+
+const DisputeModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(DisputeRepoTest),
+  Layer.provideMerge(DisputeMemberRepoTest),
+  Layer.provideMerge(DisputeCategoryRepoTest),
+  Layer.provideMerge(DisputeResolutionRepoTest),
+);
+
+const NotificationModuleTest = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoTest),
+  Layer.provideMerge(NotificationFacadeTestLive),
 );
 
 const AuthModuleTest = Layer.empty.pipe(
@@ -28,11 +49,14 @@ const AuthModuleTest = Layer.empty.pipe(
 
 export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(DatabaseTest),
-  Layer.provideMerge(ReviewModuleTest),
   Layer.provideMerge(AuthModuleTest),
-  Layer.provideMerge(DisputeRepoTest),
-  Layer.provideMerge(DisputeMemberRepoTest),
-  Layer.provideMerge(NotificationServiceTest),
+  Layer.provideMerge(ReviewModuleTest),
+  Layer.provideMerge(DisputeModuleTest),
+  Layer.provideMerge(EscrowModuleTest),
+  Layer.provideMerge(NotificationModuleTest),
+  Layer.provideMerge(ActivityLogRepoTest),
+  Layer.provideMerge(FileStorageTestLive),
+  Layer.provideMerge(ChatServiceTestLive),
   Layer.provideMerge(
     Layer.setConfigProvider(
       ConfigProvider.fromJson({
