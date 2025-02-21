@@ -8,11 +8,15 @@ import {
 } from "~/layers/storage/layer";
 import { getResource } from "./storage.service";
 import { dataResponse } from "~/libs/response";
+import { ExpectedError } from "~/config/exceptions";
 
 export const getProfile = (userId: string) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
-    const profile = yield* userRepo.firstOrThrow({ id: userId });
+    const profile = yield* userRepo
+      .firstOrThrow({ id: userId })
+      .pipe(Effect.mapError(() => new ExpectedError("User not found")));
+
     const { password, ...rest } = profile;
     return dataResponse({ data: rest });
   });
@@ -31,7 +35,9 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
     const userRepo = yield* UserRepo;
     const resourceManager = yield* FileStorage;
 
-    const user = yield* userRepo.find(userId);
+    const user = yield* userRepo
+      .firstOrThrow(userId)
+      .pipe(Effect.mapError(() => new ExpectedError("User not found")));
     const last_image_url = user.profilePicture;
 
     yield* Effect.logDebug("Upload new image");

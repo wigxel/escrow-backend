@@ -37,8 +37,8 @@ const UserMock: UserRepository = {
       role: "user",
       profilePicture: "test data",
       emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date(2025,2,21),
+      updatedAt: new Date(2025,2,21),
     });
   },
   //@ts-expect-error
@@ -60,10 +60,10 @@ const UserMock: UserRepository = {
       phone: "test data",
       bvn: "",
       role: "user",
-      profilePicture: "test data",
+      profilePicture: "https://res.cloudinary.com/upload/images/v1234/imgae.jpg",
       emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date(2025,2,21),
+      updatedAt: new Date(2025,2,21),
     });
   },
 };
