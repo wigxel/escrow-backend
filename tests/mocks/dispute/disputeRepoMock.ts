@@ -6,7 +6,7 @@ import {
 } from "~/repositories/dispute.repo";
 import { head } from "effect/Array";
 
-const disputeMock: DisputeRepository = {
+const mock: DisputeRepository = {
   create: (data) => {
     return Effect.succeed([
       {
@@ -17,10 +17,10 @@ const disputeMock: DisputeRepository = {
         acceptedBy: "",
         categoryId: 1,
         resolutionId: 1,
-        creatorRole: "seller",
+        creatorRole: "buyer",
         reason: "reason for dispute",
         resolvedBy: "",
-        createdAt: new Date(2, 2, 2000),
+        createdAt: new Date(2025, 2, 21),
       },
     ]);
   },
@@ -48,9 +48,17 @@ const disputeMock: DisputeRepository = {
   firstOrThrow: (arg) => {
     return Effect.succeed([
       {
-        id: "id",
-        createdAt: new Date(2024, 6, 30),
+        id: "test-id",
+        escrowId: "escrow-id",
         status: "pending",
+        createdBy: "creator-id",
+        acceptedBy: "",
+        categoryId: 1,
+        resolutionId: 1,
+        creatorRole: "seller",
+        reason: "reason for dispute",
+        resolvedBy: "",
+        createdAt: new Date(2025, 2, 21),
       },
     ]).pipe(Effect.flatMap(head));
   },
@@ -62,6 +70,6 @@ const disputeMock: DisputeRepository = {
 
 export const extendDisputeRepo = extendMockImplementation(
   DisputeRepo,
-  () => disputeMock,
+  () => mock,
 );
-export const DisputeRepoTest = Layer.succeed(DisputeRepo, disputeMock);
+export const DisputeRepoTest = Layer.succeed(DisputeRepo, mock);

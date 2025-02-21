@@ -1,7 +1,10 @@
 import { Effect, Layer } from "effect";
 import { head } from "effect/Array";
 import { extendMockImplementation } from "../helpers";
-import { EscrowParticipantRepo, type EscrowParticipantRepository } from "~/repositories/escrow/escrowParticipant.repo";
+import {
+  EscrowParticipantRepo,
+  type EscrowParticipantRepository,
+} from "~/repositories/escrow/escrowParticipant.repo";
 
 const mock: EscrowParticipantRepository = {
   create: (data) => {
@@ -10,6 +13,26 @@ const mock: EscrowParticipantRepository = {
 
   all: (params) => {
     return Effect.succeed([]);
+  },
+
+  getParticipants(escrowId) {
+    return Effect.succeed([
+      {
+        id: "id",
+        escrowId: "escrow-id",
+        userId: "seller-id",
+        role: "buyer",
+        status: "active",
+      },
+      {
+        id: "id",
+        escrowId: "escrow-id",
+        userId: "buyer-id",
+        role: "seller",
+        status: "active",
+      },
+      
+    ]);
   },
 
   count: (params) => {

@@ -1,5 +1,6 @@
 import { Context, Layer } from "effect";
 import type { ChatBackendInterface } from "~/services/chat/chat-service/firebase-chat-backend";
+import { extendMockImplementation } from "./helpers";
 
 export interface ChatServiceInterface
   extends ChatBackendInterface<{ id: string }> {}
@@ -20,3 +21,8 @@ export class ChatService extends Context.Tag("ChatService")<
 >() {}
 
 export const ChatServiceTestLive = Layer.succeed(ChatService, mock);
+
+export const extendChatServiceTest = extendMockImplementation(
+  ChatService,
+  () => mock,
+);

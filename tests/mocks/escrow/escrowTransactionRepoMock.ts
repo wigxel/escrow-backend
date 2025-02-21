@@ -59,7 +59,7 @@ const escrowTransactionMock: EscrowTransactionRepository = {
   firstOrThrow: (arg) => {
     return Effect.succeed({
       id: "test-id",
-      status: "created",
+      status: "deposit.success",
       title: "",
       description: "",
       createdBy: "",

@@ -204,7 +204,7 @@ export const createDispute = (params: {
   });
 };
 
-function createMessagingChannel({
+export function createMessagingChannel({
   channel_id,
   userIds,
 }: {
@@ -385,7 +385,7 @@ export const inviteMember = (data: {
       .route("mail", { address: invitedUserDetails.email })
       .notify(new DisputeInviteNotification(invitedUserDetails));
 
-      return dataResponse({message:"Member invited successfully"})
+    return dataResponse({ message: "Member invited successfully" });
   });
 };
 
@@ -442,7 +442,7 @@ export const removeMember = (data: {
       .route("mail", { address: user.email })
       .notify(new DisputeLeaveNotification(data.disputeId, user));
 
-      return dataResponse({message:"Member removed successfully"})
+    return dataResponse({ message: "Member removed successfully" });
   });
 };
 

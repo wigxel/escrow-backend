@@ -1,7 +1,8 @@
 import { Context, Layer } from "effect";
 import type { Storage } from "~/layers/storage/types";
+import { extendMockImplementation } from "./helpers";
 
-const mock: Storage = {
+class mock implements Storage  {
   getFile(fileId: string, options?) {
     return Promise.resolve({
       path() {
@@ -15,19 +16,19 @@ const mock: Storage = {
       },
       tags: [""],
     });
-  },
+  }
 
   deleteFile(fileId) {
     return Promise.resolve();
-  },
+  }
 
   uploadFile(file, options?) {
     return Promise.resolve({ fileId: "", fileUrl: "", metadata: {} });
-  },
+  }
 
   updateFileMetadata(fileId, metadata) {
     return Promise.resolve();
-  },
+  }
 };
 
 export class FileStorage extends Context.Tag("FileStorage")<
@@ -35,4 +36,9 @@ export class FileStorage extends Context.Tag("FileStorage")<
   Storage
 >() {}
 
-export const FileStorageTestLive = Layer.succeed(FileStorage, mock);
+export const FileStorageTestLive = Layer.succeed(FileStorage, new mock());
+
+export const extendFileStorageTest = extendMockImplementation(
+  FileStorage,
+  () => new mock(),
+);

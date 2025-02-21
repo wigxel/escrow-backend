@@ -41,6 +41,31 @@ const UserMock: UserRepository = {
       updatedAt: new Date(),
     });
   },
+  //@ts-expect-error
+  find(arg1, arg2) {
+    return Effect.succeed({
+      id: "test-id",
+      firstName: "test data",
+      lastName: "test data",
+      username: "",
+      email: "user@gmail.com",
+      password:
+        "$argon2id$v=19$m=19456,t=2,p=1$mxVZvfCeexfpkfp15EnDWQ$gG7x/+N0sXxqt86kwUlYr6k08+m10g9ql1VL6aQX/aA",
+      address: "test data",
+      businessName: "",
+      businessType: "tech",
+      hasBusiness: true,
+      state: "test data",
+      country: "test data",
+      phone: "test data",
+      bvn: "",
+      role: "user",
+      profilePicture: "test data",
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  },
 };
 
 export const extendUserRepoMock = extendMockImplementation(
@@ -48,4 +73,4 @@ export const extendUserRepoMock = extendMockImplementation(
   () => UserMock,
 );
 
-export const UserRepoTest = Layer.succeed(UserRepo, UserMock);;
+export const UserRepoTest = Layer.succeed(UserRepo, UserMock);
