@@ -109,7 +109,7 @@ describe("notification serivce", () => {
     });
   });
 
-  describe.skip("Mark as read", () => {
+  describe("Mark as read", () => {
     const notificationList = [
       {
         message: "MOCK_MESSAGE",
@@ -134,7 +134,13 @@ describe("notification serivce", () => {
       const program = markAsRead("current-user-id", "list", data);
       const result = await runTest(Effect.provide(program, notificationRepo));
       expect(updatedCount).toBe(data.ids.length);
-      expect(result).toMatchInlineSnapshot();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "notifications marked as read",
+          "status": "success",
+        }
+      `);
     });
 
     test("should mark all notification as read", async () => {
@@ -150,14 +156,15 @@ describe("notification serivce", () => {
       expect(updatedCount).toBe(1);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "All notifications marked as read",
-          "status": true,
+          "data": null,
+          "message": "notification marked as read",
+          "status": "success",
         }
       `);
     });
   });
 
-  describe.skip("Delete notification", () => {
+  describe("Delete notification", () => {
     test("should delete list of notifications", async () => {
       let deletedCount = 0;
       const data = { ids: [1, 6] };
@@ -172,8 +179,9 @@ describe("notification serivce", () => {
       expect(deletedCount).toBe(data.ids.length);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "Selected notifications deleted",
-          "status": true,
+          "data": null,
+          "message": "notifications deleted",
+          "status": "success",
         }
       `);
     });
@@ -191,8 +199,9 @@ describe("notification serivce", () => {
       expect(deletedCount).toBe(1);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "Deleted all notification",
-          "status": true,
+          "data": null,
+          "message": "notification deleted",
+          "status": "success",
         }
       `);
     });
