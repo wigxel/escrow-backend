@@ -1,76 +1,175 @@
-import { safeObj } from "~/libs/data.helpers";
 import { Effect, Layer } from "effect";
 import { NoSuchElementException } from "effect/Cause";
-import { randomUUID } from "uncrypto";
-import {
-  createComment,
-  createReview,
-  deleteComment,
-  deleteReview,
-  readComments,
-  readReviews,
-  updateComment,
-  updateReview,
-} from "~/services/reviews.service";
+import { createReview, deleteReview } from "~/services/reviews.service";
 import { AppTest, runTest } from "~/tests/mocks/app";
-import { extendCommentRepo } from "~/tests/mocks/comment";
-import { extendProductRepo } from "~/tests/mocks/productRepoMock";
 import { extendReviewRepoMock } from "./mocks/review";
+import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
+import { notNil } from "~/libs/query.helpers";
+import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
 
 describe("Review service", () => {
-  it("should return reviews", async () => {
-    const program = Effect.scoped(Effect.provide(readReviews(), AppTest));
+  describe("create review", () => {
+    const currentUser = {
+      id: "reviewer-id",
+      username: "username",
+      email: "",
+      phone: "",
+      role: "user",
+    };
+    const reviewData = {
+      escrowId: "escrow-id",
+      comment: "this is a comment",
+      rating: 5,
+    };
 
-    const reviews = await Effect.runPromise(program);
-    expect(reviews).to.be.toBeInstanceOf(Array);
-  });
+    test("should fail if invalid escrow id", async () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
 
-  it("should create Review", async () => {
-    const ProductRepo = extendProductRepo({
-      // @ts-expect-error
-      update({ ownerId, id: productId }, data) {
-        return Effect.succeed({
-          id: productId ?? randomUUID(),
-          name: "somename",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          ownerId: ownerId ?? "someowner",
-          categoryId: 1,
-          description: "somedescription",
-          price: "0.00",
-          rating: "0.00",
-          published: true,
-          availability: true,
-          productLocation: [],
-          productImages: [],
-          ...safeObj(data),
-        });
-      },
-
-      // @ts-expect-error
-      find: () => Effect.succeed({}),
+      const program = createReview(reviewData, currentUser);
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid escrow id]`,
+      );
     });
 
-    const ReviewRepo = extendReviewRepoMock({
-      firstOrThrow() {
-        return Effect.succeed(null);
-      },
+    test("should fail if user already reviewd", () => {
+      const program = createReview(reviewData, currentUser);
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: You already left a review]`,
+      );
     });
 
-    const program = Effect.provide(
-      createReview({
-        productId: randomUUID(),
-        userId: randomUUID(),
-        comment: "Sample comment",
-        createdAt: new Date(),
-        images: [],
-        rating: 5,
-      }),
-      ProductRepo.pipe(Layer.provideMerge(ReviewRepo)),
-    );
+    test("should fail if the escrow transaction status is at completed", () => {
+      const reviewRepo = extendReviewRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            status: "completed",
+          });
+        },
+      });
 
-    const review = await runTest(program);
-    expect(review).toHaveProperty("rating", 5);
+      const program = createReview(reviewData, currentUser);
+      const result = runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, reviewRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[PermissionError: cannot leave a review on this escrow transaction]`,
+      );
+    });
+
+    test("should fail if only one participant", () => {
+      const reviewRepo = extendReviewRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            status: "completed",
+          });
+        },
+      });
+
+      const escrowParticipantRepo = extendEscrowParticipantRepo({
+        getParticipants(escrowId) {
+          return Effect.succeed([
+            {
+              id: "user-id",
+              escrowId: "escrow-id",
+              userId: "seller-id",
+              role: "buyer",
+              status: "active",
+            },
+          ]);
+        },
+      });
+
+      const program = createReview(reviewData, currentUser);
+      const result = runTest(
+        Effect.provide(
+          program,
+          reviewRepo.pipe(
+            Layer.provideMerge(escrowRepo),
+            Layer.provideMerge(escrowParticipantRepo),
+          ),
+        ),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Invalid participants. Seller or buyer not found.]`,
+      );
+    });
+
+    test("should fail if reviewer not escrow participant", () => {
+      const reviewRepo = extendReviewRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            status: "completed",
+          });
+        },
+      });
+
+      const program = createReview(reviewData, currentUser);
+      const result = runTest(
+        Effect.provide(program, Layer.merge(reviewRepo, escrowRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[PermissionError: cannot leave a review on this escrow transaction]`,
+      );
+    });
+
+    test("should create Review", async () => {
+      let isReviewCreated = false;
+      const reviewRepo = extendReviewRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+        create() {
+          isReviewCreated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            status: "completed",
+          });
+        },
+      });
+
+      const program = createReview(reviewData, {
+        ...currentUser,
+        id: "buyer-id",
+      });
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(reviewRepo, escrowRepo)),
+      );
+      expect(isReviewCreated).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Review added successfully",
+          "status": "success",
+        }
+      `);
+    });
   });
 
   it("should update review", async () => {

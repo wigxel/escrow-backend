@@ -1,6 +1,5 @@
 import { Effect, Layer } from "effect";
 import { extendMockImplementation } from "../helpers";
-import { head } from "effect/Array";
 import {
   EscrowTransactionRepo,
   type EscrowTransactionRepository,
