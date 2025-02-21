@@ -376,7 +376,7 @@ describe("Dispute service", () => {
   describe("update dispute status", () => {
     test("should fail if user role not admin", async () => {
       const program = updateDisputeStatus({
-        currentUser:{...currentUser, role:'user'},
+        currentUser: { ...currentUser, role: "user" },
         disputeId: "dispute_id",
         status: "open",
       });
@@ -531,7 +531,9 @@ describe("Dispute service", () => {
         userId: "user-id",
       });
       const result = runTest(Effect.provide(program, disputeRepo));
-      expect(result).resolves.toMatchInlineSnapshot(`[PermissionError: Cannot invite user]`);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[PermissionError: Cannot invite user]`,
+      );
     });
     test("should fail if dispute id doesn't exist", async () => {
       const disputeRepo = extendDisputeRepo({
@@ -545,16 +547,19 @@ describe("Dispute service", () => {
         userId: "user-id",
       });
       const result = runTest(Effect.provide(program, disputeRepo));
-      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Invalid disputeID: Unassociated open dispute]`);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Invalid disputeID: Unassociated open dispute]`,
+      );
     });
-    test.skip("should fail inviting the dispute creator", async () => {
+
+    test("should fail inviting the dispute creator", async () => {
       const disputeRepo = extendDisputeRepo({
         firstOrThrow(escrow, id) {
           return Effect.succeed({ createdBy: "user-id" });
         },
       });
       const program = inviteMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
@@ -563,30 +568,68 @@ describe("Dispute service", () => {
         `[ExpectedError: Unacceptable action: cannot invite dispute creator]`,
       );
     });
-    test.skip("should fail if user id does not exist", async () => {
-      const disputeRepo = extendDisputeRepo({
-        firstOrThrow(escrow, id) {
-          return Effect.succeed({ createdBy: "buyer-id" });
-        },
-      });
+
+    test("should fail if user id does not exist", async () => {
       const userRepo = extendUserRepoMock({
         firstOrThrow(arg1, arg2) {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
       const program = inviteMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
-      const result = runTest(
-        Effect.provide(program, Layer.merge(disputeRepo, userRepo)),
-      );
+      const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
         `[ExpectedError: Invalid user id: Cannot invite this user]`,
       );
     });
-    test.skip("should fail if invitee not associated with the escrow", async () => {
+
+    test("should fail if escrow id doesn't exist", async () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow(escrow, id) {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+      const program = inviteMember({
+        currentUser,
+        disputeId: "dispute_id",
+        userId: "user-id",
+      });
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Invalid escrow id: Cannot retrieve escrow]`,
+      );
+    });
+
+    test("should fail if for a single participant", () => {
+      const escrowParticipantRepo = extendEscrowParticipantRepo({
+        getParticipants(escrowId) {
+          return Effect.succeed([
+            {
+              id: "user-id",
+              escrowId: "escrow-id",
+              userId: "seller-id",
+              role: "buyer",
+              status: "active",
+            },
+          ]);
+        },
+      });
+
+      const program = inviteMember({
+        currentUser,
+        disputeId: "dispute_id",
+        userId: "user-id",
+      });
+      const result = runTest(Effect.provide(program, escrowParticipantRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Invalid participants. Seller or buyer not found.]`,
+      );
+    });
+
+    test("should fail if invitee not associated with the escrow", async () => {
       const disputeRepo = extendDisputeRepo({
         firstOrThrow(escrow, id) {
           return Effect.succeed({
@@ -603,18 +646,17 @@ describe("Dispute service", () => {
         },
       });
       const program = inviteMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
-      const result = runTest(
-        Effect.provide(program, Layer.merge(disputeRepo, userRepo)),
-      );
+      const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
         `[ExpectedError: User must be an admin or associated with the escrow]`,
       );
     });
-    test.skip("should fail if invitee already a dispute member", async () => {
+
+    test("should fail if invitee already a dispute member", async () => {
       const disputeMemberRepo = extendDisputeMemberRepo({
         firstOrThrow(escrow, id) {
           return Effect.succeed({});
@@ -623,11 +665,11 @@ describe("Dispute service", () => {
       const userRepo = extendUserRepoMock({
         //@ts-expect-error
         firstOrThrow(arg1) {
-          return Effect.succeed({ id: "buyer-id", role: "BUYER" });
+          return Effect.succeed({ id: "buyer-id", role: "user" });
         },
       });
       const program = inviteMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
@@ -638,8 +680,10 @@ describe("Dispute service", () => {
         `[ExpectedError: User already a member]`,
       );
     });
-    test.skip("should add invitee as dispute member", async () => {
+
+    test("should add invitee as dispute member", async () => {
       let created = false;
+      let notifyCount = 0;
       const disputeMemberRepo = extendDisputeMemberRepo({
         create(data) {
           created = true;
@@ -650,30 +694,46 @@ describe("Dispute service", () => {
         },
       });
 
+      const notificationFacadeMock = extendNotificationFacade({
+        notify() {
+          notifyCount += 1;
+          return Effect.succeed(1);
+        },
+      });
+
       const userRepo = extendUserRepoMock({
         //@ts-expect-error
         firstOrThrow(arg1, arg2) {
-          return Effect.succeed({ id: "buyer-id", role: "BUYER" });
+          return Effect.succeed({ id: "buyer-id", role: "user" });
         },
       });
 
       const program = inviteMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
       const result = await runTest(
-        Effect.provide(program, Layer.merge(disputeMemberRepo, userRepo)),
+        Effect.provide(
+          program,
+          disputeMemberRepo.pipe(
+            Layer.provideMerge(userRepo),
+            Layer.provideMerge(notificationFacadeMock),
+          ),
+        ),
       );
       expect(created).toBeTruthy();
+      expect(notifyCount).toBe(2);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "User invited successfully",
-          "status": true,
+          "data": null,
+          "message": "Member invited successfully",
+          "status": "success",
         }
       `);
     });
   });
+  
   describe.skip("remove member from dispute", () => {
     test("should fail if its not an ADMIN inviting", async () => {
       const disputeRepo = extendDisputeRepo({

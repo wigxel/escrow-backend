@@ -24,7 +24,7 @@ const UserMock: UserRepository = {
 
   firstOrThrow(where: Partial<TUser>) {
     return Effect.succeed({
-      id: "test-id",
+      id: "user-id",
       firstName: "test data",
       lastName: "test data",
       email: "user@gmail.com",

@@ -324,7 +324,7 @@ export const inviteMember = (data: {
         id: disputeDetails.escrowId,
       }),
       Effect.mapError(
-        () => new ExpectedError("Invalid dispute id: Cannot retrieve dispute"),
+        () => new ExpectedError("Invalid escrow id: Cannot retrieve escrow"),
       ),
     );
 
