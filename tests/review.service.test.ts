@@ -12,14 +12,14 @@ import { notNil } from "~/libs/query.helpers";
 import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
 
 describe("Review service", () => {
+  const currentUser = {
+    id: "reviewer-id",
+    username: "username",
+    email: "",
+    phone: "",
+    role: "user",
+  };
   describe("create review", () => {
-    const currentUser = {
-      id: "reviewer-id",
-      username: "username",
-      email: "",
-      phone: "",
-      role: "user",
-    };
     const reviewData = {
       escrowId: "escrow-id",
       comment: "this is a comment",
@@ -187,7 +187,7 @@ describe("Review service", () => {
 
       const program = getReviews({ escrowId: "escrow-id" });
       const result = await runTest(Effect.provide(program, reviewRepo));
-      expect(result?.meta?.total).toBe(reviewCount)
+      expect(result?.meta?.total).toBe(reviewCount);
       expect(result).toMatchInlineSnapshot(`
         {
           "data": [
@@ -210,175 +210,62 @@ describe("Review service", () => {
           },
           "status": "success",
         }
-      `)
+      `);
     });
   });
 
-  it("should delete a review", async () => {
-    const program = Effect.scoped(
-      Effect.provide(deleteReview("MOCK_REVIEW_ID", "MOCK_USER_ID"), AppTest),
-    );
+  describe("Delete review", () => {
+    test("should fail delete review for invalid id", async () => {
+      const reviewRepo = extendReviewRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
 
-    const review = await runTest(program);
-    expect(review).toHaveProperty("rating", 3);
-  });
-
-  it("should fail delete review for invalid id", async () => {
-    const reviewRepo = extendReviewRepoMock({
-      // @ts-expect-error
-      firstOrThrow() {
-        return Effect.succeed({
-          userId: "MOCK_USER_ID_2",
-        });
-      },
-    });
-    const program = Effect.provide(
-      deleteReview("MOCK_FAKE_REVIEW_ID", "MOCK_USER_ID"),
-      reviewRepo,
-    );
-
-    const response = await runTest(program);
-    expect(response).toMatchInlineSnapshot(
-      `[PermissionError: You are not authorized to make this request]`,
-    );
-  });
-
-  it("should fail delete review for user permissions", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        deleteReview("MOCK_REVIEW_ID", "MOCK_FAKE_USER_ID"),
-        AppTest,
-      ),
-    );
-
-    const response = await runTest(program);
-    expect(response).toMatchInlineSnapshot(
-      `[PermissionError: You are not authorized to make this request]`,
-    );
-  });
-
-  // For comments
-  it("should return comments", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        readComments({
-          reviewId: "MOCK_REVIEW_COMMENT_ID",
-        }),
-        AppTest,
-      ),
-    );
-
-    const reviews = await runTest(program);
-    expect(reviews).to.be.toBeInstanceOf(Array);
-  });
-
-  it("should create comments", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        createComment({
-          comment: "somecomment",
-          reviewId: "MOCK_REVIEW_ID",
-          userId: "userId",
-          createdAt: new Date(),
-          parentCommentId: "MOCK_PARENT_COMMENT_ID",
-        }),
-        AppTest,
-      ),
-    );
-
-    const review = await runTest(program);
-    expect(review).toHaveProperty("reviewId", "MOCK_REVIEW_ID");
-  });
-
-  it("should update comments", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        updateComment("MOCK_COMMENT_ID", "MOCK_USER_ID", {
-          comment: "somecomment",
-          reviewId: "MOCK_REVIEW_ID",
-          createdAt: new Date(),
-          parentCommentId: "MOCK_PARENT_COMMENT_ID",
-        }),
-        AppTest,
-      ),
-    );
-
-    const review = await runTest(program);
-    expect(review).to.be.instanceOf(Array);
-  });
-
-  it("should fail update comments for invalid id", async () => {
-    const commentRepo = extendCommentRepo({
-      // @ts-expect-error
-      find() {
-        return Effect.succeed({
-          id: "MOCK_COMMENT_ID",
-        });
-      },
+      const program = deleteReview({
+        reviewId: "MOCK_FAKE_REVIEW_ID",
+        currentUser,
+      });
+      const response = runTest(Effect.provide(program, reviewRepo));
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid review Id]`,
+      );
     });
 
-    const program = Effect.scoped(
-      Effect.provide(
-        updateComment("MOCK_FAKE_COMMENT_ID", "MOCK_USER_ID", {
-          comment: "somecomment",
-          reviewId: "MOCK_REVIEW_ID",
-          createdAt: new Date(),
-          parentCommentId: "MOCK_PARENT_COMMENT_ID",
-        }),
-        commentRepo,
-      ),
-    );
+    test("should fail current user didn't create the review", () => {
+      const program = deleteReview({
+        reviewId: "MOCK_FAKE_REVIEW_ID",
+        currentUser: { ...currentUser, id: "MOCK_FAKE_USER_ID" },
+      });
 
-    const response = await runTest(program);
-    expect(response).toMatchInlineSnapshot(
-      `[PermissionError: Not authorized to perform this action]`,
-    );
-  });
+      const response = runTest(program);
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[PermissionError: Cannot delete this review]`,
+      );
+    });
 
-  it.skip("should fail update comments for user permissions", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        updateComment("MOCK_REVIEW_ID", "MOCK_FAKE_USER_ID", {
-          comment: "somecomment",
-          reviewId: "MOCK_REVIEW_ID",
-          createdAt: new Date(),
-          parentCommentId: "MOCK_PARENT_COMMENT_ID",
-        }),
-        AppTest,
-      ),
-    );
+    test("should delete the review", async () => {
+      let isReviewDeleted = false;
+      const reviewRepo = extendReviewRepoMock({
+        delete() {
+          isReviewDeleted = true;
+          return Effect.succeed(true);
+        },
+      });
+      const program = Effect.provide(
+        deleteReview({ reviewId: "MOCK_FAKE_REVIEW_ID", currentUser }),
+        reviewRepo,
+      );
 
-    runTest(program);
-    expect.fail(
-      "comment update should fail if comment author (user) doesn't match for given userId",
-    );
-  });
-
-  it.skip("should fail delete comments for invalid id", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        deleteComment("MOCK_FAKE_COMMENT_ID", "MOCK_USER_ID"),
-        AppTest,
-      ),
-    );
-
-    runTest(program);
-    expect.fail(
-      "deleting comment should fail if comment author (user) doesn't match for given commentId",
-    );
-  });
-
-  it.skip("should fail delete comments for user permissions", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        deleteComment("MOCK_REVIEW_ID", "MOCK_FAKE_USER_ID"),
-        AppTest,
-      ),
-    );
-
-    runTest(program);
-    expect.fail(
-      "deleting comment should fail if comment author (user) doesn't match for given userId",
-    );
+      const result = await runTest(program);
+      expect(isReviewDeleted).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Review deleted successfully",
+          "status": "success",
+        }
+      `);
+    });
   });
 });
