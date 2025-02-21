@@ -1,6 +1,10 @@
 import { Effect, Layer } from "effect";
 import { NoSuchElementException } from "effect/Cause";
-import { createReview, deleteReview } from "~/services/reviews.service";
+import {
+  createReview,
+  deleteReview,
+  getReviews,
+} from "~/services/reviews.service";
 import { AppTest, runTest } from "~/tests/mocks/app";
 import { extendReviewRepoMock } from "./mocks/review";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
@@ -172,64 +176,42 @@ describe("Review service", () => {
     });
   });
 
-  it("should update review", async () => {
-    const program = Effect.provide(
-      updateReview("MOCK_REVIEW_ID", "MOCK_USER_ID", {
-        productId: "random product id",
-        comment: "Sample comment",
-        createdAt: new Date(),
-        images: [],
-        rating: 5,
-      }),
-      AppTest,
-    );
+  describe(" Get reviews", () => {
+    test("should return reviews", async () => {
+      let reviewCount = 1;
+      const reviewRepo = extendReviewRepoMock({
+        reviewCount() {
+          return Effect.succeed({ count: reviewCount });
+        },
+      });
 
-    const review = await runTest(program);
-    expect(review).toHaveProperty("rating", 5);
-  });
-
-  it("should fail update review for invalid id", async () => {
-    const reviewRepoTest = extendReviewRepoMock({
-      firstOrThrow() {
-        return Effect.fail(new NoSuchElementException("Review does not exist"));
-      },
+      const program = getReviews({ escrowId: "escrow-id" });
+      const result = await runTest(Effect.provide(program, reviewRepo));
+      expect(result?.meta?.total).toBe(reviewCount)
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": [
+            {
+              "comment": "nice transaction",
+              "createdAt": 2025-03-20T23:00:00.000Z,
+              "escrowId": "escrow-id",
+              "id": "review-id",
+              "rating": 5,
+              "revieweeId": "reviewe-id",
+              "reviewerId": "reviewer-id",
+              "updatedAt": 2025-03-20T23:00:00.000Z,
+            },
+          ],
+          "meta": {
+            "current_page": 1,
+            "per_page": 5,
+            "total": 1,
+            "total_pages": 1,
+          },
+          "status": "success",
+        }
+      `)
     });
-    const program = Effect.scoped(
-      Effect.provide(
-        updateReview("MOCK_FAKE_REVIEW_ID", "MOCK_USER_ID", {
-          productId: "random product id",
-          comment: "Sample comment",
-          createdAt: new Date(),
-          images: [],
-          rating: 2,
-        }),
-        reviewRepoTest,
-      ),
-    );
-
-    expect(await runTest(program)).toMatchInlineSnapshot(
-      `[NoSuchElementException: Review does not exist]`,
-    );
-  });
-
-  it("should fail update review for user permissions", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        updateReview("MOCK_REVIEW_ID", "MOCK_FAKE_USER_ID", {
-          productId: "random product id",
-          comment: "Sample comment",
-          createdAt: new Date(),
-          images: [],
-          rating: 2,
-        }),
-        AppTest,
-      ),
-    );
-
-    const response = await runTest(program);
-    expect(response).toMatchInlineSnapshot(
-      `[PermissionError: You are not authorized to make this request]`,
-    );
   });
 
   it("should delete a review", async () => {

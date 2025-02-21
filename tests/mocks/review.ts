@@ -21,6 +21,21 @@ export const mock: ReviewRepository = {
     ]);
   },
 
+  getReviews() {
+    return Effect.succeed([
+      {
+        id: "review-id",
+        escrowId: "escrow-id",
+        reviewerId: "reviewer-id",
+        revieweeId: "reviewe-id",
+        comment: "nice transaction",
+        rating: 5,
+        createdAt: new Date(2025, 2, 21),
+        updatedAt: new Date(2025, 2, 21),
+      },
+    ]);
+  },
+
   firstOrThrow(reviewId: string) {
     return Effect.succeed({
       id: "review-id",
