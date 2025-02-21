@@ -11,7 +11,7 @@ import {
   type NotificationChannel,
   type NotificationMediator,
 } from "~/layers/notification/types";
-
+import { extendMockImplementation } from "./helpers";
 
 type AvailableChannels =
   | EmailChannel
@@ -54,4 +54,9 @@ export class NotificationFacade extends Context.Tag("NotificationFacade")<
 export const NotificationFacadeTestLive = Layer.succeed(
   NotificationFacade,
   new NotificationManager<AvailableChannels>(),
+);
+
+export const extendNotificationFacade = extendMockImplementation(
+  NotificationFacade,
+  () => new NotificationManager<AvailableChannels>(),
 );

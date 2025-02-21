@@ -462,7 +462,7 @@ export const updateDisputeStatus = (data: {
 
     //make sure the dispute id exists
     const disputeDetails = yield* disputeRepo
-      .firstOrThrow("id", data.disputeId)
+      .firstOrThrow({ id: data.disputeId })
       .pipe(Effect.mapError(() => new ExpectedError("invalid dispute id")));
 
     //check If you can change dispute status
@@ -485,6 +485,13 @@ export const updateDisputeStatus = (data: {
         userId: data.currentUser.id,
         role: data.currentUser.role,
       });
+
+      yield* createActivityLog(
+        disputeActivityLog.opened({
+          id: data.disputeId,
+          openedBy: data.currentUser.id,
+        }),
+      );
     }
 
     if (data.status === "resolved") {
@@ -500,5 +507,9 @@ export const updateDisputeStatus = (data: {
         }),
       );
     }
+
+    return dataResponse({
+      message: `dispute status updated from ${disputeDetails.status} to ${data.status}`,
+    });
   });
 };
