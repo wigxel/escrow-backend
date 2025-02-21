@@ -21,6 +21,7 @@ import { FileStorageTestLive } from "./filestorageMock";
 import { ChatServiceTestLive } from "./chatServiceMock";
 import { Mailer } from "~/layers/mailing";
 import type { SendMailParams } from "~/layers/mailing/types";
+import { PaginationImpl } from "~/services/search/pagination.service";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 const mailService = {
@@ -66,6 +67,7 @@ export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(FileStorageTestLive),
   Layer.provideMerge(ChatServiceTestLive),
   Layer.provideMerge(MailServiceTest),
+  Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(
       ConfigProvider.fromJson({
