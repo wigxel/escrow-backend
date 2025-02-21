@@ -19,8 +19,16 @@ import { NotificationFacadeTestLive } from "./notificationFacadeMock";
 import { ActivityLogRepoTest } from "./activityLogRepoMock";
 import { FileStorageTestLive } from "./filestorageMock";
 import { ChatServiceTestLive } from "./chatServiceMock";
+import { Mailer } from "~/layers/mailing";
+import type { SendMailParams } from "~/layers/mailing/types";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
+const mailService = {
+  send(params: SendMailParams) {
+    return Effect.succeed(undefined);
+  },
+};
+const MailServiceTest = Layer.succeed(Mailer, mailService);
 
 const EscrowModuleTest = Layer.empty.pipe(
   Layer.provideMerge(EscrowTransactionRepoTest),
@@ -57,6 +65,7 @@ export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(ActivityLogRepoTest),
   Layer.provideMerge(FileStorageTestLive),
   Layer.provideMerge(ChatServiceTestLive),
+  Layer.provideMerge(MailServiceTest),
   Layer.provideMerge(
     Layer.setConfigProvider(
       ConfigProvider.fromJson({
@@ -76,12 +85,12 @@ export const AppTest = Layer.empty.pipe(
         CLOUDINARY_CLOUD_NAME: "somecloudinarycloudname",
         SALT_HEX: "salt_hex",
         IV_HEX: "iv_hex",
-        ORG_ACCOUNT_ID:"11111111111111",
-        TB_ADDRESS:"1010",
-        PSK_PUBLIC_KEY:"",
-        FIREBASE_CONFIG:"",
-        MAILING_HEX:"",
-        MAILING_SALT:""
+        ORG_ACCOUNT_ID: "11111111111111",
+        TB_ADDRESS: "1010",
+        PSK_PUBLIC_KEY: "",
+        FIREBASE_CONFIG: "",
+        MAILING_HEX: "",
+        MAILING_SALT: "",
       }),
     ),
   ),

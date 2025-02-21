@@ -733,24 +733,20 @@ describe("Dispute service", () => {
       `);
     });
   });
-  
-  describe.skip("remove member from dispute", () => {
+
+  describe("remove member from dispute", () => {
     test("should fail if its not an ADMIN inviting", async () => {
-      const disputeRepo = extendDisputeRepo({
-        firstOrThrow(escrow, id) {
-          return Effect.succeed({ status: "pending" });
-        },
-      });
       const program = removeMember({
-        currentUser: { id: "current-user-id", role: "buyer" },
+        currentUser: { ...currentUser, role: "user" },
         disputeId: "dispute_id",
         userId: "user-id",
       });
-      const result = runTest(Effect.provide(program, disputeRepo));
+      const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unauthorized action: Cannot uninvite user]`,
+        `[PermissionError: Cannot remove user]`,
       );
     });
+
     test("should fail if user not dispute member", async () => {
       const disputeMemberRepo = extendDisputeMemberRepo({
         firstOrThrow(escrow, id) {
@@ -758,7 +754,7 @@ describe("Dispute service", () => {
         },
       });
       const program = removeMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
@@ -767,25 +763,41 @@ describe("Dispute service", () => {
         `[ExpectedError: User is not a member]`,
       );
     });
+
     test("should remove a dispute member", async () => {
       let deleted = false;
+      let notifyCount = 0;
       const disputeMemberRepo = extendDisputeMemberRepo({
         delete(escrow) {
           deleted = true;
           return Effect.succeed({});
         },
       });
+
+      const notificationFacadeMock = extendNotificationFacade({
+        notify() {
+          notifyCount += 1;
+          return Effect.succeed(1);
+        },
+      });
       const program = removeMember({
-        currentUser: { id: "current-user-id", role: "ADMIN" },
+        currentUser,
         disputeId: "dispute_id",
         userId: "user-id",
       });
-      const result = await runTest(Effect.provide(program, disputeMemberRepo));
-      expect(result).toBeTruthy();
+      const result = await runTest(
+        Effect.provide(
+          program,
+          Layer.merge(disputeMemberRepo, notificationFacadeMock),
+        ),
+      );
+      expect(deleted).toBeTruthy();
+      expect(notifyCount).toBe(2);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "User removed successfully",
-          "status": true,
+          "data": null,
+          "message": "Member removed successfully",
+          "status": "success",
         }
       `);
     });

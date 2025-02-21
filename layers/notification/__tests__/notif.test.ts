@@ -1,16 +1,12 @@
 import { Effect, Layer, pipe } from "effect";
 import { ConfigProvider } from "effect";
 import { Mailer } from "~/layers/mailing";
-import { Mailable } from "~/layers/mailing/mailables";
-import { Envelope } from "~/layers/mailing/mailables/Envelope";
 import { SendMailParams } from "~/layers/mailing/types";
 import { EmailChannel } from "~/layers/notification/EmailChannel";
 import { MailMessage } from "~/layers/notification/MailMessage";
 import { SMSChannel } from "~/layers/notification/SMSChannel";
-import { SimpleMessage } from "~/layers/notification/SimpleMessage";
 import { NotificationManager, make } from "~/layers/notification/layer";
 import { Notifiable, Notification } from "~/layers/notification/types";
-import { Content } from "../../mailing/mailables/Content";
 
 class NotificationTest extends make<NotificationTest>() {}
 
