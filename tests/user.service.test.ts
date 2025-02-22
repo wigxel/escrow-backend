@@ -3,6 +3,7 @@ import {
   checkUsername,
   createUser,
   passwordReset,
+  resendEmailVerificationOtp,
   verifyUserEmail,
 } from "~/services/user.service";
 import { AppTest, runTest } from "~/tests/mocks/app";
@@ -185,6 +186,91 @@ describe("User services", () => {
     });
   });
 
+  describe("Resend verification email", () => {
+    const email = "email";
+    test("should fail if user doesn't exist", () => {
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+
+      const program = resendEmailVerificationOtp(email);
+      const result = runTest(Effect.provide(program, userRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: User with email doesn't exist]`,
+      );
+    });
+
+    test("should fail if email is already verified", async () => {
+      const program = resendEmailVerificationOtp(email);
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Email already verified]`,
+      );
+    });
+
+    test("should succeed if user exists and email isn't verified", async () => {
+      let otpUpdated = false;
+      let isNotified = false
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "user-id",
+            firstName: "test data",
+            lastName: "test data",
+            email: "user@gmail.com",
+            password:
+              "$argon2id$v=19$m=19456,t=2,p=1$mxVZvfCeexfpkfp15EnDWQ$gG7x/+N0sXxqt86kwUlYr6k08+m10g9ql1VL6aQX/aA",
+            address: "test data",
+            state: "test data",
+            country: "test data",
+            phone: "test data",
+            role: "user",
+            profilePicture: "test data",
+            emailVerified: false,
+            createdAt: new Date(2025, 2, 21),
+            updatedAt: new Date(2025, 2, 21),
+          });
+        },
+      });
+
+      const otpRepo = extendOtpRepo({
+        update() {
+          otpUpdated = true
+          return Effect.succeed([]);
+        },
+      });
+
+      const notifyMock = extendNotificationFacade({
+        notify() {
+          isNotified = true
+          return Effect.succeed(1);
+        },
+      });
+
+      const program = resendEmailVerificationOtp(email);
+      const result = await runTest(
+        Effect.provide(
+          program,
+          userRepo.pipe(
+            Layer.provideMerge(otpRepo),
+            Layer.provideMerge(notifyMock),
+          ),
+        ),
+      );
+      expect(otpUpdated).toBeTruthy()
+      expect(isNotified).toBeTruthy()
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Email resend successful",
+          "status": "success",
+        }
+      `);
+    });
+  });
+
   describe.skip("Account verification", () => {
     it("should fail if otp is incorrect", async () => {
       const program = Effect.scoped(
@@ -214,49 +300,6 @@ describe("User services", () => {
         "success": true,
       }
     `);
-    });
-
-    describe.skip("Resend verification email", () => {
-      it("should fail if user doesn't exist", async () => {
-        const program = Effect.scoped(
-          Effect.provide(
-            requestEmailVerificationOtp("MOCK_INCORRECT_EMAIL", "verify"),
-            AppTest,
-          ),
-        );
-        const session = await runTest(program);
-        expect(session).toMatchInlineSnapshot(
-          `[ExpectedError: User with email doesn't exist]`,
-        );
-      });
-
-      it("should fail if email is already verified", async () => {
-        const program = Effect.scoped(
-          Effect.provide(
-            requestEmailVerificationOtp("johndoe@example.com", "verify"),
-            AppTest,
-          ),
-        );
-        const session = await runTest(program);
-        expect(session).toMatchInlineSnapshot(
-          `[ExpectedError: Email already verified]`,
-        );
-      });
-      it("should succeed if user exists and email isn't verified", async () => {
-        const program = Effect.scoped(
-          Effect.provide(
-            requestEmailVerificationOtp("user1@example.com", "verify"),
-            AppTest,
-          ),
-        );
-        const session = await runTest(program);
-        expect(session).toMatchObject(
-          expect.objectContaining({
-            success: true,
-            message: "OTP has been sent to email",
-          }),
-        );
-      });
     });
   });
 
