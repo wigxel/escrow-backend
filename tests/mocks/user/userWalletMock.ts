@@ -1,16 +1,17 @@
 import { Effect, Layer } from "effect";
 import { extendMockImplementation } from "../helpers";
-import { head } from "effect/Array";
-import { UserWalletRepo, type UserWalletRepository } from "~/repositories/userWallet.repo";
+import {
+  UserWalletRepo,
+  type UserWalletRepository,
+} from "~/repositories/userWallet.repo";
 
 const mock: UserWalletRepository = {
-  //@ts-expect-error
   create: (data) => {
     return Effect.succeed([
       {
         id: "test-id",
         userId: "user-id",
-        tigerBeetleAccountId: "",
+        tigerbeetleAccountId: "1111111",
       },
     ]);
   },
@@ -32,13 +33,11 @@ const mock: UserWalletRepository = {
   },
 
   firstOrThrow: (arg) => {
-    return Effect.succeed([
-      {
-        id: "test-id",
-        userId: "user-id",
-        tigerBeetleAccountId: "",
-      },
-    ]).pipe(Effect.flatMap(head));
+    return Effect.succeed({
+      id: "test-id",
+      userId: "user-id",
+      tigerbeetleAccountId: "1111111",
+    });
   },
 
   update: () => {

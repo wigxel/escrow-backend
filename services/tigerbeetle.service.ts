@@ -34,7 +34,6 @@ export const getTBAccount = (accountId: string) => {
     if (!account.length) {
       yield* new NoSuchElementException("invalid tigerbeetle account id");
     }
-
     return account;
   });
 };
@@ -44,6 +43,8 @@ export const getAccountBalance = (accountId: string) => {
     const account = (yield* getTBAccount(accountId)).find(
       (v, i) => String(v.id) === accountId,
     );
+
+    console.log(account)
     return (
       account.credits_posted - account.debits_posted - account.debits_pending
     );

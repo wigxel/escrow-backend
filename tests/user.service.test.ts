@@ -5,6 +5,7 @@ import {
   forgotPassword,
   passwordReset,
   resendEmailVerificationOtp,
+  UserBalance,
   verifyUserEmail,
 } from "~/services/user.service";
 import { AppTest, runTest } from "~/tests/mocks/app";
@@ -15,6 +16,8 @@ import { extendReferralSourceRepo } from "./mocks/referralSourceRepoMock";
 import { extendUserWalletRepo } from "./mocks/user/userWalletMock";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 import { extendNotificationFacade } from "./mocks/notification/notificationFacadeMock";
+import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
+import { Account } from "tigerbeetle-node";
 
 describe("User services", () => {
   describe("check username", () => {
@@ -457,6 +460,97 @@ describe("User services", () => {
         {
           "data": null,
           "message": "Password reset successful",
+          "status": "success",
+        }
+      `);
+    });
+  });
+
+  describe("User balance", () => {
+    const currentUser = {
+      email: "",
+      id: "",
+      username: "",
+      phone: "",
+      role: "",
+    };
+    test("should fail if invalid user id", () => {
+      const userWalletRepo = extendUserWalletRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error("not found"));
+        },
+      });
+
+      const program = UserBalance(currentUser);
+      const result = runTest(Effect.provide(program, userWalletRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Wallet not found]`,
+      );
+    });
+
+    test("should calculate the users balance", () => {
+      const escrowParticipants = extendEscrowParticipantRepo({
+        getParticipantsWithWallet(userId) {
+          return Effect.succeed([
+            {
+              id: "id",
+              escrowId: "escrow-id",
+              userId: "buyer-id",
+              role: "seller",
+              status: "active",
+              walletDetails: {
+                id: "wallet-id",
+                escrowId: "escrow-id",
+                createdAt: new Date(2025, 2, 22),
+                updatedAt: new Date(2025, 2, 22),
+                tigerbeetleAccountId: "1111111",
+              },
+            },
+            {
+              id: "id",
+              escrowId: "escrow-id",
+              userId: "buyer-id",
+              role: "seller",
+              status: "active",
+              walletDetails: {
+                id: "wallet-id",
+                escrowId: "escrow-id",
+                createdAt: new Date(2025, 2, 22),
+                updatedAt: new Date(2025, 2, 22),
+                tigerbeetleAccountId: "1111111",
+              },
+            },
+          ]);
+        },
+      });
+
+      const tigerBeetleRepo = extendTigerBeetleRepo({
+        lookupAccounts() {
+          return Effect.succeed([
+            {
+              id: BigInt(1111111),
+              credits_pending: BigInt(0),
+              credits_posted: BigInt(100000),
+              debits_pending: BigInt(0),
+              debits_posted: BigInt(0),
+            },
+          ] as Account[]);
+        },
+      });
+
+      const program = UserBalance(currentUser);
+      const result = runTest(
+        Effect.provide(
+          program,
+          Layer.merge(escrowParticipants, tigerBeetleRepo),
+        ),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(`
+        {
+          "data": {
+            "totalEscrowBalance": 2000,
+            "walletBalance": 1000,
+          },
           "status": "success",
         }
       `);

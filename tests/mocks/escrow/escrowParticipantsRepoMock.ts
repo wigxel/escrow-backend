@@ -31,7 +31,39 @@ const mock: EscrowParticipantRepository = {
         role: "seller",
         status: "active",
       },
-      
+    ]);
+  },
+
+  getParticipantsWithWallet(userId) {
+    return Effect.succeed([
+      {
+        id: "id",
+        escrowId: "escrow-id",
+        userId: "buyer-id",
+        role: "seller",
+        status: "active",
+        walletDetails: {
+          id: "wallet-id",
+          escrowId: "escrow-id",
+          createdAt: new Date(2025,2,22),
+          updatedAt: new Date(2025,2,22),
+          tigerbeetleAccountId: "tiger-beetle-id",
+        },
+      },
+      {
+        id: "id",
+        escrowId: "escrow-id",
+        userId: "buyer-id",
+        role: "seller",
+        status: "active",
+        walletDetails: {
+          id: "wallet-id",
+          escrowId: "escrow-id",
+          createdAt: new Date(2025,2,22),
+          updatedAt: new Date(2025,2,22),
+          tigerbeetleAccountId: "tiger-beetle-id",
+        },
+      },
     ]);
   },
 

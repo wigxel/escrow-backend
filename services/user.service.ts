@@ -340,9 +340,9 @@ export const UserBalance = (currentUser: SessionUser) => {
     const walletRepo = yield* UserWalletRepoLayer.tag;
     const participantsRepo = yield* EscrowParticipantRepoLayer.tag;
 
-    const walletDetails = yield* walletRepo.firstOrThrow({
+    const walletDetails = yield* _(walletRepo.firstOrThrow({
       userId: currentUser.id,
-    });
+    }),Effect.mapError(()=>new ExpectedError("Wallet not found")));
 
     const escrowDetails = yield* participantsRepo.getParticipantsWithWallet(
       currentUser.id,
