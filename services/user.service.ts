@@ -111,7 +111,6 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     yield* otpRepo.create({
       userId: user.id,
       email: user.email,
-      userKind: "USER",
       otpReason: "EMAIL_VERIFICATION",
       value: otp,
     });
@@ -128,7 +127,6 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     return dataResponse({
       data: {
         session_data,
-        user,
       },
       message: "user created successfully",
     });
@@ -186,7 +184,6 @@ export function forgotPassword(email: string) {
           otpRepo.create({
             userId: user.id,
             email: user.email,
-            userKind: "USER",
             otpReason: "PASSWORD_RESET",
             value: otp,
           }),

@@ -1,5 +1,4 @@
 import { Effect, Layer } from "effect";
-import { randomUUID } from "uncrypto";
 import { Session, type SessionImpl } from "~/layers/session";
 
 export const SesssionTest = Layer.effect(
@@ -8,20 +7,20 @@ export const SesssionTest = Layer.effect(
     const UserLive: SessionImpl = {
       create(_user_id: string) {
         return Effect.succeed({
-          session_id: randomUUID(),
-          expires_at: new Date(),
+          session_id: "session-id",
+          expires_at: new Date(2025, 2, 22),
         });
       },
 
       validate(_token: string) {
         return Effect.succeed({
           session: {
-            id: randomUUID(),
-            expiresAt: new Date(),
+            id: "session-id",
+            expiresAt: new Date(2025, 2, 22),
             fresh: true,
-            userId: randomUUID(),
+            userId: "user-id",
           },
-          user: { id: randomUUID(), email: "", phone: "", username: "" },
+          user: { id: "user-id", email: "", phone: "", username: "" },
         });
       },
 
@@ -45,8 +44,8 @@ export const SesssionTest = Layer.effect(
           phone: "string",
           profilePicture: "string",
           emailVerified: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: new Date(2025, 2, 22),
+          updatedAt: new Date(2025, 2, 22),
         });
       },
 

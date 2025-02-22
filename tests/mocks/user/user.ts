@@ -19,7 +19,28 @@ const UserMock: UserRepository = {
   },
 
   create(data: User) {
-    return Effect.succeed([data]);
+    return Effect.succeed([{
+      role: "user",
+      id: "user_id",
+      bvn: "",
+      hasBusiness: false,
+      referralSourceId: 1,
+      businessType: "",
+      businessName: "",
+      username: "",
+      firstName: "string",
+      lastName: "string",
+      email: "string",
+      password: "$argon2id$v=19$m=19456,t=2,p=1$mxVZvfCeexfpkfp15EnDWQ$gG7x/+N0sXxqt86kwUlYr6k08+m10g9ql1VL6aQX/aA",
+      address: "string",
+      state: "string",
+      country: "string",
+      phone: "string",
+      profilePicture: "string",
+      emailVerified: false,
+      createdAt: new Date(2025, 2, 22),
+      updatedAt: new Date(2025, 2, 22),
+    }]);
   },
 
   firstOrThrow(where: Partial<TUser>) {

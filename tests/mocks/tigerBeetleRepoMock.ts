@@ -4,8 +4,9 @@ import {
   TigerBeetleRepository,
 } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import type { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
+import { extendMockImplementation } from "./helpers";
 
-class mock extends TigerBeetleRepository {
+class Mock extends TigerBeetleRepository {
   constructor() {
     super({} as TigerBeetleAdapter);
   }
@@ -28,5 +29,10 @@ class mock extends TigerBeetleRepository {
 
 export const TigerBeetleRepoTestLive = Layer.succeed(
   TigerBeetleRepo,
-  new mock(),
+  new Mock(),
+);
+
+export const extendTigerBeetleRepo = extendMockImplementation(
+  TigerBeetleRepo,
+  () => new Mock(),
 );

@@ -3,7 +3,6 @@ import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
 import type { InferRequirements } from "~/services/effect.util";
 import { DatabaseTest } from "~/tests/mocks/database";
 import { NotificationRepoTest } from "~/tests/mocks/notification/notificationRepoMock";
-import { OTPRepoTest } from "~/tests/mocks/otp";
 import { SessionProviderTest } from "~/tests/mocks/authentication/session-provider";
 import { UserRepoTest } from "~/tests/mocks/user/user";
 import { DisputeMemberRepoTest } from "./dispute/disputeMembersRepo";
@@ -26,6 +25,7 @@ import { UserWalletRepoTest } from "./user/userWalletMock";
 import { ReversibleHashTestLive } from "./reversibleHashMock";
 import { ReferralSourceRepoTest } from "./referralSourceRepoMock";
 import { TigerBeetleRepoTestLive } from "./tigerBeetleRepoMock";
+import { OtpRepoTest } from "./otp";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -54,7 +54,7 @@ const NotificationModuleTest = Layer.empty.pipe(
 );
 
 const AuthModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(OTPRepoTest),
+  Layer.provideMerge(OtpRepoTest),
   Layer.provideMerge(SesssionTest),
   Layer.provideMerge(SessionProviderTest),
   Layer.provideMerge(Argon2dHasherLive),

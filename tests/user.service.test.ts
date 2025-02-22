@@ -6,9 +6,13 @@ import {
   verifyUserEmail,
 } from "~/services/user.service";
 import { AppTest, runTest } from "~/tests/mocks/app";
-import { readOTP } from "~/tests/mocks/otp";
+import { extendOtpRepo } from "~/tests/mocks/otp";
 import { extendUserRepoMock } from "./mocks/user/user";
 import { notNil } from "~/libs/query.helpers";
+import { extendReferralSourceRepo } from "./mocks/referralSourceRepoMock";
+import { extendUserWalletRepo } from "./mocks/user/userWalletMock";
+import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
+import { extendNotificationFacade } from "./mocks/notification/notificationFacadeMock";
 
 describe("User services", () => {
   describe("check username", () => {
@@ -54,35 +58,130 @@ describe("User services", () => {
     test("should fail if username is taken", async () => {
       const program = createUser(userData);
       const result = runTest(program);
-      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Username taken]`);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Username taken]`,
+      );
     });
 
-    test.skip("should fail if email or password already exist", async () => {
-      const UserRepoTest = extendUserRepoMock({
+    test("should fail for invalid referral source id", () => {
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+
+      const referralSourceRepo = extendReferralSourceRepo({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+
+      const program = createUser(userData);
+      const result = runTest(
+        Effect.provide(program, Layer.merge(userRepo, referralSourceRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: invalid referral source ID]`,
+      );
+    });
+
+    test("should fail if email or phone already exist", async () => {
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
         count() {
           return Effect.succeed(1);
         },
       });
-      const userData = {
-        address: "Test address",
-        country: "Ghana",
-        email: "johndoe@gmail.com",
-        firstName: "john",
-        lastName: "doe",
-        password: "pass123",
-        phone: "0922348923",
-        state: "Rivers",
-      };
 
-      const program = Effect.scoped(
-        Effect.provide(createUser(userData), UserRepoTest),
-      );
-
-      const response = await runTest(program);
-
-      expect(response).toMatchInlineSnapshot(
+      const program = createUser(userData);
+      const result = runTest(Effect.provide(program, userRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
         `[ExpectedError: Account already exists. Email or phone number is taken]`,
       );
+    });
+
+    test("create the user account", async () => {
+      let userCreated = false;
+      let userWalletCreated = false;
+      let tigerbeetleAccountCreated = false;
+      let otpCreated = false;
+      let isNnotified = false;
+
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          userCreated = true;
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+
+      const userWalletRepo = extendUserWalletRepo({
+        create() {
+          userWalletCreated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const tigerBeetleRepo = extendTigerBeetleRepo({
+        createAccounts() {
+          tigerbeetleAccountCreated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const otpRepo = extendOtpRepo({
+        create() {
+          otpCreated = true;
+          return Effect.succeed([
+            {
+              id: "",
+              userId: "user-id",
+              email: "user-email",
+              kind: "",
+              otpReason: "EMAIL_VERIFICATION",
+              value: "233233",
+            },
+          ]);
+        },
+      });
+
+      const notifyMock = extendNotificationFacade({
+        notify() {
+          isNnotified = true;
+          return Effect.succeed(1);
+        },
+      });
+
+      const program = createUser(userData);
+      const result = await runTest(
+        Effect.provide(
+          program,
+          userRepo.pipe(
+            Layer.provideMerge(userWalletRepo),
+            Layer.provideMerge(tigerBeetleRepo),
+            Layer.provideMerge(otpRepo),
+            Layer.provideMerge(notifyMock),
+          ),
+        ),
+      );
+      expect(userCreated).toBeTruthy();
+      expect(userWalletCreated).toBeTruthy();
+      expect(tigerbeetleAccountCreated).toBeTruthy();
+      expect(otpCreated).toBeTruthy();
+      expect(isNnotified).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": {
+            "session_data": {
+              "expires_at": 2025-03-21T23:00:00.000Z,
+              "session_id": "session-id",
+            },
+          },
+          "message": "user created successfully",
+          "status": "success",
+        }
+      `);
     });
   });
 

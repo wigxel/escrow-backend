@@ -8,8 +8,7 @@ export const otpReason = pgEnum("otp_reason", [
 export const otpTable = pgTable("otp", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull(),
-  email:varchar("email"),
-  userKind: text("user_kind").notNull(), // refers to the table
+  email: varchar("email"),
   value: varchar("value", { length: 6 }),
   otpReason: otpReason("otp_reason").default("EMAIL_VERIFICATION").notNull(),
 });
