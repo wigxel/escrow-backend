@@ -27,6 +27,7 @@ import { ReferralSourceRepoTest } from "./referralSourceRepoMock";
 import { TigerBeetleRepoTestLive } from "./tigerBeetleRepoMock";
 import { OtpRepoTest } from "./otp";
 import { PushTokenRepoTest } from "./user/pushTokenMock";
+import { PaymentGatewayTestLive } from "./payment/paymentGatewayMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -52,6 +53,11 @@ const DisputeModuleTest = Layer.empty.pipe(
 const NotificationModuleTest = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoTest),
   Layer.provideMerge(NotificationFacadeTestLive),
+);
+
+const PaymentModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(PaymentGatewayTestLive),
+ 
 );
 
 const AuthModuleTest = Layer.empty.pipe(
@@ -82,6 +88,7 @@ export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(ReversibleHashTestLive),
   Layer.provideMerge(ReferralSourceRepoTest),
   Layer.provideMerge(TigerBeetleRepoTestLive),
+  Layer.provideMerge(PaymentModuleTest),
   Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(

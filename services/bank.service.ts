@@ -18,7 +18,11 @@ export const getBankList = () => {
   return Effect.gen(function* (_) {
     const paystackGateway = yield* PaymentGateway;
     const lists = yield* paystackGateway.bankLists();
-    return dataResponse({ data: lists });
+    return dataResponse({
+      data: lists.data,
+      status: lists.status,
+      message: lists.message,
+    });
   });
 };
 
