@@ -28,6 +28,7 @@ import { TigerBeetleRepoTestLive } from "./tigerBeetleRepoMock";
 import { OtpRepoTest } from "./otp";
 import { PushTokenRepoTest } from "./user/pushTokenMock";
 import { PaymentGatewayTestLive } from "./payment/paymentGatewayMock";
+import { BankAccountRepoTest } from "./user/bankAccountMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -71,6 +72,7 @@ const UserModuleTest = Layer.empty.pipe(
   Layer.provideMerge(UserRepoTest),
   Layer.provideMerge(UserWalletRepoTest),
   Layer.provideMerge(PushTokenRepoTest),
+  Layer.provideMerge(BankAccountRepoTest),
 )
 
 export const AppTest = Layer.empty.pipe(
