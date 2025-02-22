@@ -2,6 +2,7 @@ import { Effect, Layer } from "effect";
 import {
   checkUsername,
   createUser,
+  forgotPassword,
   passwordReset,
   resendEmailVerificationOtp,
   verifyUserEmail,
@@ -321,85 +322,133 @@ describe("User services", () => {
     });
   });
 
-  describe.skip("Password reset", () => {
-    describe("Request", () => {
-      test("user can create request for a password reset", async () => {
-        const program = Effect.scoped(
-          Effect.provide(
-            readOTP.pipe(
-              Effect.flatMap((code) =>
-                passwordReset({ otp: code, password: "" }),
-              ),
-            ),
-            AppTest,
-          ),
-        );
-
-        const session = await runTest(program);
-        expect(session).toMatchInlineSnapshot(`
-        {
-          "message": "Password updated",
-          "success": true,
-        }
-      `);
+  describe("Forget password", () => {
+    const email = "email";
+    test("should fail if user doesn't exist", () => {
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
       });
 
-      it("should fail if user doesn't exist", async () => {
-        const MockUserRepo = extendUserRepoMock({
-          update() {
-            return Effect.fail(new Error("Update fail!"));
-          },
-        });
-
-        const program = Effect.scoped(
-          Effect.provide(
-            readOTP.pipe(
-              Effect.flatMap((code) =>
-                passwordReset({ otp: code, password: "" }),
-              ),
-            ),
-            MockUserRepo.pipe(Layer.provideMerge(AppTest)),
-          ),
-        );
-
-        const session = await runTest(program);
-
-        expect(session).toMatchInlineSnapshot(`[ExpectedError: Invalid user]`);
-      });
+      const program = forgotPassword(email);
+      const result = runTest(Effect.provide(program, userRepo));
+      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Request is being processed]`);
     });
 
-    describe.skip("verification and password change", () => {
-      it("should fail when password reset OTP is INVALID", async () => {
-        const program = Effect.scoped(
-          Effect.provide(
-            passwordReset({ otp: "MOCK_FAKE_OTP", password: "" }),
-            AppTest,
-          ),
-        );
-        const response = await runTest(program);
-        expect(response).toMatchInlineSnapshot(`[ExpectedError: Invalid OTP]`);
+    test("should create new otp on if otp not present for user", async () => {
+      let otpCreated = false;
+      let isNotified = false;
+      const otpRepo = extendOtpRepo({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+        create() {
+          otpCreated = true;
+          return Effect.succeed([]);
+        },
       });
 
-      test("user can reset password with valid OTP", async () => {
-        const program = Effect.scoped(
-          Effect.provide(
-            readOTP.pipe(
-              Effect.flatMap((code) =>
-                passwordReset({ otp: code, password: "" }),
-              ),
+      const notifyMock = extendNotificationFacade({
+        notify() {
+          isNotified = true;
+          return Effect.succeed(1);
+        },
+      });
+
+      const program = forgotPassword(email);
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(otpRepo, notifyMock)),
+      );
+
+      expect(otpCreated).toBeTruthy();
+      expect(isNotified).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Forget password successful",
+          "status": "success",
+        }
+      `);
+    });
+
+    test("should update otp if otp already present for user", async () => {
+      let otpUpdated = false;
+      let isNotified = false;
+      const otpRepo = extendOtpRepo({
+        update() {
+          otpUpdated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const notifyMock = extendNotificationFacade({
+        notify() {
+          isNotified = true;
+          return Effect.succeed(1);
+        },
+      });
+
+      const program = forgotPassword(email);
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(otpRepo, notifyMock)),
+      );
+
+      expect(otpUpdated).toBeTruthy();
+      expect(isNotified).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Forget password successful",
+          "status": "success",
+        }
+      `);
+    });
+  });
+
+  describe.skip("Request", () => {
+    test("user can create request for a password reset", async () => {
+      const program = Effect.scoped(
+        Effect.provide(
+          readOTP.pipe(
+            Effect.flatMap((code) =>
+              passwordReset({ otp: code, password: "" }),
             ),
-            AppTest,
           ),
-        );
+          AppTest,
+        ),
+      );
 
-        const session = await runTest(program);
-        expect(session).toMatchInlineSnapshot(`
-            {
-              "message": "Password updated",
-              "success": true,
-            }
-          `);
+      const session = await runTest(program);
+      expect(session).toMatchInlineSnapshot(`
+      {
+        "message": "Password updated",
+        "success": true,
+      }
+    `);
+    });
+
+    it("should fail if user doesn't exist", async () => {
+      const MockUserRepo = extendUserRepoMock({
+        update() {
+          return Effect.fail(new Error("Update fail!"));
+        },
       });
+
+      const program = Effect.scoped(
+        Effect.provide(
+          readOTP.pipe(
+            Effect.flatMap((code) =>
+              passwordReset({ otp: code, password: "" }),
+            ),
+          ),
+          MockUserRepo.pipe(Layer.provideMerge(AppTest)),
+        ),
+      );
+
+      const session = await runTest(program);
+
+      expect(session).toMatchInlineSnapshot(`[ExpectedError: Invalid user]`);
     });
   });
 });

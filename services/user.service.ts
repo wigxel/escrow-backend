@@ -222,6 +222,8 @@ export function forgotPassword(email: string) {
         .notify(new PasswordResetMail(user, otp)),
       Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
+
+    return dataResponse({ message: "Forget password successful" });
   });
 }
 
@@ -254,8 +256,6 @@ export function passwordReset(data: z.infer<typeof passwordResetDto>) {
     return dataResponse({ message: "Password reset successful" });
   });
 }
-
-
 
 /**
  * Find or create new user
