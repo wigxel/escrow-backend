@@ -164,6 +164,31 @@ export function resendEmailVerificationOtp(email: string) {
   });
 }
 
+export function verifyUserEmail(params: z.infer<typeof verifyEmailDto>) {
+  return Effect.gen(function* (_) {
+    const userRepo = yield* UserRepoLayer.Tag;
+    const otpRepo = yield* OtpRepo;
+
+    yield* verifyOTP(params.otp);
+    const storedOtp = yield* _(
+      otpRepo.firstOrThrow({ value: params.otp, email: params.email }),
+      Effect.mapError(() => new ExpectedError("Invalid OTP")),
+    );
+
+    yield* Effect.all([
+      userRepo.update(storedOtp.userId, { emailVerified: true }),
+      otpRepo.delete(
+        SearchOps.and(
+          SearchOps.eq("value", params.otp),
+          SearchOps.eq("email", params.email),
+        ),
+      ),
+    ]);
+
+    return dataResponse({ message: "Email verification success" });
+  });
+}
+
 export function forgotPassword(email: string) {
   return Effect.gen(function* (_) {
     const notify = yield* NotificationFacade;
@@ -230,30 +255,7 @@ export function passwordReset(data: z.infer<typeof passwordResetDto>) {
   });
 }
 
-export function verifyUserEmail(params: z.infer<typeof verifyEmailDto>) {
-  return Effect.gen(function* (_) {
-    const userRepo = yield* UserRepoLayer.Tag;
-    const otpRepo = yield* OtpRepo;
 
-    yield* verifyOTP(params.otp);
-    const storedOtp = yield* _(
-      otpRepo.firstOrThrow({ value: params.otp, email: params.email }),
-      Effect.mapError(() => new ExpectedError("Invalid OTP")),
-    );
-
-    yield* Effect.all([
-      userRepo.update(storedOtp.userId, { emailVerified: true }),
-      otpRepo.delete(
-        SearchOps.and(
-          SearchOps.eq("value", params.otp),
-          SearchOps.eq("email", params.email),
-        ),
-      ),
-    ]);
-
-    return dataResponse({ message: "Email verification success" });
-  });
-}
 
 /**
  * Find or create new user

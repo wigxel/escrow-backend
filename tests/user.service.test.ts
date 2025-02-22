@@ -212,7 +212,7 @@ describe("User services", () => {
 
     test("should succeed if user exists and email isn't verified", async () => {
       let otpUpdated = false;
-      let isNotified = false
+      let isNotified = false;
       const userRepo = extendUserRepoMock({
         firstOrThrow() {
           return Effect.succeed({
@@ -237,14 +237,14 @@ describe("User services", () => {
 
       const otpRepo = extendOtpRepo({
         update() {
-          otpUpdated = true
+          otpUpdated = true;
           return Effect.succeed([]);
         },
       });
 
       const notifyMock = extendNotificationFacade({
         notify() {
-          isNotified = true
+          isNotified = true;
           return Effect.succeed(1);
         },
       });
@@ -259,8 +259,8 @@ describe("User services", () => {
           ),
         ),
       );
-      expect(otpUpdated).toBeTruthy()
-      expect(isNotified).toBeTruthy()
+      expect(otpUpdated).toBeTruthy();
+      expect(isNotified).toBeTruthy();
       expect(result).toMatchInlineSnapshot(`
         {
           "data": null,
@@ -271,35 +271,53 @@ describe("User services", () => {
     });
   });
 
-  describe.skip("Account verification", () => {
-    it("should fail if otp is incorrect", async () => {
-      const program = Effect.scoped(
-        Effect.provide(
-          verifyUserEmail("300023"), // <-- incorrect code
-          AppTest,
-        ),
-      );
+  describe("User email verification", () => {
+    const params = { otp: "123456", email: "email" };
 
-      const verify_user = await runTest(program);
-      expect(verify_user).toMatchInlineSnapshot(`[ExpectedError: Invalid OTP]`);
+    test("should fail if otp is incorrect", async () => {
+      const otpRepo = extendOtpRepo({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
+        },
+      });
+
+      const program = verifyUserEmail(params);
+      const result = runTest(Effect.provide(program, otpRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Invalid OTP]`,
+      );
     });
 
-    it("should verify OTP is valid", async () => {
-      const program = Effect.scoped(
-        Effect.provide(
-          readOTP.pipe(Effect.flatMap((code) => verifyUserEmail(code))),
-          AppTest,
-        ),
+    test("should verify OTP is valid", async () => {
+      let userUpdated = false;
+      let otpDeleted = false;
+      const userRepo = extendUserRepoMock({
+        update() {
+          userUpdated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const otpRepo = extendOtpRepo({
+        delete() {
+          otpDeleted = true;
+          return Effect.succeed(true);
+        },
+      });
+
+      const program = verifyUserEmail(params);
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(userRepo, otpRepo)),
       );
-
-      const verify_user = await runTest(program);
-
-      expect(verify_user).toMatchInlineSnapshot(`
-      {
-        "message": "Email verified",
-        "success": true,
-      }
-    `);
+      expect(userUpdated).toBeTruthy();
+      expect(otpDeleted).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Email verification success",
+          "status": "success",
+        }
+      `);
     });
   });
 
