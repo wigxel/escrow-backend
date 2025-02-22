@@ -239,11 +239,13 @@ export function passwordReset(data: z.infer<typeof passwordResetDto>) {
     );
 
     yield* _(
-      userRepo.update(storedOtp.userId, {
-        password: yield* hashPassword(data.password),
-        emailVerified: true, // REASON: Password resets should make user verified. See: https://thecopenhagenbook.com/password-reset
-      }),
-      Effect.mapError((err) => new ExpectedError("Invalid user")),
+      userRepo.update(
+        { id: storedOtp.userId },
+        {
+          password: yield* hashPassword(data.password),
+          emailVerified: true, // REASON: Password resets should make user verified. See: https://thecopenhagenbook.com/password-reset
+        },
+      ),
     );
 
     yield* otpRepo.delete(

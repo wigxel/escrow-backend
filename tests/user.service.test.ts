@@ -333,7 +333,9 @@ describe("User services", () => {
 
       const program = forgotPassword(email);
       const result = runTest(Effect.provide(program, userRepo));
-      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Request is being processed]`);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Request is being processed]`,
+      );
     });
 
     test("should create new otp on if otp not present for user", async () => {
@@ -406,49 +408,58 @@ describe("User services", () => {
     });
   });
 
-  describe.skip("Request", () => {
-    test("user can create request for a password reset", async () => {
-      const program = Effect.scoped(
-        Effect.provide(
-          readOTP.pipe(
-            Effect.flatMap((code) =>
-              passwordReset({ otp: code, password: "" }),
-            ),
-          ),
-          AppTest,
-        ),
-      );
+  describe("Password reset", () => {
+    const params = {
+      otp: "123456",
+      password: "1234568",
+      email: "email",
+    };
 
-      const session = await runTest(program);
-      expect(session).toMatchInlineSnapshot(`
-      {
-        "message": "Password updated",
-        "success": true,
-      }
-    `);
-    });
-
-    it("should fail if user doesn't exist", async () => {
-      const MockUserRepo = extendUserRepoMock({
-        update() {
-          return Effect.fail(new Error("Update fail!"));
+    test("should fail if invalid otp", async () => {
+      const otpRepo = extendOtpRepo({
+        firstOrThrow() {
+          return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
       });
 
-      const program = Effect.scoped(
-        Effect.provide(
-          readOTP.pipe(
-            Effect.flatMap((code) =>
-              passwordReset({ otp: code, password: "" }),
-            ),
-          ),
-          MockUserRepo.pipe(Layer.provideMerge(AppTest)),
-        ),
+      const program = passwordReset(params);
+      const result = runTest(Effect.provide(program, otpRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Invalid OTP]`,
       );
+    });
 
-      const session = await runTest(program);
+    test("should reset users password", async () => {
+      let userUpdated = false;
+      let otpDeleted = false;
 
-      expect(session).toMatchInlineSnapshot(`[ExpectedError: Invalid user]`);
+      const userRepo = extendUserRepoMock({
+        update() {
+          userUpdated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const otpRepo = extendOtpRepo({
+        delete() {
+          otpDeleted = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const program = passwordReset(params);
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(userRepo, otpRepo)),
+      );
+      expect(userUpdated).toBeTruthy();
+      expect(otpDeleted).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Password reset successful",
+          "status": "success",
+        }
+      `);
     });
   });
 });
