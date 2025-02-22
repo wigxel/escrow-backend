@@ -26,6 +26,7 @@ import { ReversibleHashTestLive } from "./reversibleHashMock";
 import { ReferralSourceRepoTest } from "./referralSourceRepoMock";
 import { TigerBeetleRepoTestLive } from "./tigerBeetleRepoMock";
 import { OtpRepoTest } from "./otp";
+import { PushTokenRepoTest } from "./user/pushTokenMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -63,7 +64,7 @@ const AuthModuleTest = Layer.empty.pipe(
 const UserModuleTest = Layer.empty.pipe(
   Layer.provideMerge(UserRepoTest),
   Layer.provideMerge(UserWalletRepoTest),
-
+  Layer.provideMerge(PushTokenRepoTest),
 )
 
 export const AppTest = Layer.empty.pipe(

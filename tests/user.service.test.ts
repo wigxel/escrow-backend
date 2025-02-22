@@ -2,13 +2,15 @@ import { Effect, Layer } from "effect";
 import {
   checkUsername,
   createUser,
+  deleteUserPushToken,
   forgotPassword,
+  getUserPushTokens,
   passwordReset,
   resendEmailVerificationOtp,
   UserBalance,
   verifyUserEmail,
 } from "~/services/user.service";
-import { AppTest, runTest } from "~/tests/mocks/app";
+import { runTest } from "~/tests/mocks/app";
 import { extendOtpRepo } from "~/tests/mocks/otp";
 import { extendUserRepoMock } from "./mocks/user/user";
 import { notNil } from "~/libs/query.helpers";
@@ -18,8 +20,17 @@ import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 import { extendNotificationFacade } from "./mocks/notification/notificationFacadeMock";
 import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
 import { Account } from "tigerbeetle-node";
+import { extendPushTokenRepo } from "./mocks/user/pushTokenMock";
 
 describe("User services", () => {
+  const currentUser = {
+    email: "",
+    id: "",
+    username: "",
+    phone: "",
+    role: "",
+  };
+
   describe("check username", () => {
     test("should fail if username is taken", () => {
       const program = checkUsername("kd");
@@ -467,13 +478,6 @@ describe("User services", () => {
   });
 
   describe("User balance", () => {
-    const currentUser = {
-      email: "",
-      id: "",
-      username: "",
-      phone: "",
-      role: "",
-    };
     test("should fail if invalid user id", () => {
       const userWalletRepo = extendUserWalletRepo({
         firstOrThrow() {
@@ -551,6 +555,50 @@ describe("User services", () => {
             "totalEscrowBalance": 2000,
             "walletBalance": 1000,
           },
+          "status": "success",
+        }
+      `);
+    });
+  });
+
+  describe("Get users push notification tokens or device id", () => {
+    test("should fetch all user's push tokens or device id", async () => {
+      const program = getUserPushTokens("user-id");
+      const result = await runTest(program);
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": [
+            {
+              "createdAt": 2025-03-21T23:00:00.000Z,
+              "id": 1,
+              "token": "device-token",
+              "updatedAt": 2025-03-21T23:00:00.000Z,
+              "userId": "user-id",
+            },
+          ],
+          "status": "success",
+        }
+      `);
+    });
+  });
+
+  describe("Delete push tokens", () => {
+    test("should delete users push tokens", async () => {
+      let isDeleted = false;
+      const pushTokenRepo = extendPushTokenRepo({
+        delete() {
+          isDeleted = true;
+          return Effect.succeed(true);
+        },
+      });
+
+      const program = deleteUserPushToken({ currentUser, token: "MOCK-TOKEN" });
+      const result = await runTest(Effect.provide(program, pushTokenRepo));
+      expect(isDeleted).toBeTruthy()
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "User device push token deleted",
           "status": "success",
         }
       `);
