@@ -4,7 +4,7 @@ import {
   type IPaymentService,
   PaymentService,
 } from "~/services/stripe.service";
-import { extendMockImplementation } from "./helpers";
+import { extendMockImplementation } from "../helpers";
 
 class PaymentServiceMock implements IPaymentService {
   createCheckoutSession = (arg1, meta) => {

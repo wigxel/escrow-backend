@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { extendNotificationRepo } from "./mocks/notificationRepoMock";
+import { extendNotificationRepo } from "./mocks/notification/notificationRepoMock";
 import {
   deleteNotification,
   getNotifications,

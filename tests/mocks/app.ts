@@ -2,10 +2,10 @@ import { ConfigProvider, Effect, Layer, type Scope } from "effect";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
 import type { InferRequirements } from "~/services/effect.util";
 import { DatabaseTest } from "~/tests/mocks/database";
-import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
+import { NotificationRepoTest } from "~/tests/mocks/notification/notificationRepoMock";
 import { OTPRepoTest } from "~/tests/mocks/otp";
 import { SessionProviderTest } from "~/tests/mocks/authentication/session-provider";
-import { UserRepoTest } from "~/tests/mocks/user";
+import { UserRepoTest } from "~/tests/mocks/user/user";
 import { DisputeMemberRepoTest } from "./dispute/disputeMembersRepo";
 import { DisputeRepoTest } from "./dispute/disputeRepoMock";
 import { ReviewTest } from "./review";
@@ -15,15 +15,20 @@ import { EscrowParticipantRepoTest } from "./escrow/escrowParticipantsRepoMock";
 import { EscrowTransactionRepoTest } from "./escrow/escrowTransactionRepoMock";
 import { DisputeCategoryRepoTest } from "./dispute/disputeCategoryMock";
 import { DisputeResolutionRepoTest } from "./dispute/disputeResolutionMock";
-import { NotificationFacadeTestLive } from "./notificationFacadeMock";
+import { NotificationFacadeTestLive } from "./notification/notificationFacadeMock";
 import { ActivityLogRepoTest } from "./activityLogRepoMock";
 import { FileStorageTestLive } from "./filestorageMock";
 import { ChatServiceTestLive } from "./chatServiceMock";
 import { Mailer } from "~/layers/mailing";
 import type { SendMailParams } from "~/layers/mailing/types";
 import { PaginationImpl } from "~/services/search/pagination.service";
+import { UserWalletRepoTest } from "./user/userWalletMock";
+import { ReversibleHashTestLive } from "./reversibleHashMock";
+import { ReferralSourceRepoTest } from "./referralSourceRepoMock";
+import { TigerBeetleRepoTestLive } from "./tigerBeetleRepoMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
+
 const mailService = {
   send(params: SendMailParams) {
     return Effect.succeed(undefined);
@@ -50,15 +55,21 @@ const NotificationModuleTest = Layer.empty.pipe(
 
 const AuthModuleTest = Layer.empty.pipe(
   Layer.provideMerge(OTPRepoTest),
-  Layer.provideMerge(UserRepoTest),
   Layer.provideMerge(SesssionTest),
   Layer.provideMerge(SessionProviderTest),
   Layer.provideMerge(Argon2dHasherLive),
 );
 
+const UserModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(UserRepoTest),
+  Layer.provideMerge(UserWalletRepoTest),
+
+)
+
 export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(DatabaseTest),
   Layer.provideMerge(AuthModuleTest),
+  Layer.provideMerge(UserModuleTest),
   Layer.provideMerge(ReviewModuleTest),
   Layer.provideMerge(DisputeModuleTest),
   Layer.provideMerge(EscrowModuleTest),
@@ -67,6 +78,9 @@ export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(FileStorageTestLive),
   Layer.provideMerge(ChatServiceTestLive),
   Layer.provideMerge(MailServiceTest),
+  Layer.provideMerge(ReversibleHashTestLive),
+  Layer.provideMerge(ReferralSourceRepoTest),
+  Layer.provideMerge(TigerBeetleRepoTestLive),
   Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(

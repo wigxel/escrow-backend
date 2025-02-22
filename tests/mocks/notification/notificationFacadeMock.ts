@@ -11,7 +11,7 @@ import {
   type NotificationChannel,
   type NotificationMediator,
 } from "~/layers/notification/types";
-import { extendMockImplementation } from "./helpers";
+import { extendMockImplementation } from "../helpers";
 
 type AvailableChannels =
   | EmailChannel

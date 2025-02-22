@@ -5,7 +5,7 @@ import {
   PaymentRepo,
   PaymentRepository,
 } from "~/repositories/payment.repository";
-import { extendMockImplementation } from "./helpers";
+import { extendMockImplementation } from "../helpers";
 
 const PaymentMock: PaymentRepository = {
   create(data: PaymentDetail) {

@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { changePassword, login, logout } from "~/services/auth.service";
-import { extendUserRepoMock } from "~/tests/mocks/user";
+import { extendUserRepoMock } from "~/tests/mocks/user/user";
 import { runTest } from "./mocks/app";
 
 describe("Authentication and authorization service", () => {

@@ -11,7 +11,7 @@ import {
 import { runTest } from "./mocks/app";
 import { extendDisputeMemberRepo } from "./mocks/dispute/disputeMembersRepo";
 import { extendDisputeRepo } from "./mocks/dispute/disputeRepoMock";
-import { extendUserRepoMock } from "./mocks/user";
+import { extendUserRepoMock } from "./mocks/user/user";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 import { extendDisputeCategoryRepo } from "./mocks/dispute/disputeCategoryMock";
 import { extendDisputeResolutionyRepo } from "./mocks/dispute/disputeResolutionMock";
@@ -20,7 +20,7 @@ import { NoSuchElementException } from "effect/Cause";
 import { extendChatServiceTest } from "./mocks/chatServiceMock";
 import { extendFileStorageTest } from "./mocks/filestorageMock";
 import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
-import { extendNotificationFacade } from "./mocks/notificationFacadeMock";
+import { extendNotificationFacade } from "./mocks/notification/notificationFacadeMock";
 
 describe("Dispute service", () => {
   const currentUser = {

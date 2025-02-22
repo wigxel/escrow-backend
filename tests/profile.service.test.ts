@@ -4,7 +4,7 @@ import {
   uploadAvatarImage,
 } from "~/services/profile.service";
 import { runTest } from "./mocks/app";
-import { extendUserRepoMock } from "./mocks/user";
+import { extendUserRepoMock } from "./mocks/user/user";
 import { Effect, Layer } from "effect";
 import { notNil } from "~/libs/query.helpers";
 import { extendFileStorageTest } from "./mocks/filestorageMock";

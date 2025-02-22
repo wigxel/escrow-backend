@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import { NotificationRepo } from "~/repositories/notification.repo";
-import { extendMockImplementation } from "./helpers";
+import { extendMockImplementation } from "../helpers";
 
 const list = Effect.succeed([
   {
