@@ -1,4 +1,7 @@
-import { createEscrowTransaction } from "~/services/escrow/escrowTransactionServices";
+import {
+  createEscrowTransaction,
+  getEscrowTransactionDetails,
+} from "~/services/escrow/escrowTransactionServices";
 import { runTest } from "./mocks/app";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 import { Effect, Layer } from "effect";
@@ -54,22 +57,23 @@ describe("Escrow transaction service", () => {
       const escrowRepo = extendEscrowTransactionRepo({
         create() {
           createdEscrow = true;
-          return Effect.succeed([{
-            id: "test-id",
-            status: "deposit.success",
-            title: "",
-            description: "",
-            createdBy: "",
-            createdAt: new Date(2025, 2, 20),
-            updatedAt: new Date(2025, 2, 20),
-          }]);
+          return Effect.succeed([
+            {
+              id: "test-id",
+              status: "deposit.success",
+              title: "",
+              description: "",
+              createdBy: "",
+              createdAt: new Date(2025, 2, 20),
+              updatedAt: new Date(2025, 2, 20),
+            },
+          ]);
         },
       });
       const escrowWalletRepo = extendEscrowWalletRepo({
         create() {
           createdEscrowWallet = true;
-          return Effect.succeed([
-          ]);
+          return Effect.succeed([]);
         },
       });
       const tigerbeetleRepo = extendTigerBeetleRepo({
@@ -129,6 +133,60 @@ describe("Escrow transaction service", () => {
         {
           "data": {
             "escrowTransactionId": "test-id",
+          },
+          "status": "success",
+        }
+      `);
+    });
+  });
+
+  describe("Get escrow transaction details", () => {
+    test("should fail if invalid escrow id", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        //@ts-expect-error
+        getEscrowDetails() {
+          return Effect.fail(new Error(""));
+        },
+      });
+      const program = getEscrowTransactionDetails({
+        escrowId: "MOCK_ESCROW_ID",
+      });
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: invalid escrow id: no escrow transaction found]`,
+      );
+    });
+
+    test("should get escrow details", async () => {
+      const program = getEscrowTransactionDetails({
+        escrowId: "MOCK_ESCROW_ID",
+      });
+      const result = await runTest(program);
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": {
+            "activitylog": [
+              {},
+            ],
+            "createdAt": 2025-03-19T23:00:00.000Z,
+            "createdBy": "",
+            "description": "",
+            "escrowWalletDetails": {
+              "balance": 1000,
+              "createdAt": 2025-03-22T23:00:00.000Z,
+              "escrowId": "escrow-id",
+              "id": "test-id",
+              "tigerbeetleAccountId": "1111111",
+              "updatedAt": 2025-03-22T23:00:00.000Z,
+            },
+            "id": "test-id",
+            "participants": [
+              {},
+            ],
+            "paymentDetails": {},
+            "status": "created",
+            "title": "",
+            "updatedAt": 2025-03-19T23:00:00.000Z,
           },
           "status": "success",
         }

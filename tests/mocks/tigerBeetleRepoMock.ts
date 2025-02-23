@@ -5,6 +5,7 @@ import {
 } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import type { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
 import { extendMockImplementation } from "./helpers";
+import type { Account } from "tigerbeetle-node";
 
 class Mock extends TigerBeetleRepository {
   constructor() {
@@ -19,7 +20,15 @@ class Mock extends TigerBeetleRepository {
   }
 
   lookupAccounts() {
-    return Effect.succeed([]);
+    return Effect.succeed([
+      {
+        id: BigInt(1111111),
+        credits_pending: BigInt(0),
+        credits_posted: BigInt(100000),
+        debits_pending: BigInt(0),
+        debits_posted: BigInt(0),
+      },
+    ] as Account[]);
   }
 
   lookupTransfers() {

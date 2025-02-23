@@ -62,7 +62,6 @@ export const createEscrowTransaction = (
     if (customer && customer.id === currentUser.id) {
       yield* new ExpectedError("You cannot create transaction with yourself");
     }
-    console.log("hiii")
     //new escrow transaction
     const escrowTransaction = yield* _(
       escrowTransactionRepo.create({
@@ -132,7 +131,6 @@ export const getEscrowTransactionDetails = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
-    let balance = BigInt(0);
     const escrowDetails = yield* _(
       escrowRepo.getEscrowDetails(params.escrowId),
       Effect.mapError(
@@ -143,12 +141,9 @@ export const getEscrowTransactionDetails = (params: {
       ),
     );
 
-    if (escrowDetails.escrowWalletDetails) {
-      //get the escrow balance
-      balance = yield* getAccountBalance(
-        escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
-      );
-    }
+    const balance = yield* getAccountBalance(
+      escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
+    );
 
     return dataResponse({
       data: {

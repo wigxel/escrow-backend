@@ -22,7 +22,7 @@ const escrowTransactionMock: EscrowTransactionRepository = {
   },
   //@ts-expect-error
   getEscrowDetails(escrowId) {
-    return Effect.succeed([
+    return Effect.succeed(
       {
         id: "test-id",
         status: "created",
@@ -34,9 +34,15 @@ const escrowTransactionMock: EscrowTransactionRepository = {
         activitylog: [{}],
         paymentDetails: {},
         participants: [{}],
-        escrowWalletDetails: {},
+        escrowWalletDetails: {
+          id: "test-id",
+          escrowId: "escrow-id",
+          tigerbeetleAccountId: "1111111",
+          createdAt: new Date(2025, 2, 23),
+          updatedAt: new Date(2025, 2, 23),
+        },
       },
-    ]).pipe(Effect.flatMap(notNil));
+    ).pipe(Effect.flatMap(notNil));
   },
 
   all: (params) => {
