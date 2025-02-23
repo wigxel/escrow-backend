@@ -14,6 +14,7 @@ import { extendEscrowPaymentRepo } from "./mocks/escrow/escrowPaymentRepoMock";
 import { extendEscrowRequestRepo } from "./mocks/escrow/escrowRequestReoMock";
 import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
 import { toRuntimeWithMemoMap } from "effect/Layer";
+import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
 
 describe("Escrow transaction service", () => {
   const currentUser = {
@@ -280,7 +281,236 @@ describe("Escrow transaction service", () => {
     test("should fail is account exists and user not logged in", () => {
       const program = initializeEscrowDeposit(params, undefined);
       const result = runTest(program);
-      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Unauthorized: signin to continue]`);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Unauthorized: signin to continue]`,
+      );
+    });
+
+    test("should fail if escrow id is invalid", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+      const program = initializeEscrowDeposit(params, currentUser);
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid escrow transaction id]`,
+      );
+    });
+
+    test("should fail if escrow status not 'deposit.pending'", () => {
+      const program = initializeEscrowDeposit(params, currentUser);
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Please click the link sent to you to proceed with payment]`,
+      );
+    });
+
+    test("should fail if escrow id is invalid to get escrow request details", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            status: "deposit.pending",
+            title: "",
+            description: "",
+            createdBy: "",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+          });
+        },
+      });
+
+      const escrowRequestRepo = extendEscrowRequestRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = initializeEscrowDeposit(params, currentUser);
+      const result = runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, escrowRequestRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid escrow id]`,
+      );
+    });
+
+    test("should fail is escrow request has expired", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            status: "deposit.pending",
+            title: "",
+            description: "",
+            createdBy: "",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+          });
+        },
+      });
+
+      const escrowRequestRepo = extendEscrowRequestRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            senderId: "user-id",
+            amount: "10000",
+            escrowId: "escrow-id",
+            customerUsername: "username",
+            customerPhone: "customer phone",
+            customerRole: "seller",
+            customerEmail: "customer-email",
+            status: "pending",
+            accessCode: null,
+            authorizationUrl: null,
+            createdAt: new Date(2025, 2, 23),
+            updatedAt: new Date(2025, 2, 23),
+            expiresAt: new Date(2024, 2, 22),
+          });
+        },
+      });
+
+      const program = initializeEscrowDeposit(params, currentUser);
+      const result = runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, escrowRequestRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Escrow transaction request has expired]`,
+      );
+    });
+
+    test("should fail if escrow creator tries to initialize deposit", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            status: "deposit.pending",
+            title: "",
+            description: "",
+            createdBy: "",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+          });
+        },
+      });
+
+      const escrowRequestRepo = extendEscrowRequestRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            senderId: "user-id",
+            amount: "10000",
+            escrowId: "escrow-id",
+            customerUsername: "username",
+            customerPhone: "customer phone",
+            customerRole: "seller",
+            customerEmail: "customer-email",
+            status: "pending",
+            accessCode: null,
+            authorizationUrl: null,
+            createdAt: new Date(2025, 2, 23),
+            updatedAt: new Date(2025, 2, 23),
+            expiresAt: new Date(2025, 2, 22),
+          });
+        },
+      });
+
+      const program = initializeEscrowDeposit(params, {
+        ...currentUser,
+        id: "user-id",
+      });
+      const result = runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, escrowRequestRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Account associated with the escrow creation]`,
+      );
+    });
+
+    test("should initialize escrow deposit", async () => {
+      let createdPaymentSession = false;
+      let updatedEscrowRequest = false;
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            status: "deposit.pending",
+            title: "",
+            description: "",
+            createdBy: "",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+          });
+        },
+      });
+
+      const escrowRequestRepo = extendEscrowRequestRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            senderId: "user-id",
+            amount: "10000",
+            escrowId: "escrow-id",
+            customerUsername: "username",
+            customerPhone: "customer phone",
+            customerRole: "seller",
+            customerEmail: "customer-email",
+            status: "pending",
+            accessCode: null,
+            authorizationUrl: null,
+            createdAt: new Date(2025, 2, 23),
+            updatedAt: new Date(2025, 2, 23),
+            expiresAt: new Date(2025, 2, 22),
+          });
+        },
+
+        update() {
+          updatedEscrowRequest = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const paymentGatewayMock = extendPaymentGateway({
+        createSession() {
+          createdPaymentSession = true;
+          return Effect.succeed({
+            data: {
+              access_code: "access_code",
+              authorization_url: "authorization_url",
+              reference: "reference",
+            },
+            message: "",
+            status: "success",
+          });
+        },
+      });
+
+      const program = initializeEscrowDeposit(params, currentUser);
+      const result = await runTest(
+        Effect.provide(
+          program,
+          escrowRepo.pipe(
+            Layer.provideMerge(escrowRequestRepo),
+            Layer.provideMerge(paymentGatewayMock),
+          ),
+        ),
+      );
+      expect(createdPaymentSession).toBeTruthy()
+      expect(updatedEscrowRequest).toBeTruthy()
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": {
+            "access_code": "access_code",
+            "authorization_url": "authorization_url",
+            "reference": "reference",
+          },
+          "message": "",
+          "status": "success",
+        }
+      `)
     });
   });
 });
