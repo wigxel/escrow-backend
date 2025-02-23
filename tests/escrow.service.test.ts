@@ -4,6 +4,7 @@ import {
   getEscrowRequestDetails,
   getEscrowTransactionDetails,
   initializeEscrowDeposit,
+  validateUserStatusUpdate,
 } from "~/services/escrow/escrowTransactionServices";
 import { runTest } from "./mocks/app";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
@@ -552,7 +553,7 @@ describe("Escrow transaction service", () => {
 
       const activityLogMock = extendActivityLogRepo({
         create() {
-          createdActivityLog = true
+          createdActivityLog = true;
           return Effect.succeed([]);
         },
       });
@@ -588,6 +589,60 @@ describe("Escrow transaction service", () => {
       expect(updatedEscrowPayment).toBeTruthy();
       expect(updatedEscrow).toBeTruthy();
       expect(createdActivityLog).toBeTruthy();
+    });
+  });
+
+  describe("Validate user status update", () => {
+    const params = {
+      currentUser,
+      escrowId: "MOCK_ESCROW_ID",
+      status: "service.pending",
+    };
+
+    test("should fail if current user not seller", () => {
+      const program = validateUserStatusUpdate(params);
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Unauthorized operation: service provider operation]`,
+      );
+    });
+
+    test("should fail if current user not buyer", () => {
+      const program = validateUserStatusUpdate({
+        ...params,
+        status: "service.confirmed",
+      });
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Unauthorized operation: service consumer operation]`,
+      );
+    });
+
+    test("should retuen seller and buyer details", async () => {
+      const program = validateUserStatusUpdate({
+        ...params,
+        currentUser: { ...params.currentUser, id: "buyer-id" },
+        status: "service.confirmed",
+      });
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(`
+        {
+          "buyer": {
+            "escrowId": "escrow-id",
+            "id": "id",
+            "role": "buyer",
+            "status": "active",
+            "userId": "buyer-id",
+          },
+          "seller": {
+            "escrowId": "escrow-id",
+            "id": "id",
+            "role": "seller",
+            "status": "active",
+            "userId": "seller-id",
+          },
+        }
+      `);
     });
   });
 });

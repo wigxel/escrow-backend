@@ -21,14 +21,14 @@ const mock: EscrowParticipantRepository = {
         id: "id",
         escrowId: "escrow-id",
         userId: "seller-id",
-        role: "buyer",
+        role: "seller",
         status: "active",
       },
       {
         id: "id",
         escrowId: "escrow-id",
         userId: "buyer-id",
-        role: "seller",
+        role: "buyer",
         status: "active",
       },
     ]);

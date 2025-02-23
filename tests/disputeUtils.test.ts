@@ -1,6 +1,6 @@
 import { canTransitionDisputeStatus } from "~/services/dispute/dispute.util";
 
-describe("Transition order status", () => {
+describe("Transition escrow status", () => {
   test("should transition dispute status successfully", () => {
     const maps = [
       ["pending", "open"],
