@@ -1,5 +1,4 @@
 import { Effect, Layer } from "effect";
-import { NoSuchElementException } from "effect/Cause";
 import {
   createReview,
   deleteReview,

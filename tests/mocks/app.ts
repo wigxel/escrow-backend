@@ -29,6 +29,7 @@ import { OtpRepoTest } from "./otp";
 import { PushTokenRepoTest } from "./user/pushTokenMock";
 import { PaymentGatewayTestLive } from "./payment/paymentGatewayMock";
 import { BankAccountRepoTest } from "./user/bankAccountMock";
+import { BankAccountVerificationRepoTest } from "./user/bankVerificationMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -73,6 +74,7 @@ const UserModuleTest = Layer.empty.pipe(
   Layer.provideMerge(UserWalletRepoTest),
   Layer.provideMerge(PushTokenRepoTest),
   Layer.provideMerge(BankAccountRepoTest),
+  Layer.provideMerge(BankAccountVerificationRepoTest),
 )
 
 export const AppTest = Layer.empty.pipe(

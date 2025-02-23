@@ -69,6 +69,8 @@ export const deleteBankAcounts = (params: {
       { id: params.bankAccountId },
       { deletedAt: new Date() },
     );
+
+    return dataResponse({ message: "Bank account deleted" });
   });
 };
 
