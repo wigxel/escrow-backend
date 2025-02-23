@@ -1,5 +1,6 @@
 import {
   createEscrowTransaction,
+  finalizeEscrowTransaction,
   getEscrowRequestDetails,
   getEscrowTransactionDetails,
   initializeEscrowDeposit,
@@ -498,8 +499,8 @@ describe("Escrow transaction service", () => {
           ),
         ),
       );
-      expect(createdPaymentSession).toBeTruthy()
-      expect(updatedEscrowRequest).toBeTruthy()
+      expect(createdPaymentSession).toBeTruthy();
+      expect(updatedEscrowRequest).toBeTruthy();
       expect(result).toMatchInlineSnapshot(`
         {
           "data": {
@@ -510,7 +511,83 @@ describe("Escrow transaction service", () => {
           "message": "",
           "status": "success",
         }
-      `)
+      `);
+    });
+  });
+
+  describe("Finalize escrow transaction", () => {
+    test("should finalize escrow transaction", async () => {
+      let updatedEscrowRequest = false;
+      let createdParticipant = false;
+      let updatedEscrowPayment = false;
+      let updatedEscrow = false;
+      let createdActivityLog = false;
+
+      const escrowRequestRepo = extendEscrowRequestRepo({
+        update() {
+          updatedEscrowRequest = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const escrowParticipantRepo = extendEscrowParticipantRepo({
+        create(payload) {
+          createdParticipant = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const escrowPaymentRepo = extendEscrowPaymentRepo({
+        update() {
+          updatedEscrowPayment = true;
+          return Effect.succeed([]);
+        },
+      });
+      const escrowRepo = extendEscrowTransactionRepo({
+        update() {
+          updatedEscrow = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const activityLogMock = extendActivityLogRepo({
+        create() {
+          createdActivityLog = true
+          return Effect.succeed([]);
+        },
+      });
+
+      const program = finalizeEscrowTransaction({
+        relatedUserId: "MOCK_USER_ID",
+        escrowId: "MOCK_ESCROW_ID",
+        customerDetails: {
+          email: "MOCK_EMAIL",
+          role: "buyer",
+          userId: "MOCK_USER_ID",
+          username: "MOCK_USERNAME",
+        },
+        paymentDetails: {
+          amount: 10000,
+          paymentMethod: "card",
+          status: "success",
+        },
+      });
+      const result = await runTest(
+        Effect.provide(
+          program,
+          escrowRequestRepo.pipe(
+            Layer.provideMerge(escrowParticipantRepo),
+            Layer.provideMerge(escrowPaymentRepo),
+            Layer.provideMerge(escrowRepo),
+            Layer.provideMerge(activityLogMock),
+          ),
+        ),
+      );
+      expect(updatedEscrowRequest).toBeTruthy();
+      expect(createdParticipant).toBeTruthy();
+      expect(updatedEscrowPayment).toBeTruthy();
+      expect(updatedEscrow).toBeTruthy();
+      expect(createdActivityLog).toBeTruthy();
     });
   });
 });

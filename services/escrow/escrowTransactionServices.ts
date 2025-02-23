@@ -311,7 +311,7 @@ export const initializeEscrowDeposit = (
 /**
  * Handles the necessary updates and actions after a successful deposit.
  */
-export const updateEscrowStatus = (
+export const finalizeEscrowTransaction = (
   params: TSuccessPaymentMetaData & { paymentDetails: TPaymentDetails },
 ) => {
   return Effect.gen(function* (_) {

@@ -1,6 +1,6 @@
 import { Config, Effect } from "effect";
 import {
-  updateEscrowStatus,
+  finalizeEscrowTransaction,
   validateUserStatusUpdate,
 } from "../escrow/escrowTransactionServices";
 import {
@@ -90,7 +90,7 @@ export const handleSuccessPaymentEvents = (
       }),
     });
 
-    yield* updateEscrowStatus({
+    yield* finalizeEscrowTransaction({
       escrowId: metadata.escrowId,
       customerDetails: metadata.customerDetails,
       paymentDetails: {
