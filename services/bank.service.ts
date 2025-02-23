@@ -183,5 +183,7 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
     yield* bankVerificationRepo.delete(
       SearchOps.eq("verificationToken", token),
     );
+
+    return dataResponse({message:"Bank account added"})
   });
 };

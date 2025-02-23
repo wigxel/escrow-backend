@@ -1,4 +1,5 @@
 import {
+  addNewBankAccount,
   deleteBankAcounts,
   getBankList,
   getUserBankAccounts,
@@ -9,6 +10,8 @@ import { extendBankAccountRepo } from "./mocks/user/bankAccountMock";
 import { Effect, Layer } from "effect";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
 import { extendBankAccountVerificationRepo } from "./mocks/user/bankVerificationMock";
+import { TCreateTransferRecipientResponse } from "~/utils/paystack/type/types";
+import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 
 describe("Bank service", () => {
   const currentUser = {
@@ -197,6 +200,111 @@ describe("Bank service", () => {
         }
       `,
       );
+    });
+  });
+
+  describe("Add new bank account", () => {
+    test("should fail if invalid bank verification token", () => {
+      const bankVerificationRepo = extendBankAccountVerificationRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = addNewBankAccount("TOKEN", currentUser);
+      const result = runTest(Effect.provide(program, bankVerificationRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid bank account token]`,
+      );
+    });
+
+    test("shoulf fail if account details are wrong", () => {
+      const paymentGatewayMock = extendPaymentGateway({
+        //@ts-expect-error
+        createTransferRecipient(payload) {
+          return Effect.fail("");
+        },
+      });
+
+      const program = addNewBankAccount("TOKEN", currentUser);
+      const result = runTest(Effect.provide(program, paymentGatewayMock));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: couldn't create transfer recipient: account details are wrong]`,
+      );
+    });
+
+    test("should create the transfer recipient", async () => {
+      let transferRecipientCreated = false;
+      let createdBankAccount = false;
+      let createdTigerbeetleAccount = false;
+      let deletedBankVerification = false;
+
+      const paymentGatewayMock = extendPaymentGateway({
+        createTransferRecipient(payload) {
+          transferRecipientCreated = true
+          return Effect.succeed({
+            data: {
+              recipient_code: "res-112",
+              name: "",
+              active: true,
+              details: {
+                account_name: "account-name",
+                bank_code: "234",
+                bank_name: "gtb",
+                account_number: "1111111",
+                authorization_code: "auth_code",
+              },
+            },
+            message: "transfer recipient created",
+            status: "success",
+          } as TCreateTransferRecipientResponse);
+        },
+      });
+
+      const bankAccountRepo = extendBankAccountRepo({
+        create() {
+          createdBankAccount = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const tigerbeetleRepo = extendTigerBeetleRepo({
+        createAccounts() {
+          createdTigerbeetleAccount = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const bankVerificationRepo = extendBankAccountVerificationRepo({
+        delete(){
+          deletedBankVerification = true
+          return Effect.succeed(true)
+        }
+      })
+
+      const program = addNewBankAccount("TOKEN", currentUser);
+      const result = await runTest(
+        Effect.provide(
+          program,
+          paymentGatewayMock.pipe(
+            Layer.provideMerge(bankAccountRepo),
+            Layer.provideMerge(tigerbeetleRepo),
+            Layer.provideMerge(bankVerificationRepo),
+          ),
+        ),
+      );
+
+      expect(transferRecipientCreated).toBeTruthy();
+      expect(createdBankAccount).toBeTruthy();
+      expect(createdTigerbeetleAccount).toBeTruthy();
+      expect(deletedBankVerification).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Bank account added",
+          "status": "success",
+        }
+      `)
     });
   });
 });

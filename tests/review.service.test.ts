@@ -4,7 +4,7 @@ import {
   deleteReview,
   getReviews,
 } from "~/services/reviews.service";
-import { AppTest, runTest } from "~/tests/mocks/app";
+import { runTest } from "~/tests/mocks/app";
 import { extendReviewRepoMock } from "./mocks/review";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 import { notNil } from "~/libs/query.helpers";
