@@ -5,6 +5,7 @@ import {
   deleteUserPushToken,
   forgotPassword,
   getUserPushTokens,
+  handleUserCreationFromEscrow,
   passwordReset,
   resendEmailVerificationOtp,
   UserBalance,
@@ -477,6 +478,71 @@ describe("User services", () => {
     });
   });
 
+  describe("Handle user creation from escrow", () => {
+    const params = {
+      escrowId: "MOCK_ESCROW_ID",
+      customerEmail: "MOCK_EMAIL",
+      customerPhone: 11222333,
+      customerUsername: "MOCK_USERNAME",
+    };
+    test("should fail if email or phone already exists", () => {
+      const userRepo = extendUserRepoMock({
+        count() {
+          return Effect.succeed(1);
+        },
+      });
+
+      const program = handleUserCreationFromEscrow(params);
+      const result = runTest(Effect.provide(program, userRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Email is already taken]`,
+      );
+    });
+
+    test("should create new account from escrow", async () => {
+      let userCreated = false
+      let isNotified = false
+      const userRepo = extendUserRepoMock({
+        //@ts-expect-error
+        create() {
+          userCreated = true
+          return Effect.succeed([
+            {
+              firstName: "",
+              lastName: "",
+              password: "",
+              email: params.customerEmail,
+              phone: String(params.customerPhone),
+              username: params.customerUsername,
+            },
+          ]);
+        },
+      });
+
+      const notifyMock = extendNotificationFacade({
+        notify(){
+          isNotified = true
+          return Effect.succeed(1)
+        }
+      })
+
+      const program = handleUserCreationFromEscrow(params);
+      const result = await runTest(Effect.provide(program, Layer.merge(userRepo,notifyMock)));
+      expect(userCreated).toBeTruthy()
+      expect(isNotified).toBeTruthy()
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "email": "MOCK_EMAIL",
+          "firstName": "",
+          "lastName": "",
+          "password": "",
+          "phone": "11222333",
+          "username": "MOCK_USERNAME",
+        }
+      `);
+    });
+  });
+
   describe("User balance", () => {
     test("should fail if invalid user id", () => {
       const userWalletRepo = extendUserWalletRepo({
@@ -594,7 +660,7 @@ describe("User services", () => {
 
       const program = deleteUserPushToken({ currentUser, token: "MOCK-TOKEN" });
       const result = await runTest(Effect.provide(program, pushTokenRepo));
-      expect(isDeleted).toBeTruthy()
+      expect(isDeleted).toBeTruthy();
       expect(result).toMatchInlineSnapshot(`
         {
           "data": null,

@@ -2,6 +2,7 @@ import {
   createEscrowTransaction,
   getEscrowRequestDetails,
   getEscrowTransactionDetails,
+  initializeEscrowDeposit,
 } from "~/services/escrow/escrowTransactionServices";
 import { runTest } from "./mocks/app";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
@@ -227,7 +228,7 @@ describe("Escrow transaction service", () => {
 
       const activityLogMock = extendActivityLogRepo({
         create() {
-          activityLogCreated = true
+          activityLogCreated = true;
           return Effect.succeed([]);
         },
       });
@@ -240,8 +241,8 @@ describe("Escrow transaction service", () => {
       const result = await runTest(
         Effect.provide(program, Layer.merge(escrowRepo, activityLogMock)),
       );
-      expect(isUpdated).toBeTruthy()
-      expect(activityLogCreated).toBeTruthy()
+      expect(isUpdated).toBeTruthy();
+      expect(activityLogCreated).toBeTruthy();
       expect(result).toMatchInlineSnapshot(`
         {
           "data": {
@@ -265,6 +266,21 @@ describe("Escrow transaction service", () => {
           },
         }
       `);
+    });
+  });
+
+  describe("Initialize escrow deposit", () => {
+    const params = {
+      escrowId: "MOCK_ESCROW_ID",
+      customerEmail: "MOCK_EMAIL",
+      customerPhone: 11222333,
+      customerUsername: "MOCK_USERNAME",
+    };
+
+    test("should fail is account exists and user not logged in", () => {
+      const program = initializeEscrowDeposit(params, undefined);
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Unauthorized: signin to continue]`);
     });
   });
 });
