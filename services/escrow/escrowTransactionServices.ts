@@ -62,7 +62,7 @@ export const createEscrowTransaction = (
     if (customer && customer.id === currentUser.id) {
       yield* new ExpectedError("You cannot create transaction with yourself");
     }
-
+    console.log("hiii")
     //new escrow transaction
     const escrowTransaction = yield* _(
       escrowTransactionRepo.create({
@@ -113,7 +113,7 @@ export const createEscrowTransaction = (
       customerUsername: input.customerUsername,
       customerEmail: input.customerEmail,
       customerPhone: String(input.customerPhone),
-      expires_at: addHours(new Date(), 1),
+      expiresAt: addHours(new Date(), 1),
     };
 
     yield* escrowRequestRepo.create(escrowRequestData);
@@ -132,7 +132,7 @@ export const getEscrowTransactionDetails = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
-
+    let balance = BigInt(0);
     const escrowDetails = yield* _(
       escrowRepo.getEscrowDetails(params.escrowId),
       Effect.mapError(
@@ -145,22 +145,20 @@ export const getEscrowTransactionDetails = (params: {
 
     if (escrowDetails.escrowWalletDetails) {
       //get the escrow balance
-      const balance = yield* getAccountBalance(
+      balance = yield* getAccountBalance(
         escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
       );
-
-      return dataResponse({
-        data: {
-          ...escrowDetails,
-          escrowWalletDetails: {
-            ...escrowDetails.escrowWalletDetails,
-            balance: convertCurrencyUnit(String(balance), "kobo-naira"),
-          },
-        },
-      });
     }
 
-    return escrowDetails;
+    return dataResponse({
+      data: {
+        ...escrowDetails,
+        escrowWalletDetails: {
+          ...escrowDetails.escrowWalletDetails,
+          balance: convertCurrencyUnit(String(balance), "kobo-naira"),
+        },
+      },
+    });
   });
 };
 
@@ -251,7 +249,7 @@ export const initializeEscrowDeposit = (
     );
 
     //make sure the escrow transaction hasn't expired
-    if (isBefore(escrowRequestDetails.expires_at, new Date())) {
+    if (isBefore(escrowRequestDetails.expiresAt, new Date())) {
       yield* new ExpectedError("Escrow transaction request has expired");
     }
 

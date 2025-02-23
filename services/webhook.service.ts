@@ -54,7 +54,7 @@ export const handlePaystackWebhook = (
 
     if (PaymentGatewayEvent.$is("TransferFailed")(event)) {
       yield* unsuccessfulTransferEvent(res as TPaystackTransferWebhookEvent);
-      //code specific to failded transaction
+      //code specific to failed transaction
     }
 
     if (PaymentGatewayEvent.$is("TransferReversed")(event)) {

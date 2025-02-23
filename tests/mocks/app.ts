@@ -30,6 +30,9 @@ import { PushTokenRepoTest } from "./user/pushTokenMock";
 import { PaymentGatewayTestLive } from "./payment/paymentGatewayMock";
 import { BankAccountRepoTest } from "./user/bankAccountMock";
 import { BankAccountVerificationRepoTest } from "./user/bankVerificationMock";
+import { EscrowRequestRepoTest } from "./escrow/escrowRequestReoMock";
+import { EscrowPaymentRepoTest } from "./escrow/escrowPaymentRepoMock";
+import { EscrowWalletRepoTest } from "./escrow/escrowWalletRepoMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -43,6 +46,9 @@ const MailServiceTest = Layer.succeed(Mailer, mailService);
 const EscrowModuleTest = Layer.empty.pipe(
   Layer.provideMerge(EscrowTransactionRepoTest),
   Layer.provideMerge(EscrowParticipantRepoTest),
+  Layer.provideMerge(EscrowRequestRepoTest),
+  Layer.provideMerge(EscrowPaymentRepoTest),
+  Layer.provideMerge(EscrowWalletRepoTest),
 );
 
 const DisputeModuleTest = Layer.empty.pipe(
@@ -59,7 +65,6 @@ const NotificationModuleTest = Layer.empty.pipe(
 
 const PaymentModuleTest = Layer.empty.pipe(
   Layer.provideMerge(PaymentGatewayTestLive),
- 
 );
 
 const AuthModuleTest = Layer.empty.pipe(
