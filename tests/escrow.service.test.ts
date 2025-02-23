@@ -1,5 +1,6 @@
 import {
   createEscrowTransaction,
+  getEscrowRequestDetails,
   getEscrowTransactionDetails,
 } from "~/services/escrow/escrowTransactionServices";
 import { runTest } from "./mocks/app";
@@ -189,6 +190,79 @@ describe("Escrow transaction service", () => {
             "updatedAt": 2025-03-19T23:00:00.000Z,
           },
           "status": "success",
+        }
+      `);
+    });
+  });
+
+  describe("Get escrow request details", () => {
+    test("should fail if invalid escrow id", () => {
+      const escrowRequestRepo = extendEscrowRequestRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = getEscrowRequestDetails({
+        currentUser,
+        escrowId: "MOCK_ESCROW_ID",
+      });
+
+      const result = runTest(Effect.provide(program, escrowRequestRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid escrow id]`,
+      );
+    });
+
+    test("should get the escrow request details", async () => {
+      let isUpdated = false;
+      let activityLogCreated = false;
+
+      const escrowRepo = extendEscrowTransactionRepo({
+        update() {
+          isUpdated = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const activityLogMock = extendActivityLogRepo({
+        create() {
+          activityLogCreated = true
+          return Effect.succeed([]);
+        },
+      });
+
+      const program = getEscrowRequestDetails({
+        currentUser,
+        escrowId: "MOCK_ESCROW_ID",
+      });
+
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, activityLogMock)),
+      );
+      expect(isUpdated).toBeTruthy()
+      expect(activityLogCreated).toBeTruthy()
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": {
+            "isAuthenticated": true,
+            "requestDetails": {
+              "accessCode": null,
+              "amount": "10000",
+              "authorizationUrl": null,
+              "createdAt": 2025-03-22T23:00:00.000Z,
+              "customerEmail": "customer-email",
+              "customerPhone": "customer phone",
+              "customerRole": "seller",
+              "customerUsername": "username",
+              "escrowId": "escrow-id",
+              "expiresAt": 2026-03-22T23:00:00.000Z,
+              "id": "test-id",
+              "senderId": "user-id",
+              "status": "pending",
+              "updatedAt": 2025-03-22T23:00:00.000Z,
+            },
+          },
         }
       `);
     });
