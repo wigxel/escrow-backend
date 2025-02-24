@@ -33,6 +33,8 @@ import { BankAccountVerificationRepoTest } from "./user/bankVerificationMock";
 import { EscrowRequestRepoTest } from "./escrow/escrowRequestReoMock";
 import { EscrowPaymentRepoTest } from "./escrow/escrowPaymentRepoMock";
 import { EscrowWalletRepoTest } from "./escrow/escrowWalletRepoMock";
+import { WithdrawalRepoTest } from "./withdrawalRepoMock";
+import { AccountStatementRepoTest } from "./accountStatementRepoMock";
 
 const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
 
@@ -98,6 +100,8 @@ export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(ReferralSourceRepoTest),
   Layer.provideMerge(TigerBeetleRepoTestLive),
   Layer.provideMerge(PaymentModuleTest),
+  Layer.provideMerge(WithdrawalRepoTest),
+  Layer.provideMerge(AccountStatementRepoTest),
   Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(

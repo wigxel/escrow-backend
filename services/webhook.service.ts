@@ -115,9 +115,14 @@ export const unsuccessfulTransferEvent = (
     const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
 
-    const withdrawalDetails = yield* withdrawalRepo.firstOrThrow({
-      referenceCode: res.data.reference,
-    });
+    const withdrawalDetails = yield* _(
+      withdrawalRepo.firstOrThrow({
+        referenceCode: res.data.reference,
+      }),
+      Effect.mapError(
+        () => new NoSuchElementException("Invalid withdrawal id"),
+      ),
+    );
 
     yield* _(
       Effect.all([
