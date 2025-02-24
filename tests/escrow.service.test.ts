@@ -4,6 +4,7 @@ import {
   getEscrowRequestDetails,
   getEscrowTransactionDetails,
   initializeEscrowDeposit,
+  updateEscrowTransactionStatus,
   validateUserStatusUpdate,
 } from "~/services/escrow/escrowTransactionServices";
 import { runTest } from "./mocks/app";
@@ -17,6 +18,8 @@ import { extendEscrowRequestRepo } from "./mocks/escrow/escrowRequestReoMock";
 import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
 import { toRuntimeWithMemoMap } from "effect/Layer";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
+import { escrowStatusRules } from "~/dto/escrowTransactions.dto";
+import { z } from "zod";
 
 describe("Escrow transaction service", () => {
   const currentUser = {
@@ -641,6 +644,84 @@ describe("Escrow transaction service", () => {
             "status": "active",
             "userId": "seller-id",
           },
+        }
+      `);
+    });
+  });
+
+  describe("Update escrow transaction status", () => {
+    const params = {
+      currentUser,
+      escrowId: "MOCK_ESCROW_ID",
+      status: "service.pending" as z.infer<typeof escrowStatusRules>["status"],
+    };
+    test("should fail for invalid escrow id", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = updateEscrowTransactionStatus(params);
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: invalid escrow id: no escrow transaction found]`,
+      );
+    });
+
+    test("should fail status transaction", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            status: "deposit.pending",
+            title: "",
+            description: "",
+            createdBy: "",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+          });
+        },
+      });
+      const program = updateEscrowTransactionStatus(params);
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Cannot transition from deposit.pending to service.pending]`,
+      );
+    });
+
+    test("should update transaction status", async () => {
+      let escrowUpdated = false;
+      let createdActivityLog = false;
+
+      const escrowRepo = extendEscrowTransactionRepo({
+        update() {
+          escrowUpdated = true;
+          return Effect.succeed([]);
+        },
+      });
+      const activityLogMock = extendActivityLogRepo({
+        create() {
+          createdActivityLog = true;
+          return Effect.succeed([]);
+        },
+      });
+      const program = updateEscrowTransactionStatus({
+        ...params,
+        currentUser: { ...params.currentUser, id: "buyer-id" },
+        status: "service.confirmed",
+      });
+
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, activityLogMock)),
+      );
+      expect(escrowUpdated).toBeTruthy();
+      expect(createdActivityLog).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Status updated from deposit.success to service.confirmed successfully",
+          "status": "success",
         }
       `);
     });
