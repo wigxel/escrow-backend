@@ -257,7 +257,7 @@ export const releaseFunds = (params: {
       ),
     );
 
-    return dataResponse({message:"Funds released successfully"})
+    return dataResponse({ message: "Funds released successfully" });
   });
 };
 
@@ -356,5 +356,7 @@ export const withdrawFromWallet = (
         description: `withdrawing N${params.amount} from wallet to bank account`,
       }),
     });
+
+    return dataResponse({message:"Withdrawal processed successfully"})
   });
 };

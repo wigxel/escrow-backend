@@ -4,6 +4,7 @@ import { Effect, Layer } from "effect";
 import {
   handleSuccessPaymentEvents,
   releaseFunds,
+  withdrawFromWallet,
 } from "~/services/paystack/payment.service";
 import { runTest } from "./mocks/app";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
@@ -12,6 +13,9 @@ import { extendNotificationFacade } from "./mocks/notification/notificationFacad
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 import { extendUserWalletRepo } from "./mocks/user/userWalletMock";
 import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
+import { extendBankAccountRepo } from "./mocks/user/bankAccountMock";
+import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
+import { extendWithdrawalRepo } from "./mocks/withdrawalRepoMock";
 
 describe("Payment service", () => {
   const currentUser = {
@@ -151,10 +155,12 @@ describe("Payment service", () => {
     test("should fail if cannot legally transition escrow status", () => {
       const program = releaseFunds(params);
       const result = runTest(program);
-      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Cannot transition from created to completed]`);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Cannot transition from created to completed]`,
+      );
     });
 
-    test("should fail if recipient wallet not found", ()=>{
+    test("should fail if recipient wallet not found", () => {
       const escrowRepo = extendEscrowTransactionRepo({
         //@ts-expect-error
         getEscrowDetails() {
@@ -181,20 +187,27 @@ describe("Payment service", () => {
       });
 
       const userWalletRepo = extendUserWalletRepo({
-        firstOrThrow(){
-          return Effect.fail(new Error(""))
-        }
-      })
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
 
-      const program = releaseFunds({...params, currentUser:{...params.currentUser,id:"buyer-id"}});
-      const result = runTest(Effect.provide(program, Layer.merge(escrowRepo,userWalletRepo)));
-      expect(result).resolves.toMatchInlineSnapshot(`[NoSuchElementException: Invalid user id: user wallet not found]`)      
-    })
+      const program = releaseFunds({
+        ...params,
+        currentUser: { ...params.currentUser, id: "buyer-id" },
+      });
+      const result = runTest(
+        Effect.provide(program, Layer.merge(escrowRepo, userWalletRepo)),
+      );
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid user id: user wallet not found]`,
+      );
+    });
 
-    test("should release funds", async ()=>{
+    test("should release funds", async () => {
       let createdTigerbeetleTransfer = false;
       let createdAccountStatement = false;
-      let createdActivityLog = false
+      let createdActivityLog = false;
       let updatedEscrow = false;
       let notifyCount = 0;
 
@@ -243,20 +256,23 @@ describe("Payment service", () => {
           });
         },
 
-        update(){
-          updatedEscrow = true
-          return Effect.succeed([])
-        }
+        update() {
+          updatedEscrow = true;
+          return Effect.succeed([]);
+        },
       });
 
       const activityLogMock = extendActivityLogRepo({
-        create(){
-          createdActivityLog = true
-          return Effect.succeed([])
-        }
-      })
+        create() {
+          createdActivityLog = true;
+          return Effect.succeed([]);
+        },
+      });
 
-      const program = releaseFunds({...params, currentUser:{...params.currentUser,id:"buyer-id"}});
+      const program = releaseFunds({
+        ...params,
+        currentUser: { ...params.currentUser, id: "buyer-id" },
+      });
       const result = await runTest(
         Effect.provide(
           program,
@@ -282,7 +298,143 @@ describe("Payment service", () => {
           "message": "Funds released successfully",
           "status": "success",
         }
+      `);
+    });
+  });
+
+  describe("Withdraw from wallet", () => {
+    const params = {
+      amount: 1000,
+      accountNumberId: "MOCK_ACCOUNT_NUMBER_ID",
+      currentUser,
+    };
+
+    test("Should fail if invalid account number id", () => {
+      const bankAccountRepo = extendBankAccountRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = withdrawFromWallet(params);
+      const result = runTest(Effect.provide(program, bankAccountRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid account number id]`,
+      );
+    });
+
+    test("Should fail if user wallet not found", () => {
+      const userWalletRepo = extendUserWalletRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = withdrawFromWallet(params);
+      const result = runTest(Effect.provide(program, userWalletRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: wallet not found]`,
+      );
+    });
+
+    test("Should fail if insufficient balance", () => {
+      const PaymentGatewayMock = extendPaymentGateway({
+        //@ts-expect-error
+        initiateTransfer() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = withdrawFromWallet({ ...params, amount: 10000 });
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[InsufficientBalanceException: Insufficient account balance]`,
+      );
+    });
+
+    test("Should fail if unable to initiate transfer", () => {
+      const PaymentGatewayMock = extendPaymentGateway({
+        //@ts-expect-error
+        initiateTransfer() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = withdrawFromWallet(params);
+      const result = runTest(Effect.provide(program, PaymentGatewayMock));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Unable to initiate transfer]`,
+      );
+    });
+
+    test("should process wallet withdrawal", async () => {
+      let initiatedTransfer = false;
+      let createdWithdrawal = false;
+      let createdTigerbeetleTransfer = false;
+      let createdAccountStatement = false;
+
+      const paymentGatewayMock = extendPaymentGateway({
+        //@ts-expect-error
+        initiateTransfer() {
+          initiatedTransfer = true;
+          return Effect.succeed({
+            data: {
+              amount: "3000",
+              reference: "ref_no",
+              status: "success",
+              id: "id",
+              reason: "reason",
+            },
+            message: "message",
+            status: "status",
+          });
+        },
+      });
+
+      const withdrawalRepo = extendWithdrawalRepo({
+        create() {
+          createdWithdrawal = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const tigerBeetleRepo = extendTigerBeetleRepo({
+        createTransfers() {
+          createdTigerbeetleTransfer = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const accountStatementRepo = extendAccountStatementRepo({
+        create() {
+          createdAccountStatement = true;
+          return Effect.succeed([]);
+        },
+      });
+
+      const program = withdrawFromWallet(params);
+      const result = await runTest(
+        Effect.provide(
+          program,
+          paymentGatewayMock.pipe(
+            Layer.provideMerge(withdrawalRepo),
+            Layer.provideMerge(tigerBeetleRepo),
+            Layer.provideMerge(accountStatementRepo),
+          ),
+        ),
+      );
+
+      expect(initiatedTransfer).toBeTruthy();
+      expect(createdWithdrawal).toBeTruthy();
+      expect(createdTigerbeetleTransfer).toBeTruthy();
+      expect(createdAccountStatement).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Withdrawal processed successfully",
+          "status": "success",
+        }
       `)
-    })
+    });
   });
 });
