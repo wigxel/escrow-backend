@@ -38,6 +38,7 @@ import { NotificationFacade } from "~/layers/notification/layer";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
 import { UserWalletPaymentNotification } from "~/app/notifications/in-app/escrow/userWallet-payment.notify";
+import { dataResponse } from "~/libs/response";
 
 export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentWebhookEvent,
@@ -255,6 +256,8 @@ export const releaseFunds = (params: {
         "customer",
       ),
     );
+
+    return dataResponse({message:"Funds released successfully"})
   });
 };
 
