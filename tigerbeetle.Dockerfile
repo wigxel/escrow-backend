@@ -1,23 +1,22 @@
-# Use a minimal Debian image
-FROM docker.io/library/debian:bookworm-slim
+# Use a minimal Alpine image
+FROM alpine:3.21
 
-# Install necessary packages
-RUN rm -rf /var/lib/apt/lists/* && \
-    apt-get update && \
-    apt-get install -y ca-certificates curl debian-archive-keyring unzip && \
+# Install necessary packages (ca-certificates, curl, git, unzip, and zig)
+RUN apk update && \
+    apk add --no-cache ca-certificates curl git unzip zig && \
     update-ca-certificates
 
 # Set working directory to / so that the executable is on PATH
 WORKDIR /
 
-# Download and extract the TigerBeetle binary
-RUN curl -Lo tigerbeetle.zip https://linux.tigerbeetle.com && \
-    unzip tigerbeetle.zip && \
-    rm tigerbeetle.zip && \
-    chmod +x tigerbeetle
+# Clone the TigerBeetle repository
+RUN git clone https://github.com/tigerbeetle/tigerbeetle.git
 
-# (Optional) Expose a port if TigerBeetle listens on one (adjust as needed)
+# Build the binary using Zig, move the executable to the root, and clean up
+RUN cd tigerbeetle && \
+    zig build -Dtarget=aarch64-linux
+
+# (Optional) Expose port 3000 if TigerBeetle listens on that port
 EXPOSE 3000
 
-# Set TigerBeetle as the entrypoint so any container run executes it
-CMD ["./tigerbeetle", "start", "--addresses=3000", "--development", "0_0.tigerbeetle"]
+ENTRYPOINT ["./tigerbeetle/zig-out/bin/tigerbeetle"]
