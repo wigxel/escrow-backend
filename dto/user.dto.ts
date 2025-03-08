@@ -4,6 +4,17 @@ const passwordValidator = z.string()
   .min(6, { message: "Password too short" })
   .max(100, { message: "Password too long" });
 
+const bvnValidator = z
+  .string({ required_error: "BVN is required" })
+  .length(11, "BVN must be exactly 11 digits")
+  .regex(/^\d+$/, "BVN must be numeric")
+
+const usernameValidator = z.string(
+  {
+    required_error: "Username required",
+  }
+).min(3, { message: "Username too short" }).regex(/^[a-zA-Z0-9_]+$/, "Username must contain only letters, numbers and underscores");
+
 export const addressSchema = z.object({
   address: z.string().min(3),
   state: z.string().min(3),
@@ -16,24 +27,22 @@ export const addressSchema = z.object({
 
 export const createUserDto = z
   .object({
-    firstName: z.string().min(3).max(20),
-    lastName: z.string().min(3).max(20),
-    username: z.string().min(3),
-    email: z.string().email(),
+    firstName: z.string({ required_error: "First name is required" }).min(3).max(20),
+    lastName: z.string({ required_error: "Last name is required" }).min(3).max(20),
+    email: z.string({
+      required_error: "Email address required",
+    }).email(),
     password: passwordValidator,
     phone: z
       .string({
         required_error: "Phone number required",
       })
       .min(11),
-    profilePicture: z.string().optional(),
-    bvn: z
-      .string()
-      .length(11, "BVN must be exactly 11 digits")
-      .regex(/^\d+$/, "BVN must be numeric"),
+    // @question Why is this here?
+    // profilePicture: z.string().optional(),
     hasBusiness: z.boolean(),
-    businessName: z.string().min(3).optional(),
-    referralSourceId: z.number({ coerce: true }),
+    businessName: z.string({ required_error: "Business name required" }).min(3).nullable(),
+    referralSourceId: z.number({ coerce: true, required_error: "Referral required" }),
   })
   .refine(
     (data) => {

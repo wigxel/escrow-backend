@@ -12,7 +12,6 @@ import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
 import type { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
 import type { z } from "zod";
-import { ReversibleHash } from "~/layers/encryption/reversible";
 import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
 import type {
   createUserDto,
@@ -30,6 +29,11 @@ import { convertCurrencyUnit } from "./escrow/escrow.utils";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
 import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 import { dataResponse } from "~/libs/response";
+import cuid2 from "@paralleldrive/cuid2";
+
+const getSuffix = cuid2.init({
+  length: 4
+});
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -38,10 +42,11 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     const otpRepo = yield* OtpRepo;
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const sessionManager = yield* Session;
-    const encrypter = yield* ReversibleHash;
     const referralSourceRepo = yield* ReferralSourcesRepoLayer.Tag;
 
-    yield* checkUsername(data.username);
+
+    const username = `${data.firstName}.${data.lastName}.${getSuffix()}`.toLowerCase();
+    yield* checkUsername(username);
 
     yield* _(
       referralSourceRepo.firstOrThrow(data.referralSourceId),
@@ -55,7 +60,6 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     );
 
     data.password = hashedPassword;
-    data.bvn = yield* encrypter.encrypt(data.bvn);
 
     const userCount = yield* userRepo.count(
       SearchOps.or(
@@ -74,12 +78,12 @@ export function createUser(data: z.infer<typeof createUserDto>) {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        username: data.username,
+        username: username,
         password: data.password,
         phone: data.phone,
         businessName: data.businessName,
         hasBusiness: data.hasBusiness,
-        bvn: data.bvn,
+        bvn: null,
         referralSourceId: data.referralSourceId,
       }),
       Effect.flatMap(head),
@@ -121,7 +125,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
 
     return dataResponse({
@@ -150,14 +154,13 @@ export function resendEmailVerificationOtp(email: string) {
     if (user.emailVerified) yield* new ExpectedError("Email already verified");
 
     const otp = yield* generateOTP();
-
     yield* otpRepo.update({ email: user.email }, { value: otp });
 
     yield* _(
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
 
     return dataResponse({ message: "Email resend successful" });
@@ -220,7 +223,7 @@ export function forgotPassword(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
 
     return dataResponse({ message: "Forget password successful" });
@@ -342,7 +345,7 @@ export const UserBalance = (currentUser: SessionUser) => {
 
     const walletDetails = yield* _(walletRepo.firstOrThrow({
       userId: currentUser.id,
-    }),Effect.mapError(()=>new ExpectedError("Wallet not found")));
+    }), Effect.mapError(() => new ExpectedError("Wallet not found")));
 
     const escrowDetails = yield* participantsRepo.getParticipantsWithWallet(
       currentUser.id,
