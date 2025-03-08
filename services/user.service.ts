@@ -44,7 +44,6 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     const sessionManager = yield* Session;
     const referralSourceRepo = yield* ReferralSourcesRepoLayer.Tag;
 
-
     const username = `${data.firstName}.${data.lastName}.${getSuffix()}`.toLowerCase();
     yield* checkUsername(username);
 
@@ -129,9 +128,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     );
 
     return dataResponse({
-      data: {
-        session_data,
-      },
+      data: session_data,
       message: "user created successfully",
     });
   });
