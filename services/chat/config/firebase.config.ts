@@ -23,6 +23,7 @@ export const firestoreRef = pipe(
   Effect.map((firebase_app) => getFirestore(firebase_app)),
 );
 
+// TODO: Understand why this is needed
 let fbAdminSetup: admin.app.App = null;
 export const fbAdminSDK = Effect.suspend(() =>
   Effect.succeed(fbAdminConfigFile).pipe(
