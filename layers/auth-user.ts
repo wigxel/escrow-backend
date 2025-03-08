@@ -1,8 +1,7 @@
-import { Context, Effect, Layer, pipe } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { DatabaseLive } from "~/layers/database";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
 import { UserSessionLive } from "~/layers/session";
-import { notNil } from "~/libs/query.helpers";
 import { OTPRepoLayer } from "~/repositories/otp.repository";
 import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
 import { LuciaSessionProvider } from "~/services/lucia-session-provider";
@@ -10,14 +9,15 @@ import { LuciaSessionProvider } from "~/services/lucia-session-provider";
 export class AuthUser extends Context.Tag("AuthUser")<
   AuthUser,
   AuthUserService
->() {}
+>() { }
 
 export class AuthUserService {
-  getUserRecord({ email }) {
+  getUserRecord({ email, phone = null }: { email?: string, phone?: string }) {
     return Effect.gen(function* (_) {
       const repo = yield* UserRepo;
+      const params = phone ? { phone } : { email };
 
-      const user = yield* repo.firstOrThrow({ email });
+      const user = yield* repo.firstOrThrow(params);
 
       return {
         email: String(user.email),

@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { memberRole } from "~/migrations/schema";
+
+const passwordValidator = z.string()
+  .min(6, { message: "Password too short" })
+  .max(100, { message: "Password too long" });
 
 export const addressSchema = z.object({
   address: z.string().min(3),
@@ -17,7 +20,7 @@ export const createUserDto = z
     lastName: z.string().min(3).max(20),
     username: z.string().min(3),
     email: z.string().email(),
-    password: z.string().min(6).max(16),
+    password: passwordValidator,
     phone: z
       .string({
         required_error: "Phone number required",
@@ -57,7 +60,7 @@ export const updateUserDto = z.object({
 });
 
 export const verifyEmailDto = z.object({
-  email:z.string().email(),
+  email: z.string().email(),
   otp: z.string().length(6),
 });
 
@@ -66,17 +69,18 @@ export const sendEmailDto = z.object({
 });
 
 export const passwordResetDto = z.object({
-  password: z.string().min(6).max(16),
-  email:z.string().email(),
+  password: passwordValidator,
+  email: z.string().email(),
   otp: z.string().length(6),
 });
 
 export const passwordChangeDto = z.object({
-  oldPassword: z.string().min(6).max(16),
-  newPassword: z.string().min(6).max(16),
+  oldPassword: passwordValidator,
+  newPassword: passwordValidator
 })
 
 export const loginDto = z.object({
-  email: z.string().email().min(1, "Email is required"),
-  password: z.string().min(6, "Password length too short"),
+  phone: z.string().min(1, "Phone is required").optional(),
+  email: z.string().email().min(1, "Email is required").optional(),
+  password: passwordValidator
 });

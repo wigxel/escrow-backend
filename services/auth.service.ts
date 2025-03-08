@@ -40,6 +40,48 @@ export function login({
     );
 
     yield* Effect.logDebug("Verify password");
+    yield* _(
+      verifyPassword(body.password, user?.password ?? ""),
+      Effect.mapError(() => error),
+    );
+
+    yield* Effect.logDebug("Creating session");
+    const { session_id, expires_at } = yield* _(
+      session.create(user.user_id),
+      Effect.mapError(() => error),
+    );
+
+    yield* Effect.logDebug("Session created");
+
+    return {
+      access_token: session_id,
+      expires: expires_at.toISOString(),
+    };
+  });
+}
+
+export function loginWithPhoneNumber({
+  body,
+}: {
+  body: Partial<{
+    phone: string;
+    password: string;
+  }>
+}) {
+  return Effect.gen(function* (_) {
+    const session = yield* Session;
+    const auth_user = yield* AuthUser;
+    const error = new PermissionError("Invalid username or password provided");
+
+    yield* _(Effect.logDebug("Getting authenticated User by phone"));
+    const user = yield* _(
+      auth_user.getUserRecord({
+        phone: body.phone
+      }),
+      Effect.mapError(() => error),
+    );
+
+    yield* Effect.logDebug("Verify password");
 
     yield* _(
       verifyPassword(body.password, user?.password ?? ""),
@@ -72,8 +114,17 @@ export const changePassword = (params: {
       id: params.currentUser.id,
     });
 
-    yield* verifyPassword(params.oldPassword, userDetails.password);
+    yield* _(
+      verifyPassword(params.oldPassword, userDetails.password),
+      Effect.catchTag("PasswordHasherError", () => {
+        // @todo: Severity High - Count login attempts and block user if too many attempts
+        return new PermissionError("Invalid password provided");
+      })
+    )
+
+    yield* Effect.log("Hashing new password");
     const newHash = yield* hashPassword(params.newPassword);
+    yield* Effect.log("Hashing new password");
     const [user] = yield* userRepo.update(userDetails.id, { password: newHash });
 
     return user;

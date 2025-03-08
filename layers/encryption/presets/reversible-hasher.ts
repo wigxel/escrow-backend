@@ -96,3 +96,27 @@ export const reversibleHashLive = Layer.effect(
     };
   }),
 );
+
+
+export function createReversibleHash({
+  salt,
+  hex,
+}: { salt: string; hex: string }) {
+  const hasher = new AESAlgo(salt, hex);
+  return Layer.succeed(ReversibleHash, {
+    encrypt: (value) =>
+      Effect.try({
+        try: () => hasher.encrypt(value),
+        catch() {
+          return new HashingError("Error encrypting content");
+        },
+      }),
+    decrypt: (value) =>
+      Effect.try({
+        try: () => hasher.decrypt(value),
+        catch() {
+          return new HashingError("Error decrypting content");
+        },
+      }),
+  });
+}

@@ -1,4 +1,4 @@
-import { Effect, Either, pipe } from "effect";
+import { Effect, pipe } from "effect";
 import { PasswordHasher, PasswordHasherError } from "~/layers/encryption/index";
 
 export function hashPassword(value: string) {

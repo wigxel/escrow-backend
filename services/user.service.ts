@@ -5,7 +5,6 @@ import { PasswordResetMail } from "~/app/mail/password-reset";
 import { ExpectedError } from "~/config/exceptions";
 import { PasswordHasherError } from "~/layers/encryption";
 import { hashPassword } from "~/layers/encryption/helpers";
-import { Mail } from "~/layers/mailing/mail";
 import { Session } from "~/layers/session";
 import { OtpRepo } from "~/repositories/otp.repository";
 import { UserRepoLayer } from "~/repositories/user.repository";
@@ -54,6 +53,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
 
     data.password = hashedPassword;
     data.bvn = yield* encrypter.encrypt(data.bvn);
+
 
     const userCount = yield* userRepo.count(
       SearchOps.or(
@@ -120,7 +120,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
 
     return {
@@ -154,7 +154,7 @@ export function resendEmailVerificationOtp(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
   });
 }
@@ -191,7 +191,7 @@ export function forgotPassword(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
   });
 }

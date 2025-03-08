@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Nitro",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/nitropack",
+            "runtimeArgs": [
+                "dev"
+            ],
+            "port": 9229,
+            "outputCapture": "std",
+            "restart": true,
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
+    ]
+}
