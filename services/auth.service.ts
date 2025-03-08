@@ -83,12 +83,6 @@ export function loginWithPhoneNumber({
       ),
     );
 
-    if (!user.emailVerified) {
-      yield* new ExpectedError(
-        `Please verify your phone number ${body.phone}. We sent a verification email to your inbox`,
-      );
-    }
-
     yield* Effect.logDebug("Creating session");
     const { session_id, expires_at } = yield* _(session.create(user.id));
 

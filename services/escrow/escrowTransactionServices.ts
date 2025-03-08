@@ -62,7 +62,8 @@ export const createEscrowTransaction = (
     if (customer && customer.id === currentUser.id) {
       yield* new ExpectedError("You cannot create transaction with yourself");
     }
-    //new escrow transaction
+
+    // new escrow transaction
     const escrowTransaction = yield* _(
       escrowTransactionRepo.create({
         title: input.title,

@@ -1,15 +1,29 @@
 import { z } from "zod";
 
-const passwordValidator = z.string()
+export const passwordValidator = z.string()
   .min(6, { message: "Password too short" })
   .max(100, { message: "Password too long" });
 
-const bvnValidator = z
+export const bvnValidator = z
   .string({ required_error: "BVN is required" })
   .length(11, "BVN must be exactly 11 digits")
   .regex(/^\d+$/, "BVN must be numeric")
 
-const usernameValidator = z.string(
+export const phoneValidator = z
+  .string({
+    required_error: "Phone number required",
+  })
+  .min(11);
+
+export const emailValidator = z.string({
+  required_error: "Email address required"
+}).email();
+
+export const amountValidator = z.number({
+  coerce: true, required_error: "Amount is required"
+}).min(1);
+
+export const usernameValidator = z.string(
   {
     required_error: "Username required",
   }
@@ -33,11 +47,7 @@ export const createUserDto = z
       required_error: "Email address required",
     }).email(),
     password: passwordValidator,
-    phone: z
-      .string({
-        required_error: "Phone number required",
-      })
-      .min(11),
+    phone: phoneValidator,
     // @question Why is this here?
     // profilePicture: z.string().optional(),
     hasBusiness: z.boolean(),
