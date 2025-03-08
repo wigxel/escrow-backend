@@ -1,81 +1,107 @@
 import { ConfigProvider, Effect, Layer, type Scope } from "effect";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
-import { resolveErrorResponse } from "~/libs/response";
 import type { InferRequirements } from "~/services/effect.util";
-import { PaginationImpl } from "~/services/search/pagination.service";
 import { DatabaseTest } from "~/tests/mocks/database";
-import { NotificationRepoTest } from "~/tests/mocks/notificationRepoMock";
-import { OTPRepoTest } from "~/tests/mocks/otp";
-import { SessionProviderTest } from "~/tests/mocks/session-provider";
-import { UserRepoTest } from "~/tests/mocks/user";
-import { PaymentServiceTest } from "./PaymentServiceMock";
-import { AuthUserTest } from "./auth";
-import { CartItemRepoTest } from "./cartItemsRepoMock";
-import { CartRepoTest } from "./cartRepoMock";
-import { CategoryRepoTest } from "./categoryRepoMock";
-import { CommentTest } from "./comment";
-import { DisputeMemberRepoTest } from "./disputeMembersRepo";
-import { DisputeRepoTest } from "./disputeRepoMock";
-import { DeliveryDetailsRepoTest } from "./order-shipping-repo-mock";
-import { OrderCancellationRepoTest } from "./orderCancellationRepoMock";
-import { OrderItemsRepoTest } from "./orderItemsRepoMock";
-import { OrderRepoTest } from "./orderRepoMock";
-import { OrderStatusHistoryRepoTest } from "./orderStatusHistoryMock";
-import { PaymentOrderRepoTest } from "./paymentOrderRepoMock";
-import { PaymentRepoTest } from "./paymentRepoMock";
-import { ProductImageRepoTest } from "./productImageRepoMock";
-import { ProductRepoTest } from "./productRepoMock";
+import { NotificationRepoTest } from "~/tests/mocks/notification/notificationRepoMock";
+import { SessionProviderTest } from "~/tests/mocks/authentication/session-provider";
+import { UserRepoTest } from "~/tests/mocks/user/user";
+import { DisputeMemberRepoTest } from "./dispute/disputeMembersRepo";
+import { DisputeRepoTest } from "./dispute/disputeRepoMock";
 import { ReviewTest } from "./review";
-import { SesssionTest } from "./session";
-import { UserLocationRepoTest } from "./userLocationRepoMock";
+import { SesssionTest } from "./authentication/session";
+import { resolveErrorResponse } from "~/libs/response";
+import { EscrowParticipantRepoTest } from "./escrow/escrowParticipantsRepoMock";
+import { EscrowTransactionRepoTest } from "./escrow/escrowTransactionRepoMock";
+import { DisputeCategoryRepoTest } from "./dispute/disputeCategoryMock";
+import { DisputeResolutionRepoTest } from "./dispute/disputeResolutionMock";
+import { NotificationFacadeTestLive } from "./notification/notificationFacadeMock";
+import { ActivityLogRepoTest } from "./activityLogRepoMock";
+import { FileStorageTestLive } from "./filestorageMock";
+import { ChatServiceTestLive } from "./chatServiceMock";
+import { Mailer } from "~/layers/mailing";
+import type { SendMailParams } from "~/layers/mailing/types";
+import { PaginationImpl } from "~/services/search/pagination.service";
+import { UserWalletRepoTest } from "./user/userWalletMock";
+import { ReversibleHashTestLive } from "./reversibleHashMock";
+import { ReferralSourceRepoTest } from "./referralSourceRepoMock";
+import { TigerBeetleRepoTestLive } from "./tigerBeetleRepoMock";
+import { OtpRepoTest } from "./otp";
+import { PushTokenRepoTest } from "./user/pushTokenMock";
+import { PaymentGatewayTestLive } from "./payment/paymentGatewayMock";
+import { BankAccountRepoTest } from "./user/bankAccountMock";
+import { BankAccountVerificationRepoTest } from "./user/bankVerificationMock";
+import { EscrowRequestRepoTest } from "./escrow/escrowRequestReoMock";
+import { EscrowPaymentRepoTest } from "./escrow/escrowPaymentRepoMock";
+import { EscrowWalletRepoTest } from "./escrow/escrowWalletRepoMock";
+import { WithdrawalRepoTest } from "./withdrawalRepoMock";
+import { AccountStatementRepoTest } from "./accountStatementRepoMock";
 
-const ReviewModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(ReviewTest),
-  Layer.provideMerge(CommentTest),
+const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
+
+const mailService = {
+  send(params: SendMailParams) {
+    return Effect.succeed(undefined);
+  },
+};
+const MailServiceTest = Layer.succeed(Mailer, mailService);
+
+const EscrowModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(EscrowTransactionRepoTest),
+  Layer.provideMerge(EscrowParticipantRepoTest),
+  Layer.provideMerge(EscrowRequestRepoTest),
+  Layer.provideMerge(EscrowPaymentRepoTest),
+  Layer.provideMerge(EscrowWalletRepoTest),
 );
 
-const NotificationServiceTest = Layer.empty.pipe(
+const DisputeModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(DisputeRepoTest),
+  Layer.provideMerge(DisputeMemberRepoTest),
+  Layer.provideMerge(DisputeCategoryRepoTest),
+  Layer.provideMerge(DisputeResolutionRepoTest),
+);
+
+const NotificationModuleTest = Layer.empty.pipe(
   Layer.provideMerge(NotificationRepoTest),
+  Layer.provideMerge(NotificationFacadeTestLive),
+);
+
+const PaymentModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(PaymentGatewayTestLive),
 );
 
 const AuthModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(OTPRepoTest),
-  Layer.provideMerge(AuthUserTest),
-  Layer.provideMerge(UserRepoTest),
+  Layer.provideMerge(OtpRepoTest),
   Layer.provideMerge(SesssionTest),
   Layer.provideMerge(SessionProviderTest),
   Layer.provideMerge(Argon2dHasherLive),
 );
 
-const ProductModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(ProductRepoTest),
-  Layer.provideMerge(ProductImageRepoTest),
-  Layer.provideMerge(CategoryRepoTest),
-);
-
-const OrderModuleTest = Layer.empty.pipe(
-  Layer.provideMerge(OrderRepoTest),
-  Layer.provideMerge(OrderItemsRepoTest),
-  Layer.provideMerge(OrderStatusHistoryRepoTest),
-  Layer.provideMerge(OrderCancellationRepoTest),
-  Layer.provideMerge(DeliveryDetailsRepoTest),
-);
+const UserModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(UserRepoTest),
+  Layer.provideMerge(UserWalletRepoTest),
+  Layer.provideMerge(PushTokenRepoTest),
+  Layer.provideMerge(BankAccountRepoTest),
+  Layer.provideMerge(BankAccountVerificationRepoTest),
+)
 
 export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(DatabaseTest),
-  Layer.provideMerge(ReviewModuleTest),
   Layer.provideMerge(AuthModuleTest),
-  Layer.provideMerge(ProductModuleTest),
-  Layer.provideMerge(CartRepoTest),
-  Layer.provideMerge(CartItemRepoTest),
-  Layer.provideMerge(DisputeRepoTest),
-  Layer.provideMerge(DisputeMemberRepoTest),
-  Layer.provideMerge(PaymentRepoTest),
-  Layer.provideMerge(OrderModuleTest),
-  Layer.provideMerge(PaymentOrderRepoTest),
-  Layer.provideMerge(UserLocationRepoTest),
-  Layer.provideMerge(PaymentServiceTest),
-  Layer.provideMerge(NotificationServiceTest),
+  Layer.provideMerge(UserModuleTest),
+  Layer.provideMerge(ReviewModuleTest),
+  Layer.provideMerge(DisputeModuleTest),
+  Layer.provideMerge(EscrowModuleTest),
+  Layer.provideMerge(NotificationModuleTest),
+  Layer.provideMerge(ActivityLogRepoTest),
+  Layer.provideMerge(FileStorageTestLive),
+  Layer.provideMerge(ChatServiceTestLive),
+  Layer.provideMerge(MailServiceTest),
+  Layer.provideMerge(ReversibleHashTestLive),
+  Layer.provideMerge(ReferralSourceRepoTest),
+  Layer.provideMerge(TigerBeetleRepoTestLive),
+  Layer.provideMerge(PaymentModuleTest),
+  Layer.provideMerge(WithdrawalRepoTest),
+  Layer.provideMerge(AccountStatementRepoTest),
   Layer.provideMerge(PaginationImpl({ page: "1" })),
   Layer.provideMerge(
     Layer.setConfigProvider(
@@ -94,7 +120,14 @@ export const AppTest = Layer.empty.pipe(
         CLOUDINARY_SECRET_KEY: "somecloudinarysecret",
         CLOUDINARY_API_KEY: "somecloudinaryapikey",
         CLOUDINARY_CLOUD_NAME: "somecloudinarycloudname",
-        CLOUDINARY_FOLDER: "somecloudinaryfolder",
+        SALT_HEX: "salt_hex",
+        IV_HEX: "iv_hex",
+        ORG_ACCOUNT_ID: "11111111111111",
+        TB_ADDRESS: "1010",
+        PSK_PUBLIC_KEY: "",
+        FIREBASE_CONFIG: "",
+        MAILING_HEX: "",
+        MAILING_SALT: "",
       }),
     ),
   ),

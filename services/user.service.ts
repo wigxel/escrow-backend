@@ -27,6 +27,9 @@ import { NotificationFacade } from "~/layers/notification/layer";
 import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.notify";
 import type { SessionUser } from "~/layers/session-provider";
 import { convertCurrencyUnit } from "./escrow/escrow.utils";
+import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
+import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
+import { dataResponse } from "~/libs/response";
 
 export function createUser(data: z.infer<typeof createUserDto>) {
   return Effect.gen(function* (_) {
@@ -53,7 +56,6 @@ export function createUser(data: z.infer<typeof createUserDto>) {
 
     data.password = hashedPassword;
     data.bvn = yield* encrypter.encrypt(data.bvn);
-
 
     const userCount = yield* userRepo.count(
       SearchOps.or(
@@ -109,7 +111,6 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     yield* otpRepo.create({
       userId: user.id,
       email: user.email,
-      userKind: "USER",
       otpReason: "EMAIL_VERIFICATION",
       value: otp,
     });
@@ -120,13 +121,15 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
-    return {
-      session: session_data,
-      user,
-    };
+    return dataResponse({
+      data: {
+        session_data,
+      },
+      message: "user created successfully",
+    });
   });
 }
 
@@ -154,73 +157,10 @@ export function resendEmailVerificationOtp(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
-    );
-  });
-}
-
-export function forgotPassword(email: string) {
-  return Effect.gen(function* (_) {
-    const notify = yield* NotificationFacade;
-    const userRepo = yield* UserRepoLayer.Tag;
-    const otpRepo = yield* OtpRepo;
-
-    const otp = yield* generateOTP();
-
-    const user = yield* _(
-      userRepo.firstOrThrow({ email }),
-      Effect.mapError(() => new ExpectedError("Request is being processed")),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
-    yield* _(
-      otpRepo.firstOrThrow({ email: user.email }),
-      Effect.matchEffect({
-        onFailure: () =>
-          otpRepo.create({
-            userId: user.id,
-            email: user.email,
-            userKind: "USER",
-            otpReason: "PASSWORD_RESET",
-            value: otp,
-          }),
-        onSuccess: (v) => otpRepo.update({ email: user.email }, { value: otp }),
-      }),
-    );
-
-    yield* _(
-      notify
-        .route("mail", { address: user.email })
-        .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
-    );
-  });
-}
-
-export function passwordReset(data: z.infer<typeof passwordResetDto>) {
-  return Effect.gen(function* (_) {
-    const otpRepo = yield* OtpRepo;
-    const userRepo = yield* UserRepoLayer.Tag;
-
-    yield* verifyOTP(data.otp);
-    const storedOtp = yield* _(
-      otpRepo.firstOrThrow({ value: data.otp, email: data.email }),
-      Effect.mapError(() => new ExpectedError("Invalid OTP")),
-    );
-
-    yield* _(
-      userRepo.update(storedOtp.userId, {
-        password: yield* hashPassword(data.password),
-        emailVerified: true, // REASON: Password resets should make user verified. See: https://thecopenhagenbook.com/password-reset
-      }),
-      Effect.mapError((err) => new ExpectedError("Invalid user")),
-    );
-
-    yield* otpRepo.delete(
-      SearchOps.and(
-        SearchOps.eq("value", data.otp),
-        SearchOps.eq("email", data.email),
-      ),
-    );
+    return dataResponse({ message: "Email resend successful" });
   });
 }
 
@@ -244,6 +184,78 @@ export function verifyUserEmail(params: z.infer<typeof verifyEmailDto>) {
         ),
       ),
     ]);
+
+    return dataResponse({ message: "Email verification success" });
+  });
+}
+
+export function forgotPassword(email: string) {
+  return Effect.gen(function* (_) {
+    const notify = yield* NotificationFacade;
+    const userRepo = yield* UserRepoLayer.Tag;
+    const otpRepo = yield* OtpRepo;
+
+    const otp = yield* generateOTP();
+
+    const user = yield* _(
+      userRepo.firstOrThrow({ email }),
+      Effect.mapError(() => new ExpectedError("Request is being processed")),
+    );
+
+    yield* _(
+      otpRepo.firstOrThrow({ email: user.email }),
+      Effect.matchEffect({
+        onFailure: () =>
+          otpRepo.create({
+            userId: user.id,
+            email: user.email,
+            otpReason: "PASSWORD_RESET",
+            value: otp,
+          }),
+        onSuccess: (v) => otpRepo.update({ email: user.email }, { value: otp }),
+      }),
+    );
+
+    yield* _(
+      notify
+        .route("mail", { address: user.email })
+        .notify(new PasswordResetMail(user, otp)),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+    );
+
+    return dataResponse({ message: "Forget password successful" });
+  });
+}
+
+export function passwordReset(data: z.infer<typeof passwordResetDto>) {
+  return Effect.gen(function* (_) {
+    const otpRepo = yield* OtpRepo;
+    const userRepo = yield* UserRepoLayer.Tag;
+
+    yield* verifyOTP(data.otp);
+    const storedOtp = yield* _(
+      otpRepo.firstOrThrow({ value: data.otp, email: data.email }),
+      Effect.mapError(() => new ExpectedError("Invalid OTP")),
+    );
+
+    yield* _(
+      userRepo.update(
+        { id: storedOtp.userId },
+        {
+          password: yield* hashPassword(data.password),
+          emailVerified: true, // REASON: Password resets should make user verified. See: https://thecopenhagenbook.com/password-reset
+        },
+      ),
+    );
+
+    yield* otpRepo.delete(
+      SearchOps.and(
+        SearchOps.eq("value", data.otp),
+        SearchOps.eq("email", data.email),
+      ),
+    );
+
+    return dataResponse({ message: "Password reset successful" });
   });
 }
 
@@ -311,26 +323,77 @@ export const handleUserCreationFromEscrow = (
 export const checkUsername = (username: string) => {
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
-    const userDetails = yield* _(
+    yield* _(
       userRepo.firstOrThrow({ username }),
       Effect.matchEffect({
         onSuccess: () => new ExpectedError("Username taken"),
         onFailure: () => Effect.succeed(1),
       }),
     );
+
+    return dataResponse({ message: "Username is available" });
   });
 };
 
-export const UserWalletBalance = (currentUser: SessionUser) => {
+export const UserBalance = (currentUser: SessionUser) => {
   return Effect.gen(function* (_) {
     const walletRepo = yield* UserWalletRepoLayer.tag;
-    const walletDetails = yield* walletRepo.firstOrThrow({
-      userId: currentUser.id,
-    });
+    const participantsRepo = yield* EscrowParticipantRepoLayer.tag;
 
-    const balance = yield* getAccountBalance(walletDetails.tigerbeetleAccountId);
-    return {
-      walletBalance: convertCurrencyUnit(String(balance), "kobo-naira"),
-    };
+    const walletDetails = yield* _(walletRepo.firstOrThrow({
+      userId: currentUser.id,
+    }),Effect.mapError(()=>new ExpectedError("Wallet not found")));
+
+    const escrowDetails = yield* participantsRepo.getParticipantsWithWallet(
+      currentUser.id,
+    );
+
+    let totalEscrowBalance = BigInt(0);
+
+    for (const escrow of escrowDetails) {
+      const balance = yield* getAccountBalance(
+        escrow.walletDetails.tigerbeetleAccountId,
+      );
+      totalEscrowBalance += balance;
+    }
+
+    const walletbalance = yield* getAccountBalance(
+      walletDetails.tigerbeetleAccountId,
+    );
+
+    return dataResponse({
+      data: {
+        walletBalance: convertCurrencyUnit(String(walletbalance), "kobo-naira"),
+        totalEscrowBalance: convertCurrencyUnit(
+          String(totalEscrowBalance),
+          "kobo-naira",
+        ),
+      },
+    });
+  });
+};
+
+export const getUserPushTokens = (userId: string) => {
+  return Effect.gen(function* (_) {
+    const repo = yield* PushTokenRepoLayer.tag;
+    const tokens = yield* repo.all({ where: SearchOps.eq("userId", userId) });
+    return dataResponse({ data: tokens });
+  });
+};
+
+export const deleteUserPushToken = (params: {
+  currentUser: SessionUser;
+  token: string;
+}) => {
+  return Effect.gen(function* (_) {
+    const repo = yield* PushTokenRepoLayer.tag;
+    yield* repo.delete(
+      SearchOps.and(
+        SearchOps.eq("userId", params.currentUser.id),
+        SearchOps.eq("token", params.token),
+      ),
+    );
+
+    return dataResponse({ message: "User device push token deleted" });
   });
 };

@@ -12,23 +12,31 @@ import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.rep
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { resolveAccountNumberRules } from "~/dto/accountNumber.dto";
 import { SearchOps } from "./search/sql-search-resolver";
+import { dataResponse } from "~/libs/response";
 
 export const getBankList = () => {
   return Effect.gen(function* (_) {
     const paystackGateway = yield* PaymentGateway;
-    return yield* paystackGateway.bankLists();
+    const lists = yield* paystackGateway.bankLists();
+    return dataResponse({
+      data: lists.data,
+      status: lists.status,
+      message: lists.message,
+    });
   });
 };
 
 export const getUserBankAccounts = (currentUser: SessionUser) => {
   return Effect.gen(function* (_) {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
-    return yield* bankAccountRepo.all({
+    const accounts = yield* bankAccountRepo.all({
       where: SearchOps.and(
         SearchOps.eq("userId", currentUser.id),
         SearchOps.isNull("deletedAt"),
       ),
     });
+
+    return dataResponse({ data: accounts });
   });
 };
 
@@ -39,20 +47,17 @@ export const deleteBankAcounts = (params: {
   return Effect.gen(function* (_) {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
 
-    const whereQuery = SearchOps.and(
-      SearchOps.eq("id", params.bankAccountId),
-      SearchOps.isNull("deletedAt")
-    );
-
     const accountDetails = yield* _(
-      bankAccountRepo.find(whereQuery),
+      bankAccountRepo.firstOrThrow(
+        SearchOps.and(
+          SearchOps.eq("id", params.bankAccountId),
+          SearchOps.isNull("deletedAt"),
+        ),
+      ),
       Effect.mapError(
         () => new NoSuchElementException("Invalid bank account id"),
       ),
     );
-
-
-    yield* Effect.logDebug("Reading bank details")
 
     if (params.currentUser.id !== accountDetails.userId) {
       yield* new ExpectedError(
@@ -64,6 +69,8 @@ export const deleteBankAcounts = (params: {
       { id: params.bankAccountId },
       { deletedAt: new Date() },
     );
+
+    return dataResponse({ message: "Bank account deleted" });
   });
 };
 
@@ -81,9 +88,9 @@ export const resolveAccountNumber = (
         userId: currentUser.id,
         accountNumber: params.accountNumber,
       }),
-      Effect.match({
+      Effect.matchEffect({
         onSuccess: (v) => new ExpectedError("Account already exists"),
-        onFailure: () => { },
+        onFailure: () => Effect.succeed(1),
       }),
     );
 
@@ -110,11 +117,13 @@ export const resolveAccountNumber = (
       verificationToken,
     });
 
-    return {
-      accountName: bankDetails.data.account_name,
-      accountNumber: bankDetails.data.account_number,
-      token: verificationToken,
-    };
+    return dataResponse({
+      data: {
+        accountName: bankDetails.data.account_name,
+        accountNumber: bankDetails.data.account_number,
+        token: verificationToken,
+      },
+    });
   });
 };
 
@@ -125,8 +134,6 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
     const bankAccountRepo = yield* _(BankAccountRepoLayer.tag);
     const tigerbeetleRepo = yield* _(TigerBeetleRepoLayer.Tag);
 
-    yield* Effect.logDebug("Finding token record")
-
     const bankDetails = yield* _(
       bankVerificationRepo.firstOrThrow({ verificationToken: token }),
       Effect.mapError(
@@ -134,7 +141,6 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
       ),
     );
 
-    yield* Effect.logDebug("Creating transfer recipient")
     //create recipient code for this account
     const response = yield* _(
       paystackGateway.createTransferRecipient({
@@ -153,7 +159,6 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
     );
 
     const tigerbeetleAccountId = String(id());
-    yield* Effect.logDebug("Creating Bank account Record")
     yield* _(
       Effect.all([
         bankAccountRepo.create({
@@ -174,10 +179,11 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
       ]),
     );
 
-    yield* Effect.logDebug("Deleting token")
-    // delete the temporary bank details
+    //delete the temporary bank details
     yield* bankVerificationRepo.delete(
       SearchOps.eq("verificationToken", token),
     );
+
+    return dataResponse({message:"Bank account added"})
   });
 };

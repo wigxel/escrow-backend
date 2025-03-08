@@ -11,7 +11,7 @@ export default eventHandler((event) => {
       z.object({ reviewId: z.string().uuid() }),
     );
     const { user } = yield* getSessionInfo(event);
-    yield* deleteReview({ reviewId: data.reviewId, currentUser: user });
+    return yield* deleteReview({ reviewId: data.reviewId, currentUser: user });
   });
 
   return runLive(event, program);

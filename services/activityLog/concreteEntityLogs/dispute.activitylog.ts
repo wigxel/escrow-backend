@@ -1,6 +1,16 @@
 import type { ParamsWithId } from "./escrow.activitylog";
 
 export const disputeActivityLog = {
+  created(params) {
+    return {
+      kind: "Dispute",
+      entityId: params?.id,
+      data: {
+        summary: "Dispute created",
+        params,
+      },
+    };
+  },
   opened(params) {
     return {
       kind: "Dispute",
@@ -11,7 +21,7 @@ export const disputeActivityLog = {
       },
     };
   },
-  
+
   resolved(params: ParamsWithId) {
     return {
       kind: "Dispute",

@@ -7,6 +7,7 @@ import { NotificationRepoLayer } from "~/repositories/notification.repo";
 import { PaginationService } from "~/services/search/pagination.service";
 import type { PaginationQuery } from "./search/primitives";
 import { SearchOps } from "./search/sql-search-resolver";
+import { dataResponse } from "~/libs/response";
 
 export const getUnreadNotification = (currentUserId: string) => {
   return Effect.gen(function* (_) {
@@ -19,7 +20,7 @@ export const getUnreadNotification = (currentUserId: string) => {
       ),
     );
 
-    return { unreadCount };
+    return dataResponse({ data: { unreadCount } });
   });
 };
 
@@ -46,7 +47,7 @@ export const getNotifications = (
         ? yield* notificationRepo.all(data)
         : yield* notificationRepo.getUnreadMessages(data);
 
-    return {
+    return dataResponse({
       data: unserializeNotification(notifications),
       meta: {
         ...paginate.meta,
@@ -55,7 +56,7 @@ export const getNotifications = (
           totalNotifications.count / paginate.query.pageSize,
         ),
       },
-    };
+    });
   });
 };
 
@@ -75,13 +76,15 @@ export const markAsRead = (
         );
       }
 
-      return;
+      return dataResponse({ message: "notifications marked as read" });
     }
 
     //mark all as read
     yield* notificationRepo
       .updateNotification({ userId: currentUserId }, type)
       .pipe(Effect.mapError((e) => new ExpectedError(e.toString())));
+
+    return dataResponse({ message: "notification marked as read" });
   });
 };
 
@@ -102,11 +105,12 @@ export const deleteNotification = (
           ),
         );
       }
-
-      return
+      return dataResponse({ message: "notifications deleted" });
     }
 
     //delete all notification
     yield* notificationRepo.delete(SearchOps.eq("userId", currentUserId));
+
+    return dataResponse({ message: "notification deleted" });
   });
 };

@@ -3,6 +3,7 @@ import {
   numeric,
   pgEnum,
   pgTable,
+  serial,
   smallint,
   smallserial,
   text,
@@ -96,3 +97,12 @@ export const referralSourceTable = pgTable("referral_resource", {
   id: smallserial("id"),
   name: varchar("name"),
 });
+
+
+export const pushTokenTable = pgTable("push_token", {
+  id: serial("id").primaryKey(),
+  userId: uuid("userId"),
+  token: text("token"),
+  ...timestamps,
+});
+

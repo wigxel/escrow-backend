@@ -2,6 +2,7 @@ import type { Effect } from "effect";
 import { MailMessage } from "~/layers/notification/MailMessage";
 import type { InferError, InferRequirements } from "~/services/effect.util";
 import type { Mailable } from "../mailing/mailables";
+import type { TPushNotification } from "~/services/pushNotification/push";
 
 export interface NotificationChannel {
   type: string;
@@ -36,6 +37,10 @@ export abstract class Notification {
 
   toDatabase():DatabaseMessage{
     return 
+  }
+
+  toPush():TPushNotification{
+    return
   }
 }
 

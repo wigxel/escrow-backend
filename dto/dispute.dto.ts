@@ -3,7 +3,16 @@ import { z } from "zod";
 export const newDisputeSchema = z.object({
   escrowId: z.string().uuid(),
   reason: z.string(),
-  message: z.string(),
+  categoryId: z.number({ coerce: true }).min(1),
+  resolutionId: z.number({ coerce: true }).min(1),
+  file: z
+    .instanceof(File)
+    .refine(
+      (file) => ["image/jpeg", "image/png", "image/jpg"].includes(file.type),
+      {
+        message: "Only JPEG and PNG files are allowed",
+      },
+    ),
 });
 
 export const sendDisputeMessageSchema = z.object({

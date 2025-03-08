@@ -12,7 +12,7 @@ export function getResource(url: string) {
   return Effect.gen(function* (_) {
     const storage = yield* FileStorage;
 
-    const path = extractResourcePathFromUrl(url);
-    return yield* Effect.tryPromise(() => storage.getFile(path));
+    const fileId = extractResourcePathFromUrl(url);
+    return yield* Effect.tryPromise(() => storage.getFile(fileId));
   });
 }

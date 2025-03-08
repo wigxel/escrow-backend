@@ -1,4 +1,8 @@
-const crypto = require('node:crypto');
+const a = {name:"him",age:25,profile:{height:"5.7ft"}}
 
-console.log(crypto.randomBytes(16).toString("hex"))
-console.log(crypto.randomBytes(16).toString("hex"))
+const b = Object.assign({}, a)
+
+b.name = "kadima"
+b.profile.height="5.8ft"
+
+console.log(a,b)

@@ -16,19 +16,15 @@ export const cloudinaryConfig = Effect.gen(function* () {
   const cloudinarySecretKey = yield* Config.string("CLOUDINARY_SECRET_KEY");
   const cloudinaryApiKey = yield* Config.string("CLOUDINARY_API_KEY");
   const cloudinaryCloudName = yield* Config.string("CLOUDINARY_CLOUD_NAME");
-  const cloudinaryFolder = yield* Config.string("CLOUDINARY_FOLDER");
 
   return {
     cloudinarySecretKey,
     cloudinaryApiKey,
     cloudinaryCloudName,
-    cloudinaryFolder,
   };
 });
 
-export type ResourceRecord = ResourceApiResponse["resources"][0];
-
-export const CloudinaryStorage = Layer.effect(
+export const CloudinaryStorageLive = Layer.effect(
   FileStorage,
   pipe(
     cloudinaryConfig,
@@ -43,14 +39,6 @@ export const CloudinaryStorage = Layer.effect(
     }),
   ),
 );
-
-type CloudStorageConfig = {
-  credentials: {
-    cloudName: string;
-    apiKey: string;
-    apiSecret: string;
-  };
-};
 
 class CloudinarySDK implements Storage {
   constructor(private config: CloudStorageConfig) {
@@ -117,11 +105,15 @@ class CloudinarySDK implements Storage {
   }
 }
 
+/**
+ * extracts the publicId of the assest
+ * @param url
+ * @returns
+ */
 export function extractResourcePathFromUrl(url: string): string | null {
-  const cloudinaryRegex =
-    /^https:\/\/res.cloudinary.com\/(\w|\d)+\/image\/upload\/v\d+\//;
-
-  return url.replace(cloudinaryRegex, "").replace(/\.png$/, "");
+  const regex = /\/v\d+\/(.+?)\./;
+  const match = url.match(regex);
+  return match ? match[1] : null;
 }
 
 export class CloudinaryFR extends FileReference {
@@ -141,3 +133,13 @@ export class CloudinaryFR extends FileReference {
 }
 
 export default CloudinarySDK;
+
+type CloudStorageConfig = {
+  credentials: {
+    cloudName: string;
+    apiKey: string;
+    apiSecret: string;
+  };
+};
+
+export type ResourceRecord = ResourceApiResponse["resources"][0];

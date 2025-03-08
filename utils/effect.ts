@@ -49,7 +49,7 @@ export const runLive = <
                 return createError({
                   status: 401,
                   statusMessage: "UnknownException",
-                  message: error.message,
+                  message: error.cause as string,
                 });
               }),
               Match.orElse((err) => {
@@ -62,29 +62,11 @@ export const runLive = <
             );
           }),
           Effect.match({
-            onSuccess: (d) => {
-              const struct = new Set(['data', 'status', 'message']);
-              const payloadStruct = new Set(Object.keys(d));
-
-              if (typeof (d) === "undefined") {
-                return {
-                  status: 200,
-                  message: "Request successful",
-                }
-              }
-
-              if (Array.isArray(d)) {
-                return ({ data: d, status: 200, message: "Every response should have a message" })
-              }
-
-              if (struct.isSupersetOf(payloadStruct)) return d;
-
-              return ({ data: d ?? null, status: 200, message: "" })
-            },
+            onSuccess: (d) => d as unknown as A,
             onFailure: resolveErrorResponse,
           }),
         ),
-AppLive,
+        AppLive,
       ),
     ),
   );

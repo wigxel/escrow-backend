@@ -1,62 +1,54 @@
-import { Effect, pipe } from "effect";
-import { PermissionError } from "~/config/exceptions";
-import { AuthUser } from "~/layers/auth-user";
+import { Effect } from "effect";
+import { ExpectedError, PermissionError } from "~/config/exceptions";
 import { hashPassword, verifyPassword } from "~/layers/encryption/helpers";
 import { Session } from "~/layers/session";
 import type { SessionUser } from "~/layers/session-provider";
+import { dataResponse } from "~/libs/response";
 import { UserRepoLayer } from "~/repositories/user.repository";
-
-export function logout({ access_token }: { access_token: string }) {
-  return Effect.gen(function* (_) {
-    const session = yield* Session;
-    const response = { message: "Session terminated" } as const;
-
-    // validate authorization token
-    return yield* _(
-      session.validate(access_token),
-      Effect.flatMap(() => session.invalidate(access_token)),
-      Effect.match({
-        onSuccess: () => response,
-        onFailure: () => response,
-      }),
-    );
-  });
-}
 
 export function login({
   body,
 }: { body: Partial<{ email: string; password: string }> }) {
   return Effect.gen(function* (_) {
     const session = yield* Session;
-    const auth_user = yield* AuthUser;
-    const error = new PermissionError("Invalid username or password provided");
+    const userRepo = yield* UserRepoLayer.Tag;
 
     yield* _(Effect.logDebug("Getting authenticated User"));
-    const user = yield* _(
-      pipe(
-        auth_user.getUserRecord({ email: body.email }),
-        Effect.mapError(() => error),
+    yield* _(Effect.logDebug("Getting authenticated User"));
+    const userDetails = yield* _(
+      userRepo.firstOrThrow({ email: body.email }),
+      Effect.mapError(
+        () => new PermissionError("Invalid username or password provided"),
       ),
     );
 
     yield* Effect.logDebug("Verify password");
+
     yield* _(
-      verifyPassword(body.password, user?.password ?? ""),
-      Effect.mapError(() => error),
+      verifyPassword(body.password, userDetails?.password ?? ""),
+      Effect.mapError(
+        () => new PermissionError("Invalid username or password provided"),
+      ),
     );
 
+    if (!userDetails.emailVerified) {
+      yield* new ExpectedError(
+        `Please verify your email ${body.email}. We sent a verification email to your inbox`,
+      );
+    }
+
     yield* Effect.logDebug("Creating session");
-    const { session_id, expires_at } = yield* _(
-      session.create(user.user_id),
-      Effect.mapError(() => error),
-    );
+    const { session_id, expires_at } = yield* _(session.create(userDetails.id));
 
     yield* Effect.logDebug("Session created");
 
-    return {
-      access_token: session_id,
-      expires: expires_at.toISOString(),
-    };
+    return dataResponse({
+      data: {
+        access_token: session_id,
+        expires: expires_at.toISOString(),
+      },
+      message: "Login successful",
+    });
   });
 }
 
@@ -70,12 +62,13 @@ export function loginWithPhoneNumber({
 }) {
   return Effect.gen(function* (_) {
     const session = yield* Session;
-    const auth_user = yield* AuthUser;
+    const userRepo = yield* UserRepoLayer.Tag
+
     const error = new PermissionError("Invalid username or password provided");
 
     yield* _(Effect.logDebug("Getting authenticated User by phone"));
     const user = yield* _(
-      auth_user.getUserRecord({
+      userRepo.firstOrThrow({
         phone: body.phone
       }),
       Effect.mapError(() => error),
@@ -85,21 +78,29 @@ export function loginWithPhoneNumber({
 
     yield* _(
       verifyPassword(body.password, user?.password ?? ""),
-      Effect.mapError(() => error),
+      Effect.mapError(
+        () => new PermissionError("Invalid username or password provided"),
+      ),
     );
 
+    if (!user.emailVerified) {
+      yield* new ExpectedError(
+        `Please verify your phone number ${body.phone}. We sent a verification email to your inbox`,
+      );
+    }
+
     yield* Effect.logDebug("Creating session");
-    const { session_id, expires_at } = yield* _(
-      session.create(user.user_id),
-      Effect.mapError(() => error),
-    );
+    const { session_id, expires_at } = yield* _(session.create(user.id));
 
     yield* Effect.logDebug("Session created");
 
-    return {
-      access_token: session_id,
-      expires: expires_at.toISOString(),
-    };
+    return dataResponse({
+      data: {
+        access_token: session_id,
+        expires: expires_at.toISOString(),
+      },
+      message: "Login successful",
+    });
   });
 }
 
@@ -110,6 +111,7 @@ export const changePassword = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const userRepo = yield* UserRepoLayer.Tag;
+
     const userDetails = yield* userRepo.firstOrThrow({
       id: params.currentUser.id,
     });
@@ -127,6 +129,23 @@ export const changePassword = (params: {
     yield* Effect.log("Hashing new password");
     const [user] = yield* userRepo.update(userDetails.id, { password: newHash });
 
-    return user;
+    return dataResponse({ message: "Password changed successful" });
   });
 };
+
+export function logout({ access_token }: { access_token: string }) {
+  return Effect.gen(function* (_) {
+    const session = yield* Session;
+    const response = { message: "Session terminated" } as const;
+
+    // validate authorization token
+    return yield* _(
+      session.validate(access_token),
+      Effect.flatMap(() => session.invalidate(access_token)),
+      Effect.match({
+        onSuccess: () => response,
+        onFailure: () => response,
+      }),
+    );
+  });
+}

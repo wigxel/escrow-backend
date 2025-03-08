@@ -33,6 +33,7 @@ import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
+import { dataResponse } from "~/libs/response";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -61,7 +62,6 @@ export const createEscrowTransaction = (
     if (customer && customer.id === currentUser.id) {
       yield* new ExpectedError("You cannot create transaction with yourself");
     }
-
     //new escrow transaction
     const escrowTransaction = yield* _(
       escrowTransactionRepo.create({
@@ -112,7 +112,7 @@ export const createEscrowTransaction = (
       customerUsername: input.customerUsername,
       customerEmail: input.customerEmail,
       customerPhone: String(input.customerPhone),
-      expires_at: addHours(new Date(), 1),
+      expiresAt: addHours(new Date(), 1),
     };
 
     yield* escrowRequestRepo.create(escrowRequestData);
@@ -120,7 +120,9 @@ export const createEscrowTransaction = (
     yield* createActivityLog(
       escrowActivityLog.created({ id: escrowTransaction.id }),
     );
-    return { escrowTransactionId: escrowTransaction.id };
+    return dataResponse({
+      data: { escrowTransactionId: escrowTransaction.id },
+    });
   });
 };
 
@@ -129,7 +131,6 @@ export const getEscrowTransactionDetails = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
-
     const escrowDetails = yield* _(
       escrowRepo.getEscrowDetails(params.escrowId),
       Effect.mapError(
@@ -140,22 +141,19 @@ export const getEscrowTransactionDetails = (params: {
       ),
     );
 
-    if (escrowDetails.escrowWalletDetails) {
-      //get the escrow balance
-      const balance = yield* getAccountBalance(
-        escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
-      );
+    const balance = yield* getAccountBalance(
+      escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
+    );
 
-      return {
+    return dataResponse({
+      data: {
         ...escrowDetails,
         escrowWalletDetails: {
           ...escrowDetails.escrowWalletDetails,
           balance: convertCurrencyUnit(String(balance), "kobo-naira"),
         },
-      };
-    }
-
-    return escrowDetails;
+      },
+    });
   });
 };
 
@@ -187,8 +185,10 @@ export const getEscrowRequestDetails = (data: {
     );
 
     return {
-      requestDetails: escrowRequestDetails,
-      isAuthenticated: !!data.currentUser,
+      data: {
+        requestDetails: escrowRequestDetails,
+        isAuthenticated: !!data.currentUser,
+      },
     };
   });
 };
@@ -244,7 +244,7 @@ export const initializeEscrowDeposit = (
     );
 
     //make sure the escrow transaction hasn't expired
-    if (isBefore(escrowRequestDetails.expires_at, new Date())) {
+    if (isBefore(escrowRequestDetails.expiresAt, new Date())) {
       yield* new ExpectedError("Escrow transaction request has expired");
     }
 
@@ -300,14 +300,18 @@ export const initializeEscrowDeposit = (
       },
     );
 
-    return checkoutSession;
+    return dataResponse({
+      data: checkoutSession.data,
+      status: checkoutSession.status,
+      message: checkoutSession.message,
+    });
   });
 };
 
 /**
  * Handles the necessary updates and actions after a successful deposit.
  */
-export const updateEscrowStatus = (
+export const finalizeEscrowTransaction = (
   params: TSuccessPaymentMetaData & { paymentDetails: TPaymentDetails },
 ) => {
   return Effect.gen(function* (_) {
@@ -398,6 +402,10 @@ export const updateEscrowTransactionStatus = (params: {
     yield* createActivityLog(
       escrowActivityLog.statusFactory(params.status)({ id: params.escrowId }),
     );
+
+    return dataResponse({
+      message: `Status updated from ${escrowDetails.status} to ${params.status} successfully`,
+    });
   });
 };
 

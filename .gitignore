@@ -8,3 +8,4 @@ dist
 db.json
 /.idea
 *.tigerbeetle
+fbAdminSDKConfig.json

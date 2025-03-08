@@ -113,7 +113,7 @@ export const escrowRequestTable = pgTable("escrow_request", {
   status: invitationStatus("status").default("pending"),
   accessCode: varchar("access-code"),
   authorizationUrl: text("authorization_url"),
-  expires_at: timestamp("expires_at"),
+  expiresAt: timestamp("expires_at"),
   ...timestamps,
 });
 

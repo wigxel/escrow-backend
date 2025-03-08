@@ -1,30 +1,111 @@
 import { Effect } from "effect";
-import { extendNotificationRepo } from "./mocks/notificationRepoMock";
+import { extendNotificationRepo } from "./mocks/notification/notificationRepoMock";
 import {
   deleteNotification,
   getNotifications,
+  getUnreadNotification,
   markAsRead,
 } from "~/services/notification.service";
 import { runTest } from "./mocks/app";
 
 describe("notification serivce", () => {
+  describe("get unread notification count", () => {
+    test("should return number of unread notifications", async () => {
+      const program = getUnreadNotification("current-user-id");
+      const result = await runTest(program);
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": {
+            "unreadCount": 1,
+          },
+          "status": "success",
+        }
+      `);
+    });
+  });
 
   describe("get notifications", () => {
     test("should return all notifcation", async () => {
       const program = getNotifications("all", "current-user-id");
       const result = await runTest(program);
 
-      expect(result.data).toMatchObject([{ isRead: false }, { isRead: true }]);
-      expect(result.status).toBeTruthy();
-      expect(result.meta.total).toBeTypeOf("number");
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": [
+            {
+              "createdAt": 2024-08-11T23:00:00.000Z,
+              "id": 12,
+              "isRead": false,
+              "message": "MOCK_MESSAGE",
+              "meta": {
+                "user": {
+                  "id": "user-id",
+                  "role": "BUYER",
+                },
+              },
+              "tag": "",
+              "title": "James Wholock",
+              "userId": "MOCK_USER_ID",
+            },
+            {
+              "createdAt": 2024-08-11T23:00:00.000Z,
+              "id": 1,
+              "isRead": true,
+              "message": "MOCK_MESSAGE",
+              "meta": {
+                "user": {
+                  "id": "user-id",
+                  "role": "BUYER",
+                },
+              },
+              "tag": "",
+              "title": "Tina Wholock",
+              "userId": "MOCK_USER_ID",
+            },
+          ],
+          "meta": {
+            "current_page": 1,
+            "per_page": 5,
+            "total": 1,
+            "total_pages": 1,
+          },
+          "status": "success",
+        }
+      `)
     });
+
     test("should return only read notifications", async () => {
       const program = getNotifications("unread", "current-user-id");
       const result = await runTest(program);
 
-      expect(result.data).toMatchObject([{ isRead: false }]);
-      expect(result.meta.total).toBeTypeOf("number");
-      expect(result.status).toBeTruthy();
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "data": [
+            {
+              "createdAt": 2024-08-11T23:00:00.000Z,
+              "id": 1,
+              "isRead": false,
+              "message": "MOCK_MESSAGE",
+              "meta": {
+                "user": {
+                  "id": "user-id",
+                  "role": "BUYER",
+                },
+              },
+              "tag": "",
+              "title": "Tina Wholock",
+              "userId": "MOCK_USER_ID",
+            },
+          ],
+          "meta": {
+            "current_page": 1,
+            "per_page": 5,
+            "total": 1,
+            "total_pages": 1,
+          },
+          "status": "success",
+        }
+      `);
     });
   });
 
@@ -55,8 +136,9 @@ describe("notification serivce", () => {
       expect(updatedCount).toBe(data.ids.length);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "Selected notifications marked as read",
-          "status": true,
+          "data": null,
+          "message": "notifications marked as read",
+          "status": "success",
         }
       `);
     });
@@ -74,8 +156,9 @@ describe("notification serivce", () => {
       expect(updatedCount).toBe(1);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "All notifications marked as read",
-          "status": true,
+          "data": null,
+          "message": "notification marked as read",
+          "status": "success",
         }
       `);
     });
@@ -96,8 +179,9 @@ describe("notification serivce", () => {
       expect(deletedCount).toBe(data.ids.length);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "Selected notifications deleted",
-          "status": true,
+          "data": null,
+          "message": "notifications deleted",
+          "status": "success",
         }
       `);
     });
@@ -115,8 +199,9 @@ describe("notification serivce", () => {
       expect(deletedCount).toBe(1);
       expect(result).toMatchInlineSnapshot(`
         {
-          "message": "Deleted all notification",
-          "status": true,
+          "data": null,
+          "message": "notification deleted",
+          "status": "success",
         }
       `);
     });

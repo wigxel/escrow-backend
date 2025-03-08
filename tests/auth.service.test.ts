@@ -1,167 +1,170 @@
-import { Effect, Layer } from "effect";
-import { verifyPassword } from "~/layers/encryption/helpers";
+import { Effect } from "effect";
 import { changePassword, login, logout } from "~/services/auth.service";
-import { extendPasswordHasher } from "~/tests/mocks/password-hasher";
-import { extendUserRepoMock } from "~/tests/mocks/user";
-import { AppTest, runTest } from "./mocks/app";
+import { extendUserRepoMock } from "~/tests/mocks/user/user";
+import { runTest } from "./mocks/app";
 
-describe("Authentication service", () => {
-  it("should login user", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        login({ body: { email: "johndoe@example.com", password: "pass123" } }),
-        AppTest,
-      ),
-    );
+describe("Authentication and authorization service", () => {
+  describe("Login", () => {
+    it("should login user", async () => {
+      const loginResult = runTest(
+        login({ body: { email: "user@gmail", password: "pass123" } }),
+      );
 
-    const loginResult = runTest(program);
-
-    expect(loginResult).resolves.toMatchObject(
-      expect.objectContaining({
-        message: "Login successful",
-        data: expect.objectContaining({
-          access_token: expect.anything(),
-          expires: expect.anything(),
+      expect(loginResult).resolves.toMatchObject(
+        expect.objectContaining({
+          message: "Login successful",
+          data: expect.objectContaining({
+            access_token: expect.anything(),
+            expires: expect.anything(),
+          }),
         }),
-      }),
-    );
-  });
+      );
+    });
 
-  it("should fail user for wrong password", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
+    it("should fail user for wrong password", async () => {
+      const program = login({
+        body: {
+          email: "user@gmail.com",
+          password: "MOCK_WRONG_PASSWORD",
+        },
+      });
+
+      const response = runTest(program);
+
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[PermissionError: Invalid username or password provided]`,
+      );
+    });
+
+    it("should fail user for wrong email", async () => {
+      const userMock = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.fail(new Error("User doesn't exists"));
+        },
+      });
+
+      const program = Effect.provide(
         login({
           body: {
-            email: "johndoe@example.com",
+            email: "MOCK_WRONG_EMAIL",
             password: "MOCK_WRONG_PASSWORD",
           },
         }),
-        AppTest,
-      ),
-    );
+        userMock,
+      );
 
-    const response = runTest(program);
+      const response = runTest(program);
 
-    expect(response).resolves.toMatchInlineSnapshot(
-      `[PermissionError: Invalid username or password provided]`,
-    );
-  });
-
-  it("should fail user for wrong email", async () => {
-    const userMock = extendUserRepoMock({
-      firstOrThrow() {
-        return Effect.fail(new Error("User doesn't exists"));
-      },
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[PermissionError: Invalid username or password provided]`,
+      );
     });
 
-    const program = Effect.provide(
-      login({
-        body: {
-          email: "MOCK_WRONG_EMAIL",
-          password: "MOCK_WRONG_PASSWORD",
+    test("unverified users should verify account before login", async () => {
+      const userRepo = extendUserRepoMock({
+        firstOrThrow() {
+          return Effect.succeed({
+            id: "test-id",
+            firstName: "test data",
+            lastName: "test data",
+            email: "user@gmail.com",
+            password:
+              "$argon2id$v=19$m=19456,t=2,p=1$mxVZvfCeexfpkfp15EnDWQ$gG7x/+N0sXxqt86kwUlYr6k08+m10g9ql1VL6aQX/aA",
+            address: "test data",
+            state: "test data",
+            country: "test data",
+            phone: "test data",
+            role: "user",
+            profilePicture: "test data",
+            emailVerified: false,
+          });
         },
-      }),
-      userMock,
-    );
+      });
 
-    const response = runTest(program);
+      const program = Effect.scoped(
+        Effect.provide(
+          login({
+            body: {
+              email: "user1@example.com",
+              password: "pass123",
+            },
+          }),
+          userRepo,
+        ),
+      );
 
-    expect(response).resolves.toMatchInlineSnapshot(
-      `[PermissionError: Invalid username or password provided]`,
-    );
+      const response = runTest(program);
+
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[ExpectedError: Please verify your email user1@example.com. We sent a verification email to your inbox]`,
+      );
+    });
   });
 
-  test("unverified users should verify account before login", async () => {
-    const program = Effect.scoped(
-      Effect.provide(
-        login({
-          body: {
-            email: "user1@example.com",
-            password: "pass123",
-          },
+  describe("Password change", () => {
+    const currentUser = {
+      email: "user@gmail.com",
+      phone: "",
+      id: "USER-MOCK-ID",
+      username: "",
+    };
+
+    it("should change user password", async () => {
+      let updated = false;
+      const userRepo = extendUserRepoMock({
+        // @ts-expect-error
+        update(id: string, data) {
+          updated = true;
+          return Effect.succeed([{ email: "email" }]);
+        },
+      });
+
+      const program = Effect.provide(
+        changePassword({
+          currentUser,
+          oldPassword: "pass123",
+          newPassword: "newpass",
         }),
-        AppTest,
-      ),
-    );
+        userRepo,
+      );
 
-    const response = runTest(program);
+      const response = await runTest(program);
 
-    expect(response).resolves.toMatchInlineSnapshot(
-      `[ExpectedError: Please verify your email user1@example.com. We sent a verification email to your inbox]`,
-    );
-  });
-});
-
-it("should change user password", async () => {
-  const program = changePassword("test-id", "pass123", "newpass");
-
-  const user = await runTest(program);
-  const passwordChanged = runTest(verifyPassword("newpass", user.password));
-
-  expect(user.id).toBe("test-id");
-  expect(passwordChanged).resolves.toMatchInlineSnapshot(
-    `"Password verification successful"`,
-  );
-});
-
-describe("Password change", () => {
-  it("should change user password", async () => {
-    const program = Effect.scoped(
-      Effect.provide(changePassword("test-id", "pass123", "newpass"), AppTest),
-    );
-
-    const user = await runTest(program);
-    const passwordChanged = runTest(verifyPassword("newpass", user.password));
-
-    expect(user.id).toBe("test-id");
-    expect(passwordChanged).resolves.toMatchInlineSnapshot(
-      `"Password verification successful"`,
-    );
-  });
-
-  it("should fail if currentPassword doesn't match", async () => {
-    const WRONG_PASSWORD = "p@ss123";
-    const effect = changePassword("MOCK_USER_ID", WRONG_PASSWORD, "newpass");
-
-    const userRepoTest = extendUserRepoMock({
-      // @ts-expect-error
-      firstOrThrow() {
-        return Effect.succeed({ password: "MOCK_PASSWORD_HASH" });
-      },
+      expect(updated).toBeTruthy();
+      expect(response).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "message": "Password changed successful",
+          "status": "success",
+        }
+      `);
     });
 
-    const mockPasswordHash = extendPasswordHasher({
-      verify(password, hash) {
-        return Effect.succeed(false);
-      },
+    it("should fail if currentPassword doesn't match", async () => {
+      const program = changePassword({
+        currentUser,
+        oldPassword: "p@ss123",
+        newPassword: "newpass",
+      });
+
+      const response = runTest(program);
+
+      expect(response).resolves.toMatchInlineSnapshot(
+        `[PasswordHasherError: Password verification failed]`,
+      );
     });
-
-    const program = Effect.provide(
-      effect,
-      mockPasswordHash.pipe(Layer.provideMerge(userRepoTest)),
-    );
-
-    const user = await runTest(program);
-
-    expect(user).toMatchInlineSnapshot(
-      `[PasswordHasherError: Password verification failed]`,
-    );
   });
-});
 
-describe("Logout actions", () => {
-  test("a user can logout with access token", async () => {
-    const program = Effect.scoped(
-      Effect.provide(logout({ access_token: "MOCK_ACCESS_TOKEN" }), AppTest),
-    );
+  describe("Logout actions", () => {
+    test("a user can logout with access token", async () => {
+      const program = logout({ access_token: "MOCK_ACCESS_TOKEN" });
+      const response = runTest(program);
 
-    const response = runTest(program);
-
-    expect(response).resolves.toMatchInlineSnapshot(`
-      {
-        "message": "Session terminated",
-      }
-    `);
+      expect(response).resolves.toMatchInlineSnapshot(`
+        {
+          "message": "Session terminated",
+        }
+      `);
+    });
   });
-  test.skip("a user can logout without access token", () => {});
 });

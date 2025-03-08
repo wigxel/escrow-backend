@@ -34,7 +34,6 @@ export const getTBAccount = (accountId: string) => {
     if (!account.length) {
       yield* new NoSuchElementException("invalid tigerbeetle account id");
     }
-
     return account;
   });
 };

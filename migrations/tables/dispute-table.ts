@@ -17,6 +17,8 @@ export const disputeTable = pgTable("disputes", {
   resolvedBy: uuid("resolved_by"),
   reason: varchar("reason"),
   escrowId: uuid("escrow_id"),
+  categoryId:integer("category_id"),
+  resolutionId:integer("resolution_id"),
   status: varchar("status").default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -28,18 +30,13 @@ export const disputeMembersTable = pgTable("dispute_members", {
   role: varchar("role"),
 });
 
-export const disputeMessageTable = pgTable("dispute_messages", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  disputeId: uuid("dispute_id"),
-  senderId: uuid("sender_id"),
-  message: text("message"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-export const disputeReadReceiptTable = pgTable("dispute_read_receipt", {
+export const disputeCategoriesTable = pgTable("dispute_categories", {
   id: serial("id").primaryKey(),
-  disputeId: uuid("dispute_id"),
-  userId: uuid("user_id"),
-  lastReadCount: integer("last_read_count"),
-  readAt: timestamp("read_at").defaultNow(),
-});
+  name:varchar("name")
+})
+
+export const disputeResolutionTable = pgTable("dispute_resolutions", {
+  id: serial("id").primaryKey(),
+  name:varchar("name")
+})

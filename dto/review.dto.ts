@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createReviewDto = z.object({
   escrowId: z.string(),
   comment: z.string().min(3).max(20),
-  rating: z.number({ coerce: true }),
+  rating: z.number({ coerce: true }).min(1).max(5),
 });
 
 export const updateReviewDto = z.object({

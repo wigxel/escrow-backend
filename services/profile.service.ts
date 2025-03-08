@@ -7,11 +7,18 @@ import {
   FileUploadException,
 } from "~/layers/storage/layer";
 import { getResource } from "./storage.service";
+import { dataResponse } from "~/libs/response";
+import { ExpectedError } from "~/config/exceptions";
 
 export const getProfile = (userId: string) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
-    return yield* userRepo.firstOrThrow({ id: userId });
+    const profile = yield* userRepo
+      .firstOrThrow({ id: userId })
+      .pipe(Effect.mapError(() => new ExpectedError("User not found")));
+
+    const { password, ...rest } = profile;
+    return dataResponse({ data: rest });
   });
 };
 
@@ -19,7 +26,7 @@ export const editProfile = (userId: string, profileUpdate: Partial<User>) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepoLayer.Tag;
     const [user] = yield* userRepo.update(userId, profileUpdate);
-    return user;
+    return dataResponse({ message: "Profile edited successfully" });
   });
 };
 
@@ -27,7 +34,10 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
   return Effect.gen(function* () {
     const userRepo = yield* UserRepo;
     const resourceManager = yield* FileStorage;
-    const user = yield* userRepo.find(userId);
+
+    const user = yield* userRepo
+      .firstOrThrow(userId)
+      .pipe(Effect.mapError(() => new ExpectedError("User not found")));
     const last_image_url = user.profilePicture;
 
     yield* Effect.logDebug("Upload new image");
@@ -36,8 +46,8 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
         return resourceManager.uploadFile(image, {
           mimeType: image.type,
           fileName: image instanceof File ? image.name : undefined,
-          folder: "display-pictures",
-          tags: ["avatar", `seller:${user.id}`],
+          folder: "profile",
+          tags: ["avatar", `user:${user.id}`],
         });
       },
       catch: (err) => {
@@ -55,6 +65,6 @@ export const uploadAvatarImage = (userId: string, image: File | Blob) => {
       yield* deleteResource(resource);
     }
 
-    return fileUrl;
+    return dataResponse({ data: { fileUrl } });
   });
 };

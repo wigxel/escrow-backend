@@ -1,6 +1,6 @@
 import { Config, Effect } from "effect";
 import {
-  updateEscrowStatus,
+  finalizeEscrowTransaction,
   validateUserStatusUpdate,
 } from "../escrow/escrowTransactionServices";
 import {
@@ -38,6 +38,7 @@ import { NotificationFacade } from "~/layers/notification/layer";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
 import { UserWalletPaymentNotification } from "~/app/notifications/in-app/escrow/userWallet-payment.notify";
+import { dataResponse } from "~/libs/response";
 
 export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentWebhookEvent,
@@ -90,7 +91,7 @@ export const handleSuccessPaymentEvents = (
       }),
     });
 
-    yield* updateEscrowStatus({
+    yield* finalizeEscrowTransaction({
       escrowId: metadata.escrowId,
       customerDetails: metadata.customerDetails,
       paymentDetails: {
@@ -255,6 +256,8 @@ export const releaseFunds = (params: {
         "customer",
       ),
     );
+
+    return dataResponse({ message: "Funds released successfully" });
   });
 };
 
@@ -353,5 +356,7 @@ export const withdrawFromWallet = (
         description: `withdrawing N${params.amount} from wallet to bank account`,
       }),
     });
+
+    return dataResponse({message:"Withdrawal processed successfully"})
   });
 };

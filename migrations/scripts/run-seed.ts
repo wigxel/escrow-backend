@@ -13,7 +13,13 @@ import { capitalize, toLowerCase } from "effect/String";
 import { DatabaseConnection, DatabaseResource } from "~/config/database";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
 import { runSeed as seedUser } from "~/migrations/seeds/user.seed";
+import { runSeed as seedDisputeCategories } from "~/migrations/seeds/disputeCategory.seed";
+import { runSeed as seedDisputeResolution } from "~/migrations/seeds/disputeResolution.seed";
+import { runSeed as seedReferralSource } from "~/migrations/seeds/referralSource.seed";
 import { UserRepoLayer } from "~/repositories/user.repository";
+import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
+import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
+import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
 
 
 const minimumLogLevel = Config.string("LOG_LEVEL").pipe(
@@ -30,6 +36,9 @@ const minimumLogLevel = Config.string("LOG_LEVEL").pipe(
 const dependencies = Layer.empty.pipe(
   Layer.provideMerge(Argon2dHasherLive),
   Layer.provideMerge(UserRepoLayer.Repo.Live),
+  Layer.provideMerge(DisputeCategorysRepoLayer.Repo.Live),
+  Layer.provideMerge(DisputeResolutionssRepoLayer.Repo.Live),
+  Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
   Layer.provideMerge(minimumLogLevel),
   Layer.provideMerge(Layer.setConfigProvider(ConfigProvider.fromEnv())),
 );
@@ -67,6 +76,9 @@ function runSeeds<T extends Iterable<Effect.Effect<unknown, unknown, unknown>>>(
 
 const program = runSeeds([
   seedUser,
+  seedDisputeCategories,
+  seedDisputeResolution,
+  seedReferralSource
 ]);
 
 const scopedEffect = Effect.scoped(Effect.provide(program, dependencies));

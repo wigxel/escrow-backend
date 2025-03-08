@@ -52,6 +52,10 @@ export const participantRelations = relations(
       fields: [escrowParticipantsTable.escrowId],
       references: [escrowTransactionTable.id],
     }),
+    walletDetails: one(escrowWalletTable, {
+      fields:[escrowParticipantsTable.escrowId],
+      references:[escrowWalletTable.escrowId]
+    })
   }),
 );
 
