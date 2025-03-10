@@ -37,6 +37,7 @@ import { PushServiceLive } from "~/services/pushNotification/push";
 import { CloudinaryStorageLive } from "~/layers/storage/presets/cloudinary";
 import { LuciaSessionProvider } from "~/services/lucia-session-provider";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
+import { CommentRepoLayer } from "~/repositories/comment.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -45,6 +46,7 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(BankAccountVerificationRepoLayer.live),
   Layer.provideMerge(WithdrawalRepoLayer.live),
   Layer.provideMerge(ReviewRepoLive),
+  Layer.provideMerge(CommentRepoLayer.live),
   Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
   Layer.provideMerge(PushTokenRepoLayer.live)
 );

@@ -45,6 +45,9 @@ export class ReviewRepository extends DrizzleRepo(reviewsTable, "id") {
               return eq(reviewsTable.escrowId, value as string);
           }),
         ),
+        with:{
+          comments:true
+        },
         limit: filters.pageSize,
         offset: filters.pageSize * filters.pageNumber,
       });
