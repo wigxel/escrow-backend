@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const createReviewDto = z.object({
-  escrowId: z.string(),
-  comment: z.string().min(3).max(20),
-  rating: z.number({ coerce: true }).min(1).max(5),
+  escrowId: z.string({required_error:"Escrow transaction id is required"}),
+  comment: z.string({required_error:"Comment is required"}).min(3).max(20),
+  rating: z.number({ coerce: true ,required_error:"Rating is required"}).min(1).max(5),
 });
 
 export const updateReviewDto = z.object({
-  reviewId: z.string(),
+  reviewId: z.string({required_error:"Review id is required"}),
   productId: z.string().optional(),
   comment: z.string().min(3).optional(),
   rating: z.number().optional(),
@@ -15,7 +15,7 @@ export const updateReviewDto = z.object({
 }).parse;
 
 export const deleteReviewDto = z.object({
-  reviewId: z.string(),
+  reviewId: z.string({required_error:"Review is required"}),
 }).parse;
 
 export const reviewFilterDto = z
