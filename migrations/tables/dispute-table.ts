@@ -2,7 +2,6 @@ import {
   integer,
   pgTable,
   serial,
-  text,
   timestamp,
   uuid,
   varchar,
@@ -20,7 +19,7 @@ export const disputeTable = pgTable("disputes", {
   categoryId:integer("category_id"),
   resolutionId:integer("resolution_id"),
   status: varchar("status").default("pending"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at",{withTimezone:true,precision:6}).defaultNow(),
 });
 
 export const disputeMembersTable = pgTable("dispute_members", {

@@ -7,5 +7,5 @@ export const activityLogTable = pgTable("activity_logs", {
   // e.g. the ide of the ORDER entity
   entityId: uuid("entity_id").notNull(),
   data: jsonb("data").notNull().default({}),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at",{withTimezone:true,precision:6}).defaultNow(),
 });
