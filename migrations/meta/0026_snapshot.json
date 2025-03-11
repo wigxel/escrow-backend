@@ -1,5 +1,5 @@
 {
-  "id": "a2d032bd-df90-41a4-b0ce-fde296a3d5d4",
+  "id": "4df045f8-491c-4f26-a144-5875e7b21646",
   "prevId": "04259508-56a7-49f4-9ae8-277afdef8153",
   "version": "7",
   "dialect": "postgresql",
@@ -1508,7 +1508,8 @@
           "name": "rating",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": 3
         },
         "created_at": {
           "name": "created_at",

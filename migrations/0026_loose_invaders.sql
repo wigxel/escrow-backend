@@ -35,6 +35,7 @@ ALTER TABLE "escrow_transactions" ALTER COLUMN "updated_at" SET DATA TYPE timest
 ALTER TABLE "escrow_wallet" ALTER COLUMN "created_at" SET DATA TYPE timestamp (6) with time zone;--> statement-breakpoint
 ALTER TABLE "escrow_wallet" ALTER COLUMN "updated_at" SET DATA TYPE timestamp (6) with time zone;--> statement-breakpoint
 ALTER TABLE "activity_logs" ALTER COLUMN "created_at" SET DATA TYPE timestamp (6) with time zone;--> statement-breakpoint
+ALTER TABLE "feedback_reviews" ALTER COLUMN "rating" SET DEFAULT 3;--> statement-breakpoint
 ALTER TABLE "feedback_reviews" ALTER COLUMN "created_at" SET DATA TYPE timestamp (6) with time zone;--> statement-breakpoint
 ALTER TABLE "feedback_reviews" ALTER COLUMN "updated_at" SET DATA TYPE timestamp (6) with time zone;--> statement-breakpoint
 DO $$ BEGIN
