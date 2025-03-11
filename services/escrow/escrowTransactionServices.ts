@@ -138,15 +138,19 @@ export const listUserEscrowTransactions = (
   return Effect.gen(function* (_) {
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
 
-    return yield* searchRepo(
-      escrowRepo.with("escrowWalletDetails").with("paymentDetails"),
-      () => ({
-        where: SearchOps.and(
-          filters.status ? SearchOps.eq('status', filters.status) : SearchOps.none(),
-          SearchOps.eq('createdBy', user_id)
-        )
-      })
-    );
+    return dataResponse(
+      yield* searchRepo(
+        escrowRepo.with("escrowWalletDetails").with("paymentDetails"),
+        () => ({
+          where: SearchOps.and(
+            filters.status
+              ? SearchOps.eq("status", filters.status)
+              : SearchOps.none(),
+            SearchOps.eq("createdBy", user_id),
+          ),
+        }),
+      ),
+    )
   });
 };
 

@@ -1,0 +1,1 @@
+ALTER TABLE "escrow_transactions" ADD COLUMN "kind" varchar(255) DEFAULT 'escrow_tx';
