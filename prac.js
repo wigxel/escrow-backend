@@ -5,4 +5,4 @@ const b = Object.assign({}, a)
 b.name = "kadima"
 b.profile.height="5.8ft"
 
-console.log(a,b)
+console.log(Object.entries(a))

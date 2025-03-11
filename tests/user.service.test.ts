@@ -20,7 +20,7 @@ import { extendUserWalletRepo } from "./mocks/user/userWalletMock";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 import { extendNotificationFacade } from "./mocks/notification/notificationFacadeMock";
 import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
-import { Account } from "tigerbeetle-node";
+import type { Account } from "tigerbeetle-node";
 import { extendPushTokenRepo } from "./mocks/user/pushTokenMock";
 
 describe("User services", () => {
@@ -190,10 +190,8 @@ describe("User services", () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "data": {
-            "session_data": {
-              "expires_at": 2025-03-21T23:00:00.000Z,
-              "session_id": "session-id",
-            },
+            "expires_at": 2025-03-21T23:00:00.000Z,
+            "session_id": "session-id",
           },
           "message": "user created successfully",
           "status": "success",

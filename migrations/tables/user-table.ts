@@ -34,8 +34,7 @@ export const userTable = pgTable(
     businessName: varchar("business_name"),
     businessType: varchar("business-type"),
     referralSourceId: smallint("referral_source_id"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    ...timestamps
   },
   (table) => {
     return {
@@ -54,7 +53,7 @@ export const bankAccountTable = pgTable("bank_account", {
   accountName: varchar("account_name"),
   bankCode: varchar("bank_code"),
   paystackRecipientCode: varchar("paystack_recipient_code"),
-  deletedAt: timestamp("deleted_at"),
+  deletedAt: timestamp("deleted_at",{withTimezone:true,precision:6}),
   ...timestamps,
 });
 
@@ -68,7 +67,7 @@ export const bankAccountVerificationTable = pgTable(
     bankName: varchar("bank_name"),
     bankCode: varchar("bank_code"),
     verificationToken: uuid("verificationToken"),
-    expiresAt: timestamp("expires_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at",{withTimezone:true,precision:6}).defaultNow().notNull(),
     ...timestamps,
   },
   (table) => {
