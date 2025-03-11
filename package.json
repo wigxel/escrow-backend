@@ -16,9 +16,11 @@
     "db:show": "drizzle-kit studio",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "prepare": "nitropack prepare"
+    "prepare": "nitropack prepare",
+    "format": "biome format --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@paralleldrive/cuid2": "^2.2.2",
     "@types/nodemailer": "^6.4.15",
     "@vitest/ui": "^2.0.4",
