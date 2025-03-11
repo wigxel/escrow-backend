@@ -1,0 +1,2 @@
+pnpm biome format --staged . &&
+echo "Formatting complete"
