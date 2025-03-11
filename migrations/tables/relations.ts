@@ -14,11 +14,16 @@ import {
   escrowWalletTable,
 } from "./escrow-transaction-table";
 import { activityLogTable } from "./activitylog.table";
+import { reviewsTable } from "./review-table";
 
 export const userRelations = relations(userTable, ({ one, many }) => ({
   address: one(addressTable, {
     fields: [userTable.id],
     references: [addressTable.userId],
+  }),
+  rating: one(reviewsTable, {
+    fields: [userTable.id],
+    references: [reviewsTable.revieweeId],
   }),
 }));
 
@@ -48,13 +53,17 @@ export const activityLogRelations = relations(activityLogTable, ({ one }) => ({
 export const participantRelations = relations(
   escrowParticipantsTable,
   ({ one }) => ({
+    user: one(userTable, {
+      fields: [escrowParticipantsTable.userId],
+      references: [userTable.id],
+    }),
     transactionDetails: one(escrowTransactionTable, {
       fields: [escrowParticipantsTable.escrowId],
       references: [escrowTransactionTable.id],
     }),
     walletDetails: one(escrowWalletTable, {
-      fields:[escrowParticipantsTable.escrowId],
-      references:[escrowWalletTable.escrowId]
+      fields: [escrowParticipantsTable.escrowId],
+      references: [escrowWalletTable.escrowId]
     })
   }),
 );

@@ -19,5 +19,8 @@ export const notificationTable = pgTable("notification", {
   title: varchar("title"),
   message: text("message"),
   isRead: boolean("is_read").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    precision: 6,
+  }).defaultNow(),
 });

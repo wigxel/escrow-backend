@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import type { InferEffectFnResult } from "~/services/effect.util";
-import type { LegacySearchableRepo } from "~/services/repository/repo.types";
+import type { LegacySearchableRepo, RepoHelperOuter, SearchableParams } from "~/services/repository/repo.types";
 import { FilterImpl, SearchFilter } from "~/services/search/filter.service";
 import {
   PaginationImpl,
@@ -11,7 +11,7 @@ import type {
   PaginationQuery,
 } from "~/services/search/primitives";
 
-interface QueryRepo extends LegacySearchableRepo {}
+interface QueryRepo extends LegacySearchableRepo { }
 
 export function searchByQueryRepo<TRepo extends QueryRepo>(repo: TRepo) {
   return searchByRepoWhere(repo, () => ({ where: {} }));
@@ -54,6 +54,54 @@ export function searchByRepoWhere<TRepo extends QueryRepo, A, E, R>(
         total,
       },
     };
+  });
+}
+
+export function searchRepo<
+  // biome-ignore lint/suspicious/noExplicitAny: Type is inferred from the repo
+  const TRepo extends RepoHelperOuter<any, any>,
+  const TData = InferEffectFnResult<TRepo['paginate']>
+>(
+  repo: TRepo,
+  getWhereParams: (params: Partial<PaginationQuery & FilterQuery>) => {
+    where: SearchableParams['where']
+    // @ts-expect-error No need to specify type
+  } = () => ({})
+) {
+  return Effect.suspend(() => {
+    return Effect.gen(function* (_) {
+      const filter = yield* _(SearchFilter);
+      const pagination = yield* _(PaginationService);
+
+      yield* Effect.logDebug(
+        `searchByQuery:: Search(${filter.search}), Cursor(${pagination.query.pageNumber}), Limit(${pagination.query.pageSize})`
+      );
+
+      const searchParams = {
+        search: filter.search,
+        ...pagination.query,
+      };
+
+      const filters: SearchableParams = {
+        ...getWhereParams(searchParams),
+        ...searchParams,
+      };
+
+      const [total, data] = yield* _(
+        Effect.all([
+          repo.count(filters.where),
+          repo.paginate(filters)
+        ])
+      );
+
+      return {
+        data: data as TData,
+        meta: {
+          ...pagination.meta,
+          total,
+        },
+      };
+    });
   });
 }
 

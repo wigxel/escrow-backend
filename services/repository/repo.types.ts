@@ -35,8 +35,8 @@ export interface SortOrder {
 
 export interface SearchableParams
   extends PaginationQuery,
-    FilterQuery,
-    SortOrder {
+  FilterQuery,
+  SortOrder {
   where: FilterOrLogicOperator | Array<FilterOrLogicOperator>;
 }
 
@@ -84,14 +84,23 @@ export interface RepoModel {
   delete: (
     params: SearchableParams["where"],
   ) => Effect.Effect<unknown, unknown, unknown>;
+
+  with: (name: string) => this;
+
+  paginate(filters: Partial<SearchableParams>):
+    Effect.Effect<unknown, unknown, unknown>;
 }
 
-export interface RepoClass<Table extends DrizzleTableWithColumns> {
-  new (): RepoHelperOuter<Table>;
+export interface RepoClass<Table extends DrizzleTableWithColumns, TRelationship extends string> {
+  new(): RepoHelperOuter<Table, TRelationship>;
 }
 
-export interface RepoHelperOuter<Table extends DrizzleTableWithColumns>
-  extends Omit<RepoHelperInner<Table>, "find" | "firstOrThrow" | "update"> {
+export interface RepoHelperOuter<
+  Table extends DrizzleTableWithColumns,
+  TRelationship extends string>
+  extends Omit<RepoHelperInner<Table, TRelationship>,
+    "find" | "firstOrThrow" | "update" | "with"> {
+
   /**
    * ```ts
    *  Model.find(1)
@@ -121,10 +130,13 @@ export interface RepoHelperOuter<Table extends DrizzleTableWithColumns>
     params: FindArg1,
     data: unknown,
   ): ReturnType<RepoHelperInner<Table>["update"]>;
+
+  with: (name: TRelationship) => this;
 }
 
 export interface RepoHelperInner<
   TTable extends DrizzleTableWithColumns,
+  TRelationship extends string = string,
   Insert = InferInsert<TTable>,
   Select = InferInsert<TTable>,
 > {
@@ -141,7 +153,11 @@ export interface RepoHelperInner<
   >;
 
   all: (
-    payload?: Partial<SearchableParams>,
+    params?: Partial<SearchableParams>,
+  ) => Effect.Effect<Select[], RepoQueryErrors, DatabaseConnection>;
+
+  paginate: (
+    params?: Partial<SearchableParams>,
   ) => Effect.Effect<Select[], RepoQueryErrors, DatabaseConnection>;
 
   /**
@@ -182,6 +198,10 @@ export interface RepoHelperInner<
   delete: (
     params: SearchableParams["where"],
   ) => Effect.Effect<void, RepoQueryErrors, DatabaseConnection>;
+
+  with: (
+    key?: TRelationship,
+  ) => this;
 }
 
 export type FindArg1 =

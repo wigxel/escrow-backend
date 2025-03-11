@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import type { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
-import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
+import { EscrowTransactionRepo, EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
@@ -34,6 +34,7 @@ import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 import { dataResponse } from "~/libs/response";
+import { searchRepo } from "../search";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -127,6 +128,18 @@ export const createEscrowTransaction = (
   });
 };
 
+export function listTransactions() {
+  return Effect.gen(function* () {
+    const repo = yield* EscrowTransactionRepo;
+
+    return yield* searchRepo(
+      repo
+        .with("paymentDetails")
+        .with("escrowWalletDetails")
+    )
+  })
+}
+
 export const getEscrowTransactionDetails = (params: {
   escrowId: string;
 }) => {
@@ -137,7 +150,7 @@ export const getEscrowTransactionDetails = (params: {
       Effect.mapError(
         () =>
           new NoSuchElementException(
-            "invalid escrow id: no escrow transaction found",
+            "Invalid escrow id: no escrow transaction found",
           ),
       ),
     );

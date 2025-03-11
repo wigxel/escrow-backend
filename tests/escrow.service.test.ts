@@ -16,10 +16,9 @@ import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRe
 import { extendEscrowPaymentRepo } from "./mocks/escrow/escrowPaymentRepoMock";
 import { extendEscrowRequestRepo } from "./mocks/escrow/escrowRequestReoMock";
 import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
-import { toRuntimeWithMemoMap } from "effect/Layer";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
-import { escrowStatusRules } from "~/dto/escrowTransactions.dto";
-import { z } from "zod";
+import type { escrowStatusRules } from "~/dto/escrowTransactions.dto";
+import type { z } from "zod";
 
 describe("Escrow transaction service", () => {
   const currentUser = {
@@ -33,7 +32,7 @@ describe("Escrow transaction service", () => {
   describe("Create escrow transaction", () => {
     const params = {
       amount: 10000,
-      creatorRole: "seller" as "seller",
+      creatorRole: "seller" as const,
       customerEmail: "MOCK_EMAIL",
       customerPhone: 11222333,
       customerUsername: "MOCK_USERNAME",

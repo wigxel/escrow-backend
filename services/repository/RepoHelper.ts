@@ -1,5 +1,6 @@
 import type { PgTableWithColumns } from "drizzle-orm/pg-core";
 import type { Effect } from "effect/Effect";
+import { runDrizzleQuery } from "~/libs/query.helpers";
 import { createRepoHelpers } from "~/services/repository/drizzle-repo-helper";
 import type {
   FindArg1,
@@ -20,7 +21,10 @@ export type KeyofTableColumns<
   ? keyof Config["columns"]
   : Fallback;
 
+
 const DrizzleRepoProto = {
+  __relations: [],
+
   $helper: {} as RepoHelperInner<DrizzleTableWithColumns>,
 
   all(params: Partial<SearchableParams>) {
@@ -53,13 +57,30 @@ const DrizzleRepoProto = {
   delete(params: SearchableParams["where"]) {
     return this.$helper.delete(params);
   },
+
+  paginate(filters: Pick<SearchableParams, 'pageSize' | 'pageNumber'>) {
+    return runDrizzleQuery(db => {
+      return db.query.escrowTransactionTable.findMany({
+        offset: filters.pageNumber,
+        limit: filters.pageSize,
+        with: Object.fromEntries(this.__relations.map((e) => [e, true]))
+      });
+    })
+  },
+
+  with(name: string) {
+    this.__relations.push(name);
+    return this;
+  }
 };
 
-export const DrizzleRepo = <const Table extends DrizzleTableWithColumns>(
-  table: Table,
-  primaryColumn: KeyofTableColumns<Table>,
-): RepoClass<Table> => {
-  function DrizzleRepoClass() {}
+export const DrizzleRepo = <const Table extends DrizzleTableWithColumns,
+  const TRelationship extends string>(
+    table: Table,
+    primaryColumn: KeyofTableColumns<Table>,
+    params: { relationship: TRelationship[] }
+  ) => {
+  function DrizzleRepoClass() { }
 
   DrizzleRepoClass.prototype = {
     primaryColumn,
@@ -67,6 +88,5 @@ export const DrizzleRepo = <const Table extends DrizzleTableWithColumns>(
     $helper: createRepoHelpers(table),
   };
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  return DrizzleRepoClass as any;
+  return DrizzleRepoClass as unknown as RepoClass<Table, TRelationship>;
 };
