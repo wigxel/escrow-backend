@@ -1,6 +1,6 @@
 import type { PgTableWithColumns } from "drizzle-orm/pg-core";
 import type { Effect } from "effect/Effect";
-import { runDrizzleQuery } from "~/libs/query.helpers";
+import { queryFiltersToWhere, runDrizzleQuery } from "~/libs/query.helpers";
 import { createRepoHelpers } from "~/services/repository/drizzle-repo-helper";
 import type {
   FindArg1,
@@ -10,6 +10,8 @@ import type {
   RepoModelIdType,
   SearchableParams,
 } from "~/services/repository/repo.types";
+import { SearchOps } from "../search/sql-search-resolver";
+import { escrowTransactionTable } from "~/migrations/schema";
 
 // biome-ignore lint/suspicious/noExplicitAny: Required for inference to work well
 export type DrizzleTableWithColumns = PgTableWithColumns<any>;
@@ -58,11 +60,12 @@ const DrizzleRepoProto = {
     return this.$helper.delete(params);
   },
 
-  paginate(filters: Pick<SearchableParams, 'pageSize' | 'pageNumber'>) {
+  paginate(filters: SearchableParams) {
     return runDrizzleQuery(db => {
       return db.query.escrowTransactionTable.findMany({
         offset: filters.pageNumber,
         limit: filters.pageSize,
+        where: queryFiltersToWhere(escrowTransactionTable, SearchOps.reduce(filters.where)),
         with: Object.fromEntries(this.__relations.map((e) => [e, true]))
       });
     })
@@ -78,7 +81,7 @@ export const DrizzleRepo = <const Table extends DrizzleTableWithColumns,
   const TRelationship extends string>(
     table: Table,
     primaryColumn: KeyofTableColumns<Table>,
-    params: { relationship: TRelationship[] }
+    params: Partial<{ relationship: TRelationship[] }> = {}
   ) => {
   function DrizzleRepoClass() { }
 
