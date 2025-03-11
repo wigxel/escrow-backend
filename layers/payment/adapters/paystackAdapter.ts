@@ -1,6 +1,10 @@
 import { Paystack } from "~/utils/paystack/paystack";
 import { PaymentGateway, type TPaymentGateway } from "../payment-gateway";
-import type { TCreateTransferRecipientData, TInitializeTransactionData, TInitiateTransferData } from "~/utils/paystack/type/data";
+import type {
+  TCreateTransferRecipientData,
+  TInitializeTransactionData,
+  TInitiateTransferData,
+} from "~/utils/paystack/type/data";
 import { Config, Effect, Layer, pipe, Redacted } from "effect";
 import { PaystackEventLive } from "./paystack-events";
 import type { UnknownException } from "effect/Cause";
@@ -33,24 +37,25 @@ class PaystackGateway implements TPaymentGateway {
     });
   }
 
-  bankLists(currency="NGN") {
-    return this.run((gateway)=>{
-      return gateway.listBanks(currency)
-    })
+  bankLists(currency = "NGN") {
+    return this.run((gateway) => {
+      return gateway.listBanks(currency);
+    });
   }
 
-  resolveBankAccount(accountNumber:string,bankCode:string){
-    return this.run((gateway)=>gateway.resolveAccountNumber(accountNumber,bankCode))
+  resolveBankAccount(accountNumber: string, bankCode: string) {
+    return this.run((gateway) =>
+      gateway.resolveAccountNumber(accountNumber, bankCode),
+    );
   }
 
-  createTransferRecipient(payload:TCreateTransferRecipientData){
-    return this.run((gateway)=>gateway.createTransferRecipient(payload))
+  createTransferRecipient(payload: TCreateTransferRecipientData) {
+    return this.run((gateway) => gateway.createTransferRecipient(payload));
   }
 
-  initiateTransfer(payload:TInitiateTransferData){
-    return this.run((gateway)=>gateway.initiateTransfer(payload))
+  initiateTransfer(payload: TInitiateTransferData) {
+    return this.run((gateway) => gateway.initiateTransfer(payload));
   }
-
 }
 
 export const PaystackGatewayLive = pipe(

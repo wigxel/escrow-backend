@@ -17,7 +17,7 @@ export default eventHandler(async (event) => {
 
     return {
       status: "success",
-      message: "Bank account added successfully"
+      message: "Bank account added successfully",
     };
   });
 

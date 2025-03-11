@@ -3,9 +3,9 @@ import { Context, Data, type Option } from "effect";
 export type PaymentGatewayEvents = Data.TaggedEnum<{
   ChargeSuccess: { readonly data: object };
   ChargeFailed: { readonly data: object };
-  TransferSuccess:{readonly data:object}
-  TransferFailed:{readonly data:object}
-  TransferReversed:{readonly data:object}
+  TransferSuccess: { readonly data: object };
+  TransferFailed: { readonly data: object };
+  TransferReversed: { readonly data: object };
   UnknownPaymentEvent: { readonly data: unknown };
 }>;
 
@@ -19,10 +19,8 @@ export interface PaymentEventServiceImpl {
   ): Option.Option<T>;
 }
 
-export class PaymentGatewayEventService extends Context.Tag("PaymentGatewayEventService")<
-  PaymentGatewayEventService,
-  PaymentEventServiceImpl
->() {}
+export class PaymentGatewayEventService extends Context.Tag(
+  "PaymentGatewayEventService",
+)<PaymentGatewayEventService, PaymentEventServiceImpl>() {}
 
 export const PaymentGatewayEvent = Data.taggedEnum<PaymentGatewayEvents>();
-

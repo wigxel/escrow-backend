@@ -1,5 +1,8 @@
-import { TEscrowParticipant } from "~/migrations/schema";
-import { canTransitionEscrowStatus, getBuyerAndSellerFromParticipants } from "~/services/escrow/escrow.utils";
+import type { TEscrowParticipant } from "~/migrations/schema";
+import {
+  canTransitionEscrowStatus,
+  getBuyerAndSellerFromParticipants,
+} from "~/services/escrow/escrow.utils";
 import { runTest } from "./mocks/app";
 
 describe("Escrow utility", () => {
@@ -48,14 +51,16 @@ describe("Escrow utility", () => {
     ] as TEscrowParticipant[];
 
     test("should fail if buyer and seller not found", () => {
-      const program = getBuyerAndSellerFromParticipants([participants[0]])
-      const result = runTest(program)
-      expect(result).resolves.toMatchInlineSnapshot(`[ExpectedError: Invalid participants. Seller or buyer not found.]`)
+      const program = getBuyerAndSellerFromParticipants([participants[0]]);
+      const result = runTest(program);
+      expect(result).resolves.toMatchInlineSnapshot(
+        "[ExpectedError: Invalid participants. Seller or buyer not found.]",
+      );
     });
 
     test("should return participants", () => {
-      const program = getBuyerAndSellerFromParticipants(participants)
-      const result = runTest(program)
+      const program = getBuyerAndSellerFromParticipants(participants);
+      const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(`
         {
           "buyer": {
@@ -73,8 +78,7 @@ describe("Escrow utility", () => {
             "userId": "MOCK_SELLER_ID",
           },
         }
-      `)
+      `);
     });
-    
   });
 });

@@ -19,28 +19,31 @@ const UserMock: UserRepository = {
   },
 
   create(data: User) {
-    return Effect.succeed([{
-      role: "user",
-      id: "user_id",
-      bvn: "",
-      hasBusiness: false,
-      referralSourceId: 1,
-      businessType: "",
-      businessName: "",
-      username: "",
-      firstName: "string",
-      lastName: "string",
-      email: "string",
-      password: "$argon2id$v=19$m=19456,t=2,p=1$mxVZvfCeexfpkfp15EnDWQ$gG7x/+N0sXxqt86kwUlYr6k08+m10g9ql1VL6aQX/aA",
-      address: "string",
-      state: "string",
-      country: "string",
-      phone: "string",
-      profilePicture: "string",
-      emailVerified: false,
-      createdAt: new Date(2025, 2, 22),
-      updatedAt: new Date(2025, 2, 22),
-    }]);
+    return Effect.succeed([
+      {
+        role: "user",
+        id: "user_id",
+        bvn: "",
+        hasBusiness: false,
+        referralSourceId: 1,
+        businessType: "",
+        businessName: "",
+        username: "",
+        firstName: "string",
+        lastName: "string",
+        email: "string",
+        password:
+          "$argon2id$v=19$m=19456,t=2,p=1$mxVZvfCeexfpkfp15EnDWQ$gG7x/+N0sXxqt86kwUlYr6k08+m10g9ql1VL6aQX/aA",
+        address: "string",
+        state: "string",
+        country: "string",
+        phone: "string",
+        profilePicture: "string",
+        emailVerified: false,
+        createdAt: new Date(2025, 2, 22),
+        updatedAt: new Date(2025, 2, 22),
+      },
+    ]);
   },
 
   firstOrThrow(where: Partial<TUser>) {
@@ -58,8 +61,8 @@ const UserMock: UserRepository = {
       role: "user",
       profilePicture: "test data",
       emailVerified: true,
-      createdAt: new Date(2025,2,21),
-      updatedAt: new Date(2025,2,21),
+      createdAt: new Date(2025, 2, 21),
+      updatedAt: new Date(2025, 2, 21),
     });
   },
   //@ts-expect-error
@@ -81,10 +84,11 @@ const UserMock: UserRepository = {
       phone: "test data",
       bvn: "",
       role: "user",
-      profilePicture: "https://res.cloudinary.com/upload/images/v1234/imgae.jpg",
+      profilePicture:
+        "https://res.cloudinary.com/upload/images/v1234/imgae.jpg",
       emailVerified: true,
-      createdAt: new Date(2025,2,21),
-      updatedAt: new Date(2025,2,21),
+      createdAt: new Date(2025, 2, 21),
+      updatedAt: new Date(2025, 2, 21),
     });
   },
 };

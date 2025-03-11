@@ -1,4 +1,4 @@
-import { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
+import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
 import { extendEscrowWalletRepo } from "./mocks/escrow/escrowWalletRepoMock";
 import { Effect, Layer } from "effect";
 import {
@@ -56,7 +56,7 @@ describe("Payment service", () => {
       const program = handleSuccessPaymentEvents(params);
       const result = runTest(Effect.provide(program, escrowWalletRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid escrow id: wallet not found]`,
+        "[ExpectedError: Invalid escrow id: wallet not found]",
       );
     });
 
@@ -115,7 +115,7 @@ describe("Payment service", () => {
       const program = releaseFunds(params);
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid escrow transaction id]`,
+        "[NoSuchElementException: Invalid escrow transaction id]",
       );
     });
 
@@ -148,7 +148,7 @@ describe("Payment service", () => {
       const program = releaseFunds(params);
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: This transaction has already been completed.]`,
+        "[ExpectedError: This transaction has already been completed.]",
       );
     });
 
@@ -156,7 +156,7 @@ describe("Payment service", () => {
       const program = releaseFunds(params);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Cannot transition from created to completed]`,
+        "[ExpectedError: Cannot transition from created to completed]",
       );
     });
 
@@ -200,7 +200,7 @@ describe("Payment service", () => {
         Effect.provide(program, Layer.merge(escrowRepo, userWalletRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid user id: user wallet not found]`,
+        "[NoSuchElementException: Invalid user id: user wallet not found]",
       );
     });
 
@@ -319,7 +319,7 @@ describe("Payment service", () => {
       const program = withdrawFromWallet(params);
       const result = runTest(Effect.provide(program, bankAccountRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid account number id]`,
+        "[NoSuchElementException: Invalid account number id]",
       );
     });
 
@@ -333,7 +333,7 @@ describe("Payment service", () => {
       const program = withdrawFromWallet(params);
       const result = runTest(Effect.provide(program, userWalletRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: wallet not found]`,
+        "[NoSuchElementException: wallet not found]",
       );
     });
 
@@ -348,7 +348,7 @@ describe("Payment service", () => {
       const program = withdrawFromWallet({ ...params, amount: 10000 });
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[InsufficientBalanceException: Insufficient account balance]`,
+        "[InsufficientBalanceException: Insufficient account balance]",
       );
     });
 
@@ -363,7 +363,7 @@ describe("Payment service", () => {
       const program = withdrawFromWallet(params);
       const result = runTest(Effect.provide(program, PaymentGatewayMock));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unable to initiate transfer]`,
+        "[ExpectedError: Unable to initiate transfer]",
       );
     });
 
@@ -434,7 +434,7 @@ describe("Payment service", () => {
           "message": "Withdrawal processed successfully",
           "status": "success",
         }
-      `)
+      `);
     });
   });
 });

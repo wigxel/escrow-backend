@@ -37,7 +37,7 @@ describe("User services", () => {
       const program = checkUsername("kd");
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Username taken]`,
+        "[ExpectedError: Username taken]",
       );
     });
 
@@ -76,7 +76,7 @@ describe("User services", () => {
       const program = createUser(userData);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Username taken]`,
+        "[ExpectedError: Username taken]",
       );
     });
 
@@ -98,7 +98,7 @@ describe("User services", () => {
         Effect.provide(program, Layer.merge(userRepo, referralSourceRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: invalid referral source ID]`,
+        "[ExpectedError: invalid referral source ID]",
       );
     });
 
@@ -115,7 +115,7 @@ describe("User services", () => {
       const program = createUser(userData);
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Account already exists. Email or phone number is taken]`,
+        "[ExpectedError: Account already exists. Email or phone number is taken]",
       );
     });
 
@@ -220,7 +220,7 @@ describe("User services", () => {
       const program = resendEmailVerificationOtp(email);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Email already verified]`,
+        "[ExpectedError: Email already verified]",
       );
     });
 
@@ -298,7 +298,7 @@ describe("User services", () => {
       const program = verifyUserEmail(params);
       const result = runTest(Effect.provide(program, otpRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid OTP]`,
+        "[ExpectedError: Invalid OTP]",
       );
     });
 
@@ -347,7 +347,7 @@ describe("User services", () => {
       const program = forgotPassword(email);
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Request is being processed]`,
+        "[ExpectedError: Request is being processed]",
       );
     });
 
@@ -438,7 +438,7 @@ describe("User services", () => {
       const program = passwordReset(params);
       const result = runTest(Effect.provide(program, otpRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid OTP]`,
+        "[ExpectedError: Invalid OTP]",
       );
     });
 
@@ -493,17 +493,17 @@ describe("User services", () => {
       const program = handleUserCreationFromEscrow(params);
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Email is already taken]`,
+        "[ExpectedError: Email is already taken]",
       );
     });
 
     test("should create new account from escrow", async () => {
-      let userCreated = false
-      let isNotified = false
+      let userCreated = false;
+      let isNotified = false;
       const userRepo = extendUserRepoMock({
         //@ts-expect-error
         create() {
-          userCreated = true
+          userCreated = true;
           return Effect.succeed([
             {
               firstName: "",
@@ -518,16 +518,18 @@ describe("User services", () => {
       });
 
       const notifyMock = extendNotificationFacade({
-        notify(){
-          isNotified = true
-          return Effect.succeed(1)
-        }
-      })
+        notify() {
+          isNotified = true;
+          return Effect.succeed(1);
+        },
+      });
 
       const program = handleUserCreationFromEscrow(params);
-      const result = await runTest(Effect.provide(program, Layer.merge(userRepo,notifyMock)));
-      expect(userCreated).toBeTruthy()
-      expect(isNotified).toBeTruthy()
+      const result = await runTest(
+        Effect.provide(program, Layer.merge(userRepo, notifyMock)),
+      );
+      expect(userCreated).toBeTruthy();
+      expect(isNotified).toBeTruthy();
       expect(result).toMatchInlineSnapshot(`
         {
           "email": "MOCK_EMAIL",
@@ -552,7 +554,7 @@ describe("User services", () => {
       const program = UserBalance(currentUser);
       const result = runTest(Effect.provide(program, userWalletRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Wallet not found]`,
+        "[ExpectedError: Wallet not found]",
       );
     });
 

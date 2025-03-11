@@ -16,7 +16,7 @@ export default eventHandler(async (event) => {
       newPassword: body.newPassword,
     });
 
-    return { message: "Password changed successfully" }
+    return { message: "Password changed successfully" };
   });
 
   return runLive(event, program);

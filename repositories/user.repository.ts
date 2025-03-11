@@ -1,6 +1,6 @@
 import { eq, like, or } from "drizzle-orm";
-import { Context, Effect, Layer} from "effect";
-import { notNil,  runDrizzleQuery } from "~/libs/query.helpers";
+import { Context, Effect, Layer } from "effect";
+import { notNil, runDrizzleQuery } from "~/libs/query.helpers";
 import { userTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
 

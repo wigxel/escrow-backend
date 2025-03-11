@@ -1,6 +1,5 @@
 import type { Notification } from "~/migrations/schema";
 
-
 export const unserializeNotification = (notifications: Notification[]) => {
   if (!notifications.length) return [];
   const result: Notification[] = [];

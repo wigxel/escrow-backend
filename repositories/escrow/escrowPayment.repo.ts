@@ -7,14 +7,12 @@ export class EscrowPaymentRepository extends DrizzleRepo(
   "id",
 ) {}
 
-export class EscrowPaymentRepo extends Context.Tag(
-  "EscrowPaymentRepo",
-)<EscrowPaymentRepo, EscrowPaymentRepository>() {}
+export class EscrowPaymentRepo extends Context.Tag("EscrowPaymentRepo")<
+  EscrowPaymentRepo,
+  EscrowPaymentRepository
+>() {}
 
 export const EscrowPaymentRepoLayer = {
   tag: EscrowPaymentRepo,
-  live: Layer.succeed(
-    EscrowPaymentRepo,
-    new EscrowPaymentRepository(),
-  ),
+  live: Layer.succeed(EscrowPaymentRepo, new EscrowPaymentRepository()),
 };

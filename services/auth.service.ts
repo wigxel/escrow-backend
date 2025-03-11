@@ -58,18 +58,18 @@ export function loginWithPhoneNumber({
   body: Partial<{
     phone: string;
     password: string;
-  }>
+  }>;
 }) {
   return Effect.gen(function* (_) {
     const session = yield* Session;
-    const userRepo = yield* UserRepoLayer.Tag
+    const userRepo = yield* UserRepoLayer.Tag;
 
     const error = new PermissionError("Invalid username or password provided");
 
     yield* _(Effect.logDebug("Getting authenticated User by phone"));
     const user = yield* _(
       userRepo.firstOrThrow({
-        phone: body.phone
+        phone: body.phone,
       }),
       Effect.mapError(() => error),
     );
@@ -115,13 +115,15 @@ export const changePassword = (params: {
       Effect.catchTag("PasswordHasherError", () => {
         // @todo: Severity High - Count login attempts and block user if too many attempts
         return new PermissionError("Invalid password provided");
-      })
-    )
+      }),
+    );
 
     yield* Effect.log("Hashing new password");
     const newHash = yield* hashPassword(params.newPassword);
     yield* Effect.log("Hashing new password");
-    const [user] = yield* userRepo.update(userDetails.id, { password: newHash });
+    const [user] = yield* userRepo.update(userDetails.id, {
+      password: newHash,
+    });
 
     return dataResponse({ message: "Password changed successful" });
   });

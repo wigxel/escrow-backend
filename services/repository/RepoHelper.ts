@@ -23,7 +23,6 @@ export type KeyofTableColumns<
   ? keyof Config["columns"]
   : Fallback;
 
-
 const DrizzleRepoProto = {
   __relations: [],
 
@@ -61,29 +60,34 @@ const DrizzleRepoProto = {
   },
 
   paginate(filters: SearchableParams) {
-    return runDrizzleQuery(db => {
+    return runDrizzleQuery((db) => {
       return db.query.escrowTransactionTable.findMany({
         offset: filters.pageNumber,
         limit: filters.pageSize,
-        where: queryFiltersToWhere(escrowTransactionTable, SearchOps.reduce(filters.where)),
-        with: Object.fromEntries(this.__relations.map((e) => [e, true]))
+        where: queryFiltersToWhere(
+          escrowTransactionTable,
+          SearchOps.reduce(filters.where),
+        ),
+        with: Object.fromEntries(this.__relations.map((e) => [e, true])),
       });
-    })
+    });
   },
 
   with(name: string) {
     this.__relations.push(name);
     return this;
-  }
+  },
 };
 
-export const DrizzleRepo = <const Table extends DrizzleTableWithColumns,
-  const TRelationship extends string>(
-    table: Table,
-    primaryColumn: KeyofTableColumns<Table>,
-    params: Partial<{ relationship: TRelationship[] }> = {}
-  ) => {
-  function DrizzleRepoClass() { }
+export const DrizzleRepo = <
+  const Table extends DrizzleTableWithColumns,
+  const TRelationship extends string,
+>(
+  table: Table,
+  primaryColumn: KeyofTableColumns<Table>,
+  params: Partial<{ relationship: TRelationship[] }> = {},
+) => {
+  function DrizzleRepoClass() {}
 
   DrizzleRepoClass.prototype = {
     primaryColumn,

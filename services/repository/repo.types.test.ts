@@ -1,4 +1,4 @@
-import { Expect, Equal } from "type-testing";
+import type { Expect, Equal } from "type-testing";
 import {
   boolean,
   pgTable,
@@ -7,7 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
-import { InferResult } from "../effect.util";
+import type { InferResult } from "../effect.util";
 
 //////// SCHEMA
 const table = pgTable("user", {

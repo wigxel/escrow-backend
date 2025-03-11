@@ -9,14 +9,14 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export function Layout({ title="", children }: LayoutProps) {
+export function Layout({ title = "", children }: LayoutProps) {
   return (
     <Html>
-      <Head/>
+      <Head />
       <Preview>{title}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Header heading={title}/>
+          <Header heading={title} />
           {children}
           <Footer />
         </Container>

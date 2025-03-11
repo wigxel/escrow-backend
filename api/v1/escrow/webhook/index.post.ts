@@ -4,8 +4,5 @@ export default eventHandler(async (event) => {
   const body = await readBody(event);
   const sig = getHeader(event, "x-paystack-signature");
 
-  return runLive(
-    event,
-    handlePaystackWebhook(body, sig),
-  );
+  return runLive(event, handlePaystackWebhook(body, sig));
 });

@@ -97,7 +97,6 @@ export const reversibleHashLive = Layer.effect(
   }),
 );
 
-
 export function createReversibleHash({
   salt,
   hex,

@@ -191,4 +191,3 @@ export type TPaystackTransferWebhookEvent = {
 export type TPaystackWebookEvent =
   | TPaystackPaymentWebhookEvent
   | TPaystackTransferWebhookEvent;
-

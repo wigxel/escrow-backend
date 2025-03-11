@@ -45,8 +45,8 @@ const mock: EscrowParticipantRepository = {
         walletDetails: {
           id: "wallet-id",
           escrowId: "escrow-id",
-          createdAt: new Date(2025,2,22),
-          updatedAt: new Date(2025,2,22),
+          createdAt: new Date(2025, 2, 22),
+          updatedAt: new Date(2025, 2, 22),
           tigerbeetleAccountId: "tiger-beetle-id",
         },
       },
@@ -59,8 +59,8 @@ const mock: EscrowParticipantRepository = {
         walletDetails: {
           id: "wallet-id",
           escrowId: "escrow-id",
-          createdAt: new Date(2025,2,22),
-          updatedAt: new Date(2025,2,22),
+          createdAt: new Date(2025, 2, 22),
+          updatedAt: new Date(2025, 2, 22),
           tigerbeetleAccountId: "tiger-beetle-id",
         },
       },

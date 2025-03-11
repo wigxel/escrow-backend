@@ -1,9 +1,7 @@
 import { Effect } from "effect";
 import { toLower } from "ramda";
 import { hashPassword } from "~/layers/encryption/helpers";
-import type {
-  userTable,
-} from "~/migrations/schema";
+import type { userTable } from "~/migrations/schema";
 import { createFactory } from "~/migrations/seeds/setup";
 import { UserRepo } from "~/repositories/user.repository";
 

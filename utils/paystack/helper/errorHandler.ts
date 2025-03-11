@@ -1,4 +1,4 @@
-import type { AxiosError } from 'axios';
+import type { AxiosError } from "axios";
 
 export const errorHandler = (error: AxiosError): { message: string } => {
   if (error.response) {

@@ -39,18 +39,22 @@ export const escrowStatusRules = z.object({
 });
 
 export const escrowTransactionFilterDto = z.object({
-  status: z.enum([
-    "created",
-    "deposit.pending",
-    "deposit.success",
-    "service.pending",
-    "service.confirmed",
-    "completed",
-    "dispute",
-    "refunded",
-    "cancelled",
-    "expired",
-  ]).optional()
+  status: z
+    .enum([
+      "created",
+      "deposit.pending",
+      "deposit.success",
+      "service.pending",
+      "service.confirmed",
+      "completed",
+      "dispute",
+      "refunded",
+      "cancelled",
+      "expired",
+    ])
+    .optional(),
 });
 
-export type TEscrowTransactionFilter = z.infer<typeof escrowTransactionFilterDto>
+export type TEscrowTransactionFilter = z.infer<
+  typeof escrowTransactionFilterDto
+>;

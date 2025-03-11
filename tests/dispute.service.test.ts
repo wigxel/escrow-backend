@@ -49,7 +49,7 @@ describe("Dispute service", () => {
 
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid Escrow ID]`,
+        "[ExpectedError: Invalid Escrow ID]",
       );
     });
 
@@ -64,7 +64,7 @@ describe("Dispute service", () => {
 
       const result = runTest(Effect.provide(program, disputeCategoryRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid Dispute Category ID]`,
+        "[ExpectedError: Invalid Dispute Category ID]",
       );
     });
 
@@ -79,7 +79,7 @@ describe("Dispute service", () => {
 
       const result = runTest(Effect.provide(program, disputeResolutionRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid Dispute Resolution ID]`,
+        "[ExpectedError: Invalid Dispute Resolution ID]",
       );
     });
 
@@ -102,7 +102,7 @@ describe("Dispute service", () => {
 
       const result = runTest(Effect.provide(program, escrowParticipantRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid participants. Seller or buyer not found.]`,
+        "[ExpectedError: Invalid participants. Seller or buyer not found.]",
       );
     });
 
@@ -114,7 +114,7 @@ describe("Dispute service", () => {
 
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: cannot create dispute]`,
+        "[PermissionError: cannot create dispute]",
       );
     });
 
@@ -137,7 +137,7 @@ describe("Dispute service", () => {
 
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Cannot transition from created to dispute]`,
+        "[ExpectedError: Cannot transition from created to dispute]",
       );
     });
 
@@ -146,7 +146,7 @@ describe("Dispute service", () => {
 
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Escrow already has an open dispute]`,
+        "[ExpectedError: Escrow already has an open dispute]",
       );
     });
 
@@ -383,7 +383,7 @@ describe("Dispute service", () => {
 
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot affect dispute status]`,
+        "[PermissionError: Cannot affect dispute status]",
       );
     });
     test("should fail if dispute id doesn't exist", async () => {
@@ -399,7 +399,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: invalid dispute id]`,
+        "[ExpectedError: invalid dispute id]",
       );
     });
 
@@ -416,7 +416,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Cannot transition from pending to resolved]`,
+        "[ExpectedError: Cannot transition from pending to resolved]",
       );
     });
 
@@ -532,7 +532,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot invite user]`,
+        "[PermissionError: Cannot invite user]",
       );
     });
     test("should fail if dispute id doesn't exist", async () => {
@@ -548,7 +548,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid disputeID: Unassociated open dispute]`,
+        "[ExpectedError: Invalid disputeID: Unassociated open dispute]",
       );
     });
 
@@ -565,7 +565,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unacceptable action: cannot invite dispute creator]`,
+        "[ExpectedError: Unacceptable action: cannot invite dispute creator]",
       );
     });
 
@@ -582,7 +582,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid user id: Cannot invite this user]`,
+        "[ExpectedError: Invalid user id: Cannot invite this user]",
       );
     });
 
@@ -599,7 +599,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid escrow id: Cannot retrieve escrow]`,
+        "[ExpectedError: Invalid escrow id: Cannot retrieve escrow]",
       );
     });
 
@@ -625,7 +625,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, escrowParticipantRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid participants. Seller or buyer not found.]`,
+        "[ExpectedError: Invalid participants. Seller or buyer not found.]",
       );
     });
 
@@ -652,7 +652,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: User must be an admin or associated with the escrow]`,
+        "[ExpectedError: User must be an admin or associated with the escrow]",
       );
     });
 
@@ -677,7 +677,7 @@ describe("Dispute service", () => {
         Effect.provide(program, Layer.merge(disputeMemberRepo, userRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: User already a member]`,
+        "[ExpectedError: User already a member]",
       );
     });
 
@@ -743,7 +743,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot remove user]`,
+        "[PermissionError: Cannot remove user]",
       );
     });
 
@@ -760,7 +760,7 @@ describe("Dispute service", () => {
       });
       const result = runTest(Effect.provide(program, disputeMemberRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: User is not a member]`,
+        "[ExpectedError: User is not a member]",
       );
     });
 

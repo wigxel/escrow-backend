@@ -21,7 +21,6 @@ import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo
 import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
 import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
 
-
 const minimumLogLevel = Config.string("LOG_LEVEL").pipe(
   Effect.map((level) => {
     const formatted_level = capitalize(
@@ -78,7 +77,7 @@ const program = runSeeds([
   seedUser,
   seedDisputeCategories,
   seedDisputeResolution,
-  seedReferralSource
+  seedReferralSource,
 ]);
 
 const scopedEffect = Effect.scoped(Effect.provide(program, dependencies));

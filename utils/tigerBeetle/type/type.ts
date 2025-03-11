@@ -39,7 +39,7 @@ export type TTBTransfer = {
    * This is a user-defined enum denoting the category of the account.
    * eg. 1001 is Bank Account and 1002 is Money Market Account
    */
-  code?:TBTransferCode
+  code?: TBTransferCode;
   flags?: TransferFlags;
 };
 
@@ -64,9 +64,8 @@ export enum LedgerType {
   Currency = "Currency",
 }
 
-export enum TBTransferCode{
+export enum TBTransferCode {
   ESCROW_PAYMENT = 300,
   RELEASE_ESCROW_FUNDS = 400,
-  WALLET_WITHDRAWAL = 500
-
+  WALLET_WITHDRAWAL = 500,
 }

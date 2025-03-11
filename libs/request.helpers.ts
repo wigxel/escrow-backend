@@ -1,8 +1,8 @@
 import { safeObj } from "~/libs/data.helpers";
-import { Cause, Effect, pipe } from "effect";
+import { type Cause, Effect, pipe } from "effect";
 // @ts-expect-error
-import { H3Event } from "h3";
-import { SafeParseReturnType, z } from "zod";
+import type { H3Event } from "h3";
+import type { SafeParseReturnType, z } from "zod";
 import { ValidationError } from "~/config/exceptions";
 
 export function validateZod<TSuccess>(

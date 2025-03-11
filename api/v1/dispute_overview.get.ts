@@ -5,13 +5,15 @@ import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.r
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {
-    const categoryRepo = yield* DisputeCategorysRepoLayer.Tag
-    const resolutionRepo = yield* DisputeResolutionssRepoLayer.Tag
+    const categoryRepo = yield* DisputeCategorysRepoLayer.Tag;
+    const resolutionRepo = yield* DisputeResolutionssRepoLayer.Tag;
 
-    return dataResponse({data:{
-      categories: yield* categoryRepo.all(),
-      resolutions: yield* resolutionRepo.all()
-    }})
+    return dataResponse({
+      data: {
+        categories: yield* categoryRepo.all(),
+        resolutions: yield* resolutionRepo.all(),
+      },
+    });
   });
 
   return runLive(event, program);

@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "./.nitro/types/tsconfig.json"
-  ],
+  "extends": ["./.nitro/types/tsconfig.json"],
   "compilerOptions": {
     "types": ["vitest/globals"],
     "noEmit": true,

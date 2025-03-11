@@ -20,7 +20,7 @@ export class EmailVerificationMail extends Mailable {
   content(): Content {
     const viewTemplate = EmailVerifcationView({
       username: this.user.firstName,
-      otp:this.otp,
+      otp: this.otp,
     });
 
     return new Content({

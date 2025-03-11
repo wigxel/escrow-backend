@@ -35,7 +35,7 @@ describe("Review service", () => {
       const program = createReview(reviewData, currentUser);
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid escrow id]`,
+        "[NoSuchElementException: Invalid escrow id]",
       );
     });
 
@@ -43,7 +43,7 @@ describe("Review service", () => {
       const program = createReview(reviewData, currentUser);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: You already left a review]`,
+        "[ExpectedError: You already left a review]",
       );
     });
 
@@ -66,7 +66,7 @@ describe("Review service", () => {
         Effect.provide(program, Layer.merge(escrowRepo, reviewRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: cannot leave a review on this escrow transaction]`,
+        "[PermissionError: cannot leave a review on this escrow transaction]",
       );
     });
 
@@ -110,7 +110,7 @@ describe("Review service", () => {
         ),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Invalid participants. Seller or buyer not found.]`,
+        "[ExpectedError: Invalid participants. Seller or buyer not found.]",
       );
     });
 
@@ -133,7 +133,7 @@ describe("Review service", () => {
         Effect.provide(program, Layer.merge(reviewRepo, escrowRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[PermissionError: cannot leave a review on this escrow transaction]`,
+        "[PermissionError: cannot leave a review on this escrow transaction]",
       );
     });
 
@@ -177,7 +177,7 @@ describe("Review service", () => {
 
   describe(" Get reviews", () => {
     test("should return reviews", async () => {
-      let reviewCount = 1;
+      const reviewCount = 1;
       const reviewRepo = extendReviewRepoMock({
         reviewCount() {
           return Effect.succeed({ count: reviewCount });
@@ -227,7 +227,7 @@ describe("Review service", () => {
       });
       const response = runTest(Effect.provide(program, reviewRepo));
       expect(response).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid review Id]`,
+        "[NoSuchElementException: Invalid review Id]",
       );
     });
 
@@ -239,7 +239,7 @@ describe("Review service", () => {
 
       const response = runTest(program);
       expect(response).resolves.toMatchInlineSnapshot(
-        `[PermissionError: Cannot delete this review]`,
+        "[PermissionError: Cannot delete this review]",
       );
     });
 

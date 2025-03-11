@@ -7,12 +7,14 @@ export class BankAccountVerificationRepository extends DrizzleRepo(
   "id",
 ) {}
 
-export class BankAccountVerificationRepo extends Context.Tag("BankAccountVerificationRepo")<
-  BankAccountVerificationRepo,
-  BankAccountVerificationRepository
->() {}
+export class BankAccountVerificationRepo extends Context.Tag(
+  "BankAccountVerificationRepo",
+)<BankAccountVerificationRepo, BankAccountVerificationRepository>() {}
 
 export const BankAccountVerificationRepoLayer = {
   tag: BankAccountVerificationRepo,
-  live: Layer.succeed(BankAccountVerificationRepo, new BankAccountVerificationRepository()),
+  live: Layer.succeed(
+    BankAccountVerificationRepo,
+    new BankAccountVerificationRepository(),
+  ),
 };

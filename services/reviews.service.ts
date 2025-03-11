@@ -15,111 +15,113 @@ import { CommentRepoLayer } from "~/repositories/comment.repo";
 import { head } from "effect/Array";
 
 export function createReview(
-	params: z.infer<typeof createReviewDto>,
-	currentUser: SessionUser,
+  params: z.infer<typeof createReviewDto>,
+  currentUser: SessionUser,
 ) {
-	return Effect.gen(function* (_) {
-		const reviewRepo = yield* ReviewRepo;
-		const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
-		const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
-		const commentRepo = yield* CommentRepoLayer.tag;
+  return Effect.gen(function* (_) {
+    const reviewRepo = yield* ReviewRepo;
+    const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
+    const escrowParticipantRepo = yield* EscrowParticipantRepoLayer.tag;
+    const commentRepo = yield* CommentRepoLayer.tag;
 
-		const escrowDetails = yield* _(
-			escrowRepo.firstOrThrow({ id: params.escrowId }),
-			Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
-		);
+    const escrowDetails = yield* _(
+      escrowRepo.firstOrThrow({ id: params.escrowId }),
+      Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
+    );
 
-		//check if user already reviewed
-		const r = yield* _(
-			reviewRepo.firstOrThrow({
-				reviewerId: currentUser.id,
-				escrowId: escrowDetails.id,
-			}),
-			Effect.matchEffect({
-				onSuccess: () => new ExpectedError("You already left a review"),
-				onFailure: () => Effect.succeed(1),
-			}),
-		);
+    //check if user already reviewed
+    const r = yield* _(
+      reviewRepo.firstOrThrow({
+        reviewerId: currentUser.id,
+        escrowId: escrowDetails.id,
+      }),
+      Effect.matchEffect({
+        onSuccess: () => new ExpectedError("You already left a review"),
+        onFailure: () => Effect.succeed(1),
+      }),
+    );
 
-		if (!(escrowDetails.status === "completed")) {
-			yield* new PermissionError("Cannot leave a review at this stage");
-		}
+    if (!(escrowDetails.status === "completed")) {
+      yield* new PermissionError("Cannot leave a review at this stage");
+    }
 
-		const participants = yield* escrowParticipantRepo.getParticipants(
-			escrowDetails.id,
-		);
+    const participants = yield* escrowParticipantRepo.getParticipants(
+      escrowDetails.id,
+    );
 
-		const { seller, buyer } =
-			yield* getBuyerAndSellerFromParticipants(participants);
+    const { seller, buyer } =
+      yield* getBuyerAndSellerFromParticipants(participants);
 
-		if (currentUser.id !== seller.userId && currentUser.id !== buyer.userId) {
-			yield* new PermissionError(
-				"cannot leave a review on this escrow transaction",
-			);
-		}
+    if (currentUser.id !== seller.userId && currentUser.id !== buyer.userId) {
+      yield* new PermissionError(
+        "cannot leave a review on this escrow transaction",
+      );
+    }
 
-		const revieweeId =
-			currentUser.id !== seller.userId ? seller.userId : buyer.userId;
-    
-		const review = yield* reviewRepo.create({
-			escrowId: escrowDetails.id,
-			reviewerId: currentUser.id,
-			revieweeId,
-			rating: params.rating,
-		}).pipe(Effect.flatMap(head));
+    const revieweeId =
+      currentUser.id !== seller.userId ? seller.userId : buyer.userId;
+
+    const review = yield* reviewRepo
+      .create({
+        escrowId: escrowDetails.id,
+        reviewerId: currentUser.id,
+        revieweeId,
+        rating: params.rating,
+      })
+      .pipe(Effect.flatMap(head));
 
     //add the comment
     yield* commentRepo.create({
-      reviewId:review.id,
-      userId:currentUser.id,
-      comment:params.comment
-    })
+      reviewId: review.id,
+      userId: currentUser.id,
+      comment: params.comment,
+    });
 
-		return dataResponse({ message: "Review added successfully" });
-	});
+    return dataResponse({ message: "Review added successfully" });
+  });
 }
 
 export function getReviews(filters: z.infer<typeof reviewFilterDto>) {
-	return Effect.gen(function* (_) {
-		const reviewRepo = yield* ReviewRepo;
-		const paginate = yield* PaginationService;
+  return Effect.gen(function* (_) {
+    const reviewRepo = yield* ReviewRepo;
+    const paginate = yield* PaginationService;
 
-		const reviewCount = yield* reviewRepo.reviewCount(filters);
-		const reviews = yield* reviewRepo.getReviews({
-			...filters,
-			...paginate.query,
-		});
+    const reviewCount = yield* reviewRepo.reviewCount(filters);
+    const reviews = yield* reviewRepo.getReviews({
+      ...filters,
+      ...paginate.query,
+    });
 
-		return dataResponse({
-			data: reviews,
-			meta: {
-				...paginate.meta,
-				total: reviewCount.count,
-				total_pages: Math.ceil(reviewCount.count / paginate.query.pageSize),
-			},
-		});
-	});
+    return dataResponse({
+      data: reviews,
+      meta: {
+        ...paginate.meta,
+        total: reviewCount.count,
+        total_pages: Math.ceil(reviewCount.count / paginate.query.pageSize),
+      },
+    });
+  });
 }
 
 export function deleteReview(params: {
-	reviewId: string;
-	currentUser: SessionUser;
+  reviewId: string;
+  currentUser: SessionUser;
 }) {
-	return Effect.gen(function* (_) {
-		const reviewRepo = yield* ReviewRepo;
+  return Effect.gen(function* (_) {
+    const reviewRepo = yield* ReviewRepo;
 
-		const review = yield* _(
-			reviewRepo.firstOrThrow({
-				id: params.reviewId,
-			}),
-			Effect.mapError(() => new NoSuchElementException("Invalid review Id")),
-		);
+    const review = yield* _(
+      reviewRepo.firstOrThrow({
+        id: params.reviewId,
+      }),
+      Effect.mapError(() => new NoSuchElementException("Invalid review Id")),
+    );
 
-		if (params.currentUser.id !== review.reviewerId) {
-			yield* new PermissionError("Cannot delete this review");
-		}
+    if (params.currentUser.id !== review.reviewerId) {
+      yield* new PermissionError("Cannot delete this review");
+    }
 
-		yield* reviewRepo.delete(SearchOps.eq("id", params.reviewId));
-		return dataResponse({ message: "Review deleted successfully" });
-	});
+    yield* reviewRepo.delete(SearchOps.eq("id", params.reviewId));
+    return dataResponse({ message: "Review deleted successfully" });
+  });
 }

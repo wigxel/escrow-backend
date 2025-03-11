@@ -1,7 +1,10 @@
 import { Effect, Layer } from "effect";
 import { extendMockImplementation } from "./helpers";
 
-import { ReferralSourceRepo, type ReferralSourceRepository } from "~/repositories/referralSource.repo";
+import {
+  ReferralSourceRepo,
+  type ReferralSourceRepository,
+} from "~/repositories/referralSource.repo";
 
 const mock: ReferralSourceRepository = {
   create: (data) => {

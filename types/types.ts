@@ -21,11 +21,11 @@ type ShapeOf<T> = Record<keyof T, unknown>;
 export type AssertKeysEqual<X extends ShapeOf<Y>, Y extends ShapeOf<X>> = never;
 
 export type TAccountStatementMetadata = {
-  escrowId?:string,
-  from:string,
-  to:string,
-  description:string
-}
+  escrowId?: string;
+  from: string;
+  to: string;
+  description: string;
+};
 
 export type TSuccessPaymentMetaData = {
   escrowId: string;
@@ -44,7 +44,6 @@ export type TPaymentDetails = {
   paymentMethod: string;
 };
 
-
 export type TPaystackEventResponse = {
   event: string;
   data: {
@@ -52,7 +51,7 @@ export type TPaystackEventResponse = {
     reference: string;
     status: string;
     channel: string;
-    metadata: Record<string,unknown>;
+    metadata: Record<string, unknown>;
   };
 };
 

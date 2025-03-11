@@ -21,7 +21,7 @@ export class EscrowParticipantRepository extends DrizzleRepo(
       return db.query.escrowParticipantsTable.findMany({
         where: eq(escrowParticipantsTable.userId, userId),
         with: {
-          walletDetails:true
+          walletDetails: true,
         },
       });
     }).pipe(Effect.flatMap(notNil));

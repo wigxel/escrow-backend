@@ -32,8 +32,8 @@ export function createLuciaProvider<TAdapter extends Adapter>(
       return {
         email: attributes.email,
         role: attributes.role,
-        username:attributes.username,
-        phone:attributes.phone
+        username: attributes.username,
+        phone: attributes.phone,
       };
     },
   });
@@ -106,7 +106,7 @@ declare module "lucia" {
   interface DatabaseUserAttributes {
     email: string;
     role: string;
-    username:string,
-    phone:string
+    username: string;
+    phone: string;
   }
 }

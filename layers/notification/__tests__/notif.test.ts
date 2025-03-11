@@ -1,12 +1,12 @@
 import { Effect, Layer, pipe } from "effect";
 import { ConfigProvider } from "effect";
 import { Mailer } from "~/layers/mailing";
-import { SendMailParams } from "~/layers/mailing/types";
+import type { SendMailParams } from "~/layers/mailing/types";
 import { EmailChannel } from "~/layers/notification/EmailChannel";
 import { MailMessage } from "~/layers/notification/MailMessage";
 import { SMSChannel } from "~/layers/notification/SMSChannel";
 import { NotificationManager, make } from "~/layers/notification/layer";
-import { Notifiable, Notification } from "~/layers/notification/types";
+import { type Notifiable, Notification } from "~/layers/notification/types";
 
 class NotificationTest extends make<NotificationTest>() {}
 
@@ -16,9 +16,7 @@ describe("NotificationService", () => {
     const channel_one = new SMSChannel();
     const channel_two = new EmailChannel();
     const mailService = {
-      send: function (params: SendMailParams) {
-        return Effect.succeed(undefined);
-      },
+      send: (params: SendMailParams) => Effect.succeed(undefined),
     };
 
     instance.registerChannel(channel_one);

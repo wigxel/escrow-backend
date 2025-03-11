@@ -10,7 +10,7 @@ import { extendBankAccountRepo } from "./mocks/user/bankAccountMock";
 import { Effect, Layer } from "effect";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
 import { extendBankAccountVerificationRepo } from "./mocks/user/bankVerificationMock";
-import { TCreateTransferRecipientResponse } from "~/utils/paystack/type/types";
+import type { TCreateTransferRecipientResponse } from "~/utils/paystack/type/types";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 
 describe("Bank service", () => {
@@ -83,7 +83,7 @@ describe("Bank service", () => {
       const program = deleteBankAcounts(params);
       const result = runTest(Effect.provide(program, bankAccountRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid bank account id]`,
+        "[NoSuchElementException: Invalid bank account id]",
       );
     });
 
@@ -94,7 +94,7 @@ describe("Bank service", () => {
       });
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unathorized action: cannot delete bank account]`,
+        "[ExpectedError: Unathorized action: cannot delete bank account]",
       );
     });
 
@@ -126,7 +126,7 @@ describe("Bank service", () => {
       const program = resolveAccountNumber(params, currentUser);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Account already exists]`,
+        "[ExpectedError: Account already exists]",
       );
     });
 
@@ -152,7 +152,7 @@ describe("Bank service", () => {
         ),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unknown bank code: 233 or Could not resolve account name]`,
+        "[ExpectedError: Unknown bank code: 233 or Could not resolve account name]",
       );
     });
 
@@ -214,7 +214,7 @@ describe("Bank service", () => {
       const program = addNewBankAccount("TOKEN", currentUser);
       const result = runTest(Effect.provide(program, bankVerificationRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid bank account token]`,
+        "[NoSuchElementException: Invalid bank account token]",
       );
     });
 
@@ -241,7 +241,7 @@ describe("Bank service", () => {
 
       const paymentGatewayMock = extendPaymentGateway({
         createTransferRecipient(payload) {
-          transferRecipientCreated = true
+          transferRecipientCreated = true;
           return Effect.succeed({
             data: {
               recipient_code: "res-112",
@@ -276,11 +276,11 @@ describe("Bank service", () => {
       });
 
       const bankVerificationRepo = extendBankAccountVerificationRepo({
-        delete(){
-          deletedBankVerification = true
-          return Effect.succeed(true)
-        }
-      })
+        delete() {
+          deletedBankVerification = true;
+          return Effect.succeed(true);
+        },
+      });
 
       const program = addNewBankAccount("TOKEN", currentUser);
       const result = await runTest(
@@ -304,7 +304,7 @@ describe("Bank service", () => {
           "message": "Bank account added",
           "status": "success",
         }
-      `)
+      `);
     });
   });
 });

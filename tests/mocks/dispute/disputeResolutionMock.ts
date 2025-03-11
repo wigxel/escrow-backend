@@ -1,7 +1,10 @@
 import { Effect, Layer } from "effect";
 import { head } from "effect/Array";
 import { extendMockImplementation } from "../helpers";
-import { DisputeResolutionsRepo, type DisputeResolutionsRepository } from "~/repositories/disputeResolution.repo";
+import {
+  DisputeResolutionsRepo,
+  type DisputeResolutionsRepository,
+} from "~/repositories/disputeResolution.repo";
 
 const mock: DisputeResolutionsRepository = {
   create: (data) => {

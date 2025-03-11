@@ -4,7 +4,7 @@ import {
   transferSuccessEvent,
   unsuccessfulTransferEvent,
 } from "~/services/webhook.service";
-import { TPaystackTransferWebhookEvent } from "~/utils/paystack/type/types";
+import type { TPaystackTransferWebhookEvent } from "~/utils/paystack/type/types";
 import { runTest } from "./mocks/app";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 import { extendAccountStatementRepo } from "./mocks/accountStatementRepoMock";
@@ -26,7 +26,7 @@ describe("Webhook service", () => {
       const program = transferSuccessEvent(params);
       const result = runTest(Effect.provide(program, withdrawalRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid withdrawal id]`,
+        "[NoSuchElementException: Invalid withdrawal id]",
       );
     });
 
@@ -88,7 +88,7 @@ describe("Webhook service", () => {
       const program = unsuccessfulTransferEvent(params);
       const result = runTest(Effect.provide(program, withdrawalRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid withdrawal id]`,
+        "[NoSuchElementException: Invalid withdrawal id]",
       );
     });
 

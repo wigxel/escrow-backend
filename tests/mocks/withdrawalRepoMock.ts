@@ -33,7 +33,7 @@ const mock: WithdrawalRepository = {
       referenceCode: "ref_CODE",
       status: "pending",
       tigerbeetleTransferId: "1111111",
-      userId:"user-id"
+      userId: "user-id",
     });
   },
 

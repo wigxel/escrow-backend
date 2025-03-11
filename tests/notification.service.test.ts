@@ -71,7 +71,7 @@ describe("notification serivce", () => {
           },
           "status": "success",
         }
-      `)
+      `);
     });
 
     test("should return only read notifications", async () => {

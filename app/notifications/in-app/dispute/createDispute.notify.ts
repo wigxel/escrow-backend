@@ -6,7 +6,7 @@ export class CreateDisputeNotification extends Notification {
       escrowId: string;
       triggeredBy: string;
       role?: string;
-    }
+    },
   ) {
     super();
   }

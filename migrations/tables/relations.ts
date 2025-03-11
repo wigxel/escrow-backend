@@ -63,8 +63,8 @@ export const participantRelations = relations(
     }),
     walletDetails: one(escrowWalletTable, {
       fields: [escrowParticipantsTable.escrowId],
-      references: [escrowWalletTable.escrowId]
-    })
+      references: [escrowWalletTable.escrowId],
+    }),
   }),
 );
 
@@ -93,6 +93,6 @@ export const reviewsTableRelations = relations(reviewsTable, ({ many }) => ({
 export const commentTableRelations = relations(commentsTable, ({ one }) => ({
   review: one(reviewsTable, {
     fields: [commentsTable.reviewId],
-    references: [reviewsTable.id]
-  })
-}))
+    references: [reviewsTable.id],
+  }),
+}));

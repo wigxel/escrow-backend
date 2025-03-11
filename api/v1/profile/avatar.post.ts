@@ -24,7 +24,7 @@ export default eventHandler((event) => {
       return uploadAvatarImage(e.session.user.id, e.avatar);
     }),
     Effect.map((r) => {
-      return r.profile
+      return r.profile;
     }),
   );
 

@@ -82,7 +82,7 @@ const UserModuleTest = Layer.empty.pipe(
   Layer.provideMerge(PushTokenRepoTest),
   Layer.provideMerge(BankAccountRepoTest),
   Layer.provideMerge(BankAccountVerificationRepoTest),
-)
+);
 
 export const AppTest = Layer.empty.pipe(
   Layer.provideMerge(DatabaseTest),

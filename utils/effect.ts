@@ -84,11 +84,12 @@ export const resolveError = (err: unknown) => {
   return new Error("Unknown error");
 };
 
-export function defineAppHandler<A, E,
-  R extends InferRequirements<typeof AppLive> | Scope.Scope>
-  (effect_fn: (event: H3Event) => Effect.Effect<A, E, R>) {
+export function defineAppHandler<
+  A,
+  E,
+  R extends InferRequirements<typeof AppLive> | Scope.Scope,
+>(effect_fn: (event: H3Event) => Effect.Effect<A, E, R>) {
   return defineEventHandler(async (event) => {
-
-    return await runLive(event, effect_fn(event))
-  })
+    return await runLive(event, effect_fn(event));
+  });
 }

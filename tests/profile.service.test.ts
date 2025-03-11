@@ -21,7 +21,7 @@ describe("Profile service", () => {
       const program = getProfile("user-id");
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: User not found]`,
+        "[ExpectedError: User not found]",
       );
     });
 
@@ -87,7 +87,7 @@ describe("Profile service", () => {
       const program = uploadAvatarImage("user-id", image);
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: User not found]`,
+        "[ExpectedError: User not found]",
       );
     });
 

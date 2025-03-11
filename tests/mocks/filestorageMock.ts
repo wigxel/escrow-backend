@@ -2,7 +2,7 @@ import { Context, Layer } from "effect";
 import type { Storage } from "~/layers/storage/types";
 import { extendMockImplementation } from "./helpers";
 
-class mock implements Storage  {
+class mock implements Storage {
   getFile(fileId: string, options?) {
     return Promise.resolve({
       path() {
@@ -29,7 +29,7 @@ class mock implements Storage  {
   updateFileMetadata(fileId, metadata) {
     return Promise.resolve();
   }
-};
+}
 
 export class FileStorage extends Context.Tag("FileStorage")<
   FileStorage,

@@ -1,5 +1,5 @@
 import { Context, Layer } from "effect";
-import { AccountStatementTable} from "~/migrations/schema";
+import { AccountStatementTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
 
 export class AccountStatementRepository extends DrizzleRepo(

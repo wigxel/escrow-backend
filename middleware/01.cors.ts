@@ -1,5 +1,5 @@
 // @ts-expect-error
-import { defineEventHandler, type H3CorsOptions, H3Event } from "h3";
+import { defineEventHandler, type H3CorsOptions, type H3Event } from "h3";
 
 const whitelist = ["localhost:*", "*garage.vercel.app"];
 

@@ -48,7 +48,7 @@ describe("Escrow transaction service", () => {
       });
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: You cannot create transaction with yourself]`,
+        "[ExpectedError: You cannot create transaction with yourself]",
       );
     });
 
@@ -160,7 +160,7 @@ describe("Escrow transaction service", () => {
       });
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: invalid escrow id: no escrow transaction found]`,
+        "[NoSuchElementException: invalid escrow id: no escrow transaction found]",
       );
     });
 
@@ -216,7 +216,7 @@ describe("Escrow transaction service", () => {
 
       const result = runTest(Effect.provide(program, escrowRequestRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid escrow id]`,
+        "[NoSuchElementException: Invalid escrow id]",
       );
     });
 
@@ -286,7 +286,7 @@ describe("Escrow transaction service", () => {
       const program = initializeEscrowDeposit(params, undefined);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unauthorized: signin to continue]`,
+        "[ExpectedError: Unauthorized: signin to continue]",
       );
     });
 
@@ -299,7 +299,7 @@ describe("Escrow transaction service", () => {
       const program = initializeEscrowDeposit(params, currentUser);
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid escrow transaction id]`,
+        "[NoSuchElementException: Invalid escrow transaction id]",
       );
     });
 
@@ -307,7 +307,7 @@ describe("Escrow transaction service", () => {
       const program = initializeEscrowDeposit(params, currentUser);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Please click the link sent to you to proceed with payment]`,
+        "[ExpectedError: Please click the link sent to you to proceed with payment]",
       );
     });
 
@@ -337,7 +337,7 @@ describe("Escrow transaction service", () => {
         Effect.provide(program, Layer.merge(escrowRepo, escrowRequestRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: Invalid escrow id]`,
+        "[NoSuchElementException: Invalid escrow id]",
       );
     });
 
@@ -382,7 +382,7 @@ describe("Escrow transaction service", () => {
         Effect.provide(program, Layer.merge(escrowRepo, escrowRequestRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Escrow transaction request has expired]`,
+        "[ExpectedError: Escrow transaction request has expired]",
       );
     });
 
@@ -430,7 +430,7 @@ describe("Escrow transaction service", () => {
         Effect.provide(program, Layer.merge(escrowRepo, escrowRequestRepo)),
       );
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Account associated with the escrow creation]`,
+        "[ExpectedError: Account associated with the escrow creation]",
       );
     });
 
@@ -605,7 +605,7 @@ describe("Escrow transaction service", () => {
       const program = validateUserStatusUpdate(params);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unauthorized operation: service provider operation]`,
+        "[ExpectedError: Unauthorized operation: service provider operation]",
       );
     });
 
@@ -616,7 +616,7 @@ describe("Escrow transaction service", () => {
       });
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Unauthorized operation: service consumer operation]`,
+        "[ExpectedError: Unauthorized operation: service consumer operation]",
       );
     });
 
@@ -664,7 +664,7 @@ describe("Escrow transaction service", () => {
       const program = updateEscrowTransactionStatus(params);
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[NoSuchElementException: invalid escrow id: no escrow transaction found]`,
+        "[NoSuchElementException: invalid escrow id: no escrow transaction found]",
       );
     });
 
@@ -685,7 +685,7 @@ describe("Escrow transaction service", () => {
       const program = updateEscrowTransactionStatus(params);
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        `[ExpectedError: Cannot transition from deposit.pending to service.pending]`,
+        "[ExpectedError: Cannot transition from deposit.pending to service.pending]",
       );
     });
 

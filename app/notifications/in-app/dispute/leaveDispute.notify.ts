@@ -6,7 +6,7 @@ export class LeaveDisputeNotification extends Notification {
       disputeId: string;
       triggeredBy: string;
       role?: string;
-    }
+    },
   ) {
     super();
   }

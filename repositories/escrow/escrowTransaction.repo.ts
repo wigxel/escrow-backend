@@ -6,14 +6,13 @@ import { notNil, runDrizzleQuery } from "~/libs/query.helpers";
 import { escrowTransactionTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
 
-export class EscrowTransactionRepository
-  extends DrizzleRepo(escrowTransactionTable, "id", {
-    relationship: [
-      "paymentDetails",
-      "escrowWalletDetails"
-    ]
-  }) {
-
+export class EscrowTransactionRepository extends DrizzleRepo(
+  escrowTransactionTable,
+  "id",
+  {
+    relationship: ["paymentDetails", "escrowWalletDetails"],
+  },
+) {
   getEscrowDetails(escrowId: string) {
     return runDrizzleQuery((db) => {
       return db.query.escrowTransactionTable.findFirst({
@@ -48,7 +47,7 @@ export class EscrowTransactionRepository
 export class EscrowTransactionRepo extends Context.Tag("EscrowTransactionRepo")<
   EscrowTransactionRepo,
   EscrowTransactionRepository
->() { }
+>() {}
 
 export const EscrowTransactionRepoLayer = {
   tag: EscrowTransactionRepo,

@@ -4,9 +4,9 @@ import type { NoSuchElementException, UnknownException } from "effect/Cause";
 export interface SessionUser {
   id: string;
   role?: string;
-  email:string,
-  username:string,
-  phone:string
+  email: string;
+  username: string;
+  phone: string;
 }
 
 export interface SessionInfo {

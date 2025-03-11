@@ -16,10 +16,13 @@ export const disputeTable = pgTable("disputes", {
   resolvedBy: uuid("resolved_by"),
   reason: varchar("reason"),
   escrowId: uuid("escrow_id"),
-  categoryId:integer("category_id"),
-  resolutionId:integer("resolution_id"),
+  categoryId: integer("category_id"),
+  resolutionId: integer("resolution_id"),
   status: varchar("status").default("pending"),
-  createdAt: timestamp("created_at",{withTimezone:true,precision:6}).defaultNow(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    precision: 6,
+  }).defaultNow(),
 });
 
 export const disputeMembersTable = pgTable("dispute_members", {
@@ -29,13 +32,12 @@ export const disputeMembersTable = pgTable("dispute_members", {
   role: varchar("role"),
 });
 
-
 export const disputeCategoriesTable = pgTable("dispute_categories", {
   id: serial("id").primaryKey(),
-  name:varchar("name")
-})
+  name: varchar("name"),
+});
 
 export const disputeResolutionTable = pgTable("dispute_resolutions", {
   id: serial("id").primaryKey(),
-  name:varchar("name")
-})
+  name: varchar("name"),
+});

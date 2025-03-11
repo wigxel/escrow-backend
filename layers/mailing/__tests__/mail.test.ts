@@ -4,7 +4,7 @@ import { Mail, MailLive } from "~/layers/mailing/mail";
 import { Mailable } from "~/layers/mailing/mailables";
 import { Content } from "~/layers/mailing/mailables/Content";
 import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import { SendMailParams } from "~/layers/mailing/types";
+import type { SendMailParams } from "~/layers/mailing/types";
 
 class OrderFulfilledMail extends Mailable {
   constructor(public data: { name: string }) {
@@ -28,9 +28,7 @@ class OrderFulfilledMail extends Mailable {
 
 it("can quickly send out mail", async () => {
   const mailer = {
-    send: function (params: SendMailParams) {
-      return Effect.succeed(undefined);
-    },
+    send: (params: SendMailParams) => Effect.succeed(undefined),
   };
 
   const mail_template = new OrderFulfilledMail({

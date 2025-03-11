@@ -1,5 +1,8 @@
 import { Context, Layer } from "effect";
-import { disputeCategoriesTable, referralSourceTable } from "~/migrations/schema";
+import {
+  disputeCategoriesTable,
+  referralSourceTable,
+} from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
 
 export class DisputeCategoryRepository extends DrizzleRepo(

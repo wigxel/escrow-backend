@@ -21,7 +21,6 @@ export default eventHandler((event) => {
       currentUser: user,
       disputeData: data,
     });
-    
   });
 
   return runLive(event, program);

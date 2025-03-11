@@ -96,7 +96,7 @@ export const NotificationLive = Layer.sync(NotificationFacade, () => {
   const instance = new NotificationManager<AvailableChannels>();
   instance.registerChannel(new EmailChannel());
   instance.registerChannel(new InAppChannel());
-  instance.registerChannel(new PushNotificationChannel())
+  instance.registerChannel(new PushNotificationChannel());
 
   return instance;
 });

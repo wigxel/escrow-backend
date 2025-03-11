@@ -13,5 +13,4 @@ export class OrderCancelledNotification extends Notification {
       .subject("Cancelled order")
       .line("One or more of your orders has been cancelled");
   }
-
 }

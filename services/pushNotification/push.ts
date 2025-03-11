@@ -14,10 +14,7 @@ export class FirebasePushNotification
 export const PushServiceLive = pipe(
   fbAdminSDK,
   Effect.map((ref) => {
-    return Layer.succeed(
-      PushService,
-      new FirebasePushNotification(ref),
-    );
+    return Layer.succeed(PushService, new FirebasePushNotification(ref));
   }),
   Layer.unwrapScoped,
 );
@@ -41,5 +38,3 @@ export interface IFcmMessage {
   token: string;
   notification: TPushNotification;
 }
-
-

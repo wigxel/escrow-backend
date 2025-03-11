@@ -13,10 +13,10 @@ export interface NotificationChannel {
 }
 
 export type DatabaseMessage = {
-  tag:string,
-  title: string,
-  message: string,
-  metadata: Record<string,unknown>
+  tag: string;
+  title: string;
+  message: string;
+  metadata: Record<string, unknown>;
 };
 
 export interface NotificationEvent<Tame, T> {
@@ -35,12 +35,12 @@ export abstract class Notification {
     return true;
   }
 
-  toDatabase():DatabaseMessage{
-    return 
+  toDatabase(): DatabaseMessage {
+    return;
   }
 
-  toPush():TPushNotification{
-    return
+  toPush(): TPushNotification {
+    return;
   }
 }
 

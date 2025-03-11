@@ -5,13 +5,13 @@ import { extendMockImplementation } from "./helpers";
 export interface ChatServiceInterface
   extends ChatBackendInterface<{ id: string }> {}
 
-  //@ts-expect-error
+//@ts-expect-error
 const mock: ChatServiceInterface = {
   startConversation(params) {
-    return Promise.resolve()
+    return Promise.resolve();
   },
   sendMessage(params) {
-    return Promise.resolve()
+    return Promise.resolve();
   },
 };
 

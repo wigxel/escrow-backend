@@ -9,8 +9,8 @@ export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {
     const { user } = yield* getSessionInfo(event);
     yield* validateBody(event, addPushTokenDto);
-    return yield* getUserPushTokens(user.id)
+    return yield* getUserPushTokens(user.id);
   });
 
-  return runLive(event, program)
+  return runLive(event, program);
 });

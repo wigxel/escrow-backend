@@ -15,7 +15,7 @@ export class InAppChannel extends AbstractNotificationChannel {
   send(notification: InAppEvent) {
     return Effect.gen(function* (_) {
       const repo = yield* NotificationRepoLayer.Tag;
-      
+
       if (notification.entity instanceof Notification) {
         const payload = notification.entity.toDatabase();
 

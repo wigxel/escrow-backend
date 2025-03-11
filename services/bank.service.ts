@@ -184,6 +184,6 @@ export const addNewBankAccount = (token: string, currentUser: SessionUser) => {
       SearchOps.eq("verificationToken", token),
     );
 
-    return dataResponse({message:"Bank account added"})
+    return dataResponse({ message: "Bank account added" });
   });
 };

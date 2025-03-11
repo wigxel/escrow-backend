@@ -48,7 +48,7 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(ReviewRepoLive),
   Layer.provideMerge(CommentRepoLayer.live),
   Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
-  Layer.provideMerge(PushTokenRepoLayer.live)
+  Layer.provideMerge(PushTokenRepoLayer.live),
 );
 
 const DisputeModule = Layer.empty.pipe(
@@ -81,7 +81,6 @@ export const AuthLive = Layer.empty.pipe(
   Layer.provideMerge(LuciaSessionProvider),
   Layer.provideMerge(Argon2dHasherLive),
 );
-
 
 export const MailingModule = Layer.empty.pipe(
   Layer.provideMerge(NotificationLive),

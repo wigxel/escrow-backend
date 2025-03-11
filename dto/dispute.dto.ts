@@ -1,8 +1,12 @@
 import { z } from "zod";
 
 export const newDisputeSchema = z.object({
-  escrowId: z.string({required_error:"Escrow transaction id is required"}).uuid(),
-  reason: z.string({required_error:"Please provide the reason for the dispute"}),
+  escrowId: z
+    .string({ required_error: "Escrow transaction id is required" })
+    .uuid(),
+  reason: z.string({
+    required_error: "Please provide the reason for the dispute",
+  }),
   categoryId: z.number({ coerce: true }).min(1),
   resolutionId: z.number({ coerce: true }).min(1),
   file: z

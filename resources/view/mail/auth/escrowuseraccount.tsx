@@ -22,7 +22,8 @@ export function EscrowUserAccountView({
       </TextBase>
       <TextBase>
         If you didn’t set a password earlier, you can use the 'Forgot Password'
-        option at the "sign-in" page to generate one and gain access to your account
+        option at the "sign-in" page to generate one and gain access to your
+        account
       </TextBase>
     </Layout>
   );

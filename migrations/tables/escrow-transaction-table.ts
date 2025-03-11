@@ -57,7 +57,9 @@ export const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true, precision: 6 })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 6 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 6 })
+    .defaultNow()
+    .notNull(),
 };
 
 export const escrowTransactionTable = pgTable("escrow_transactions", {

@@ -7,12 +7,12 @@ import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {
-    const repo = yield* PushTokenRepoLayer.tag
+    const repo = yield* PushTokenRepoLayer.tag;
     const { user } = yield* getSessionInfo(event);
     const data = yield* validateBody(event, addPushTokenDto);
-    yield* repo.create({userId:user.id,token:data.token})
-    return dataResponse({message:"Device push notification token added"})
+    yield* repo.create({ userId: user.id, token: data.token });
+    return dataResponse({ message: "Device push notification token added" });
   });
 
-  return runLive(event, program)
+  return runLive(event, program);
 });

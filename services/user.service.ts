@@ -32,7 +32,7 @@ import { dataResponse } from "~/libs/response";
 import cuid2 from "@paralleldrive/cuid2";
 
 const getSuffix = cuid2.init({
-  length: 4
+  length: 4,
 });
 
 export function createUser(data: z.infer<typeof createUserDto>) {
@@ -44,7 +44,8 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     const sessionManager = yield* Session;
     const referralSourceRepo = yield* ReferralSourcesRepoLayer.Tag;
 
-    const username = `${data.firstName}.${data.lastName}.${getSuffix()}`.toLowerCase();
+    const username =
+      `${data.firstName}.${data.lastName}.${getSuffix()}`.toLowerCase();
     yield* checkUsername(username);
 
     yield* _(
@@ -124,7 +125,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({
@@ -157,7 +158,7 @@ export function resendEmailVerificationOtp(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({ message: "Email resend successful" });
@@ -220,7 +221,7 @@ export function forgotPassword(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({ message: "Forget password successful" });
@@ -340,9 +341,12 @@ export const UserBalance = (currentUser: SessionUser) => {
     const walletRepo = yield* UserWalletRepoLayer.tag;
     const participantsRepo = yield* EscrowParticipantRepoLayer.tag;
 
-    const walletDetails = yield* _(walletRepo.firstOrThrow({
-      userId: currentUser.id,
-    }), Effect.mapError(() => new ExpectedError("Wallet not found")));
+    const walletDetails = yield* _(
+      walletRepo.firstOrThrow({
+        userId: currentUser.id,
+      }),
+      Effect.mapError(() => new ExpectedError("Wallet not found")),
+    );
 
     const escrowDetails = yield* participantsRepo.getParticipantsWithWallet(
       currentUser.id,

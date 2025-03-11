@@ -24,7 +24,9 @@ export const safeStr = (a: unknown, fallback = ""): string =>
 
 const EmptyObject: Record<string, never> = Object.freeze({});
 
-export const safeObj = <T>(obj: T): T extends Record<string, unknown> ? T : typeof EmptyObject => {
+export const safeObj = <T>(
+  obj: T,
+): T extends Record<string, unknown> ? T : typeof EmptyObject => {
   // @ts-expect-error;
   return isObject(obj) ? obj : EmptyObject;
 };

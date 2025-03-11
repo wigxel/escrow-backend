@@ -1,6 +1,9 @@
 import { Effect, Layer } from "effect";
 import { extendMockImplementation } from "../helpers";
-import { type BankAccountVerificationRepository,BankAccountVerificationRepo } from "~/repositories/bankAccountVerification.repo";
+import {
+  type BankAccountVerificationRepository,
+  BankAccountVerificationRepo,
+} from "~/repositories/bankAccountVerification.repo";
 
 export const bankAccountMockData = {
   id: "1",
@@ -51,4 +54,7 @@ export const extendBankAccountVerificationRepo = extendMockImplementation(
   BankAccountVerificationRepo,
   () => mock,
 );
-export const BankAccountVerificationRepoTest = Layer.succeed(BankAccountVerificationRepo, mock);
+export const BankAccountVerificationRepoTest = Layer.succeed(
+  BankAccountVerificationRepo,
+  mock,
+);

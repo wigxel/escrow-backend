@@ -1,7 +1,10 @@
 import { Effect } from "effect";
 import type { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
-import { EscrowTransactionRepo, EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
+import {
+  EscrowTransactionRepo,
+  EscrowTransactionRepoLayer,
+} from "~/repositories/escrow/escrowTransaction.repo";
 import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
@@ -133,7 +136,7 @@ export const createEscrowTransaction = (
 
 export const listUserEscrowTransactions = (
   filters: TEscrowTransactionFilter,
-  user_id: string
+  user_id: string,
 ) => {
   return Effect.gen(function* (_) {
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
@@ -150,7 +153,7 @@ export const listUserEscrowTransactions = (
           ),
         }),
       ),
-    )
+    );
   });
 };
 

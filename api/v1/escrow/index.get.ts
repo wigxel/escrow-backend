@@ -13,7 +13,7 @@ export default defineAppHandler((event) => {
     return yield* _(
       listUserEscrowTransactions(params, user.id).pipe(
         Effect.provide(SearchServiceLive(getQuery(event))),
-      )
+      ),
     );
   });
 });

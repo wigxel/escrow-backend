@@ -38,5 +38,4 @@ export const fbAdminSDK = Effect.suspend(() =>
   ),
 );
 
-
 export type TFbAdminSDK = admin.app.App;

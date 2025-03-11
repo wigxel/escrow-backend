@@ -1,13 +1,14 @@
 import { z } from "zod";
 
-export const passwordValidator = z.string()
+export const passwordValidator = z
+  .string()
   .min(6, { message: "Password too short" })
   .max(100, { message: "Password too long" });
 
 export const bvnValidator = z
   .string({ required_error: "BVN is required" })
   .length(11, "BVN must be exactly 11 digits")
-  .regex(/^\d+$/, "BVN must be numeric")
+  .regex(/^\d+$/, "BVN must be numeric");
 
 export const phoneValidator = z
   .string({
@@ -15,19 +16,28 @@ export const phoneValidator = z
   })
   .min(11);
 
-export const emailValidator = z.string({
-  required_error: "Email address required"
-}).email();
+export const emailValidator = z
+  .string({
+    required_error: "Email address required",
+  })
+  .email();
 
-export const amountValidator = z.number({
-  coerce: true, required_error: "Amount is required"
-}).min(1);
+export const amountValidator = z
+  .number({
+    coerce: true,
+    required_error: "Amount is required",
+  })
+  .min(1);
 
-export const usernameValidator = z.string(
-  {
+export const usernameValidator = z
+  .string({
     required_error: "Username required",
-  }
-).min(3, { message: "Username too short" }).regex(/^[a-zA-Z0-9_]+$/, "Username must contain only letters, numbers and underscores");
+  })
+  .min(3, { message: "Username too short" })
+  .regex(
+    /^[a-zA-Z0-9_]+$/,
+    "Username must contain only letters, numbers and underscores",
+  );
 
 export const addressSchema = z.object({
   address: z.string().min(3),
@@ -41,18 +51,32 @@ export const addressSchema = z.object({
 
 export const createUserDto = z
   .object({
-    firstName: z.string({ required_error: "First name is required" }).min(3).max(20),
-    lastName: z.string({ required_error: "Last name is required" }).min(3).max(20),
-    email: z.string({
-      required_error: "Email address required",
-    }).email(),
+    firstName: z
+      .string({ required_error: "First name is required" })
+      .min(3)
+      .max(20),
+    lastName: z
+      .string({ required_error: "Last name is required" })
+      .min(3)
+      .max(20),
+    email: z
+      .string({
+        required_error: "Email address required",
+      })
+      .email(),
     password: passwordValidator,
     phone: phoneValidator,
     // @question Why is this here?
     // profilePicture: z.string().optional(),
     hasBusiness: z.boolean(),
-    businessName: z.string({ required_error: "Business name required" }).min(3).nullable(),
-    referralSourceId: z.number({ coerce: true, required_error: "Referral required" }),
+    businessName: z
+      .string({ required_error: "Business name required" })
+      .min(3)
+      .nullable(),
+    referralSourceId: z.number({
+      coerce: true,
+      required_error: "Referral required",
+    }),
   })
   .refine(
     (data) => {
@@ -95,11 +119,11 @@ export const passwordResetDto = z.object({
 
 export const passwordChangeDto = z.object({
   oldPassword: passwordValidator,
-  newPassword: passwordValidator
-})
+  newPassword: passwordValidator,
+});
 
 export const loginDto = z.object({
   phone: z.string().min(1, "Phone is required").optional(),
   email: z.string().email().min(1, "Email is required").optional(),
-  password: passwordValidator
+  password: passwordValidator,
 });

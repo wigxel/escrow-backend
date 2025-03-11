@@ -21,7 +21,7 @@ export function dataResponse(params?: TResponseData) {
 
 type TResponseData = {
   data?: unknown;
-  meta?:unknown
+  meta?: unknown;
   status?: string;
   message?: string;
 };

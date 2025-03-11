@@ -35,8 +35,8 @@ export interface SortOrder {
 
 export interface SearchableParams
   extends PaginationQuery,
-  FilterQuery,
-  SortOrder {
+    FilterQuery,
+    SortOrder {
   where: FilterOrLogicOperator | Array<FilterOrLogicOperator>;
 }
 
@@ -87,20 +87,25 @@ export interface RepoModel {
 
   with: (name: string) => this;
 
-  paginate(filters: Partial<SearchableParams>):
-    Effect.Effect<unknown, unknown, unknown>;
+  paginate(
+    filters: Partial<SearchableParams>,
+  ): Effect.Effect<unknown, unknown, unknown>;
 }
 
-export interface RepoClass<Table extends DrizzleTableWithColumns, TRelationship extends string> {
-  new(): RepoHelperOuter<Table, TRelationship>;
+export interface RepoClass<
+  Table extends DrizzleTableWithColumns,
+  TRelationship extends string,
+> {
+  new (): RepoHelperOuter<Table, TRelationship>;
 }
 
 export interface RepoHelperOuter<
   Table extends DrizzleTableWithColumns,
-  TRelationship extends string>
-  extends Omit<RepoHelperInner<Table, TRelationship>,
-    "find" | "firstOrThrow" | "update" | "with"> {
-
+  TRelationship extends string,
+> extends Omit<
+    RepoHelperInner<Table, TRelationship>,
+    "find" | "firstOrThrow" | "update" | "with"
+  > {
   /**
    * ```ts
    *  Model.find(1)
@@ -199,9 +204,7 @@ export interface RepoHelperInner<
     params: SearchableParams["where"],
   ) => Effect.Effect<void, RepoQueryErrors, DatabaseConnection>;
 
-  with: (
-    key?: TRelationship,
-  ) => this;
+  with: (key?: TRelationship) => this;
 }
 
 export type FindArg1 =

@@ -357,6 +357,6 @@ export const withdrawFromWallet = (
       }),
     });
 
-    return dataResponse({message:"Withdrawal processed successfully"})
+    return dataResponse({ message: "Withdrawal processed successfully" });
   });
 };

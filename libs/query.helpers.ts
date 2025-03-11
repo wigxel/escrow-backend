@@ -217,4 +217,3 @@ export function paginateQuery<A extends Readonly<[number, unknown[]]>, E, R>(
 
 export const allColumns = (v: DrizzleTableWithColumns) =>
   Object.fromEntries(Object.keys(v).map((key) => [key, v[key]]));
-
