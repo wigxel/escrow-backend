@@ -4,13 +4,13 @@ WORKDIR /
 
 COPY package*.json .
 
-RUN npm install -g pnpm && pnpm install
+RUN npm install -g pnpm bun && pnpm install
 
 COPY . .
 
 RUN pnpm run build
 
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=${PORT:-3000}
+EXPOSE ${PORT}
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["bun", ".output/server/index.mjs"]
