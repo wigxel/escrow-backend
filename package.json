@@ -1,9 +1,13 @@
 {
   "private": true,
   "name": "escrow-backend",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "nitro build",
     "dev": "nitro dev",
+    "start": "node .output/server/index.mjs",
     "start:tigerbeetle": "tigerbeetle start --addresses=4111 --development 0_0_escrow_app.tigerbeetle",
     "preview": "node .output/server/index.mjs",
     "db:seed": "tsx migrations/scripts/run-seed.ts",

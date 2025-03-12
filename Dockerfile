@@ -13,4 +13,4 @@ RUN pnpm run build
 ENV PORT=${PORT:-3000}
 EXPOSE ${PORT}
 
-CMD ["bun", ".output/server/index.mjs"]
+CMD ["bun", "run", ".output/server/index.mjs"]
