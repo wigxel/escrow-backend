@@ -69,6 +69,7 @@ export function searchRepo<
   repo: TRepo,
   getWhereParams: (params: Partial<PaginationQuery & FilterQuery>) => {
     where: SearchableParams["where"];
+    orderBy?: SearchableParams["orderBy"];
     // @ts-expect-error No need to specify type
   } = () => ({}),
 ) {

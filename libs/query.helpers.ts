@@ -2,7 +2,9 @@ import { safeObj } from "~/libs/data.helpers";
 import {
   type SQLWrapper,
   and,
+  asc,
   count,
+  desc,
   eq,
   gt,
   gte,
@@ -217,3 +219,31 @@ export function paginateQuery<A extends Readonly<[number, unknown[]]>, E, R>(
 
 export const allColumns = (v: DrizzleTableWithColumns) =>
   Object.fromEntries(Object.keys(v).map((key) => [key, v[key]]));
+
+/**
+ * Works only for drizzle
+ * @example db.query.<model>.findMany({
+ *     orderBy: toSortOrder({ created_at: 'desc', name: 'asc' })
+ *   })
+ * @param sort_column_map
+ * @returns
+ */
+export function toSortOrder(sort_column_map: SearchableParams["orderBy"]) {
+  return (fields: Record<string, unknown>) => {
+    const order_records = [];
+
+    for (const key in sort_column_map) {
+      const drizzle_column = fields[key];
+      const dir = sort_column_map[key];
+
+      if (!drizzle_column) continue;
+
+      // @ts-expect-error
+      order_records.push(
+        dir === "desc" ? desc(drizzle_column) : asc(drizzle_column),
+      );
+    }
+
+    return order_records;
+  };
+}

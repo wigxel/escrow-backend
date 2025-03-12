@@ -9,12 +9,12 @@ export const escrowActivityLog = {
       },
     };
   },
-  depositPending(params) {
+  depositPending(params: { id: string }) {
     return {
       kind: "Escrow",
-      entityId: params?.id,
+      entityId: params.id,
       data: {
-        summary: "Escrow deposit is pending",
+        summary: "Payer viewed the transaction",
         params,
       },
     };

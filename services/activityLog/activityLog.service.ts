@@ -8,3 +8,17 @@ export const createActivityLog = (event: TActivityLogEvent) => {
     yield* activity.create(event);
   });
 };
+
+export const logActivityOnce = (event: TActivityLogEvent) => {
+  return Effect.gen(function* (_) {
+    const activity = yield* ActivityLogRepoLayer.tag;
+
+    yield* _(
+      activity.firstOrThrow(event),
+      Effect.catchTag("NoSuchElementException", () => activity.create(event)),
+      Effect.catchAll(() =>
+        Effect.succeed("Skipping Activity write. Record already exists."),
+      ),
+    );
+  });
+};

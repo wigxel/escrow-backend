@@ -1,6 +1,10 @@
 import type { PgTableWithColumns } from "drizzle-orm/pg-core";
 import type { Effect } from "effect/Effect";
-import { queryFiltersToWhere, runDrizzleQuery } from "~/libs/query.helpers";
+import {
+  queryFiltersToWhere,
+  runDrizzleQuery,
+  toSortOrder,
+} from "~/libs/query.helpers";
 import { createRepoHelpers } from "~/services/repository/drizzle-repo-helper";
 import type {
   FindArg1,
@@ -12,6 +16,7 @@ import type {
 } from "~/services/repository/repo.types";
 import { SearchOps } from "../search/sql-search-resolver";
 import { escrowTransactionTable } from "~/migrations/schema";
+import { asc, desc } from "drizzle-orm";
 
 // biome-ignore lint/suspicious/noExplicitAny: Required for inference to work well
 export type DrizzleTableWithColumns = PgTableWithColumns<any>;
@@ -68,6 +73,7 @@ const DrizzleRepoProto = {
           escrowTransactionTable,
           SearchOps.reduce(filters.where),
         ),
+        orderBy: toSortOrder(filters.orderBy),
         with: Object.fromEntries(this.__relations.map((e) => [e, true])),
       });
     });

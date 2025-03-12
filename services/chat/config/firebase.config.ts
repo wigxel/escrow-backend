@@ -1,9 +1,18 @@
 import { getFirestore } from "@firebase/firestore";
 import { destr } from "destr";
+import admin from "firebase-admin";
 import { pipe, Config, Effect, Redacted } from "effect";
 import { type FirebaseOptions, initializeApp } from "firebase/app";
-import admin from "firebase-admin";
-import fbAdminConfigFile from "~/utils/fbadminSDKConfig.json";
+
+const fbAdminSDKConfig = pipe(
+  Config.redacted("FIREBASE_ADMIN_SDK"),
+  Effect.map((value) => {
+    return destr(Redacted.value(value).replaceAll("\\", "")) as Record<
+      string,
+      unknown
+    >;
+  }),
+);
 
 const firebaseConfig = pipe(
   Config.redacted("FIREBASE_CONFIG"),
@@ -26,7 +35,8 @@ export const firestoreRef = pipe(
 // TODO: Understand why this is needed
 let fbAdminSetup: admin.app.App = null;
 export const fbAdminSDK = Effect.suspend(() =>
-  Effect.succeed(fbAdminConfigFile).pipe(
+  pipe(
+    fbAdminSDKConfig,
     Effect.map((value) => value as admin.ServiceAccount),
     Effect.map((fbAdminSDKConfig) => {
       if (fbAdminSetup) return fbAdminSetup;

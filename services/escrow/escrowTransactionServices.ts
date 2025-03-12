@@ -1,10 +1,7 @@
 import { Effect } from "effect";
 import type { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
-import {
-  EscrowTransactionRepo,
-  EscrowTransactionRepoLayer,
-} from "~/repositories/escrow/escrowTransaction.repo";
+import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import type {
   confirmEscrowRequestRules,
   createEscrowTransactionRules,
@@ -35,11 +32,13 @@ import {
 } from "../tigerbeetle.service";
 import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
-import { createActivityLog } from "../activityLog/activityLog.service";
+import {
+  createActivityLog,
+  logActivityOnce,
+} from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 import { dataResponse } from "~/libs/response";
 import { searchRepo } from "../search";
-import { PaginationService } from "../search/pagination.service";
 import { SearchOps } from "../search/sql-search-resolver";
 
 export const createEscrowTransaction = (
@@ -151,6 +150,7 @@ export const listUserEscrowTransactions = (
               : SearchOps.none(),
             SearchOps.eq("createdBy", user_id),
           ),
+          orderBy: { createdAt: "desc" },
         }),
       ),
     );
@@ -204,14 +204,15 @@ export const getEscrowRequestDetails = (data: {
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
     );
 
-    //update the escrow transaction status to "deposit.pending"
+    // update the escrow transaction status to "deposit.pending"
+    // TODO: Move this logic out of this function
     yield* escrowTransactionRepo.update(
       { id: escrowRequestDetails.escrowId },
       { status: "deposit.pending" },
     );
 
-    //log the escrow creation
-    yield* createActivityLog(
+    // log the escrow creation
+    yield* logActivityOnce(
       escrowActivityLog.depositPending({ id: escrowRequestDetails.escrowId }),
     );
 
@@ -253,16 +254,16 @@ export const initializeEscrowDeposit = (
       );
     }
 
-    const escrowTransactionDetails = yield* _(
-      escrowTransactionRepo.firstOrThrow({ id: input.escrowId }),
+    const tx_details = yield* _(
+      escrowTransactionRepo.find(input.escrowId),
       Effect.mapError(
         () => new NoSuchElementException("Invalid escrow transaction id"),
       ),
     );
 
-    if (escrowTransactionDetails.status !== "deposit.pending") {
+    if (tx_details.status !== "deposit.pending") {
       yield* new ExpectedError(
-        "Please click the link sent to you to proceed with payment",
+        `Please click the link sent to you to proceed with payment ${input.escrowId}`,
       );
     }
 
