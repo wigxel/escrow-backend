@@ -8,4 +8,3 @@ dist
 db.json
 /.idea
 *.tigerbeetle
-utils/fbadminSDKConfig.json
