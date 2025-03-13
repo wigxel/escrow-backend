@@ -2,5 +2,5 @@
 export default defineNitroConfig({
   srcDir: "./",
   compatibilityDate: "2025-01-13",
-  preset: "node-server",
+  preset: "digital_ocean",
 });
