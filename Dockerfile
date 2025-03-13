@@ -4,7 +4,7 @@ WORKDIR /
 
 COPY package*.json .
 
-RUN npm install -g pnpm bun && pnpm install
+RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
@@ -12,4 +12,4 @@ RUN pnpm run build
 
 EXPOSE 3000
 
-CMD ["bun", "run", ".output/server/index.mjs"]
+CMD ["pnpm", "run", "start"]

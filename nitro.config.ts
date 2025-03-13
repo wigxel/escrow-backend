@@ -2,5 +2,5 @@
 export default defineNitroConfig({
   srcDir: "./",
   compatibilityDate: "2025-01-13",
-  preset: "bun",
+  preset: "node_cluster",
 });
