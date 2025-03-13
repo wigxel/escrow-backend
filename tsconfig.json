@@ -1,10 +1,11 @@
 {
-  "extends": ["./.nitro/types/tsconfig.json"],
+  "extends": [
+    "./.nitro/types/tsconfig.json"
+  ],
   "compilerOptions": {
-    "types": ["vitest/globals"],
-    "noEmit": true,
-    "paths": {
-      "~/*": ["./*"]
-    }
+    "types": [
+      "vitest/globals"
+    ],
+    "noEmit": true
   }
 }
