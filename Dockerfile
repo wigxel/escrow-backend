@@ -10,7 +10,6 @@ COPY . .
 
 RUN pnpm run build
 
-ENV PORT=${PORT:-3000}
-EXPOSE ${PORT}
+EXPOSE 3000
 
 CMD ["bun", "run", ".output/server/index.mjs"]
