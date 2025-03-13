@@ -13,6 +13,7 @@ COPY . .
 
 RUN pnpm run build
 
-EXPOSE 3000
+ENV PORT=8080
+EXPOSE $PORT
 
 CMD ["pnpm", "run", "start"]
