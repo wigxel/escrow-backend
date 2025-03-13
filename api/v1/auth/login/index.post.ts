@@ -1,9 +1,9 @@
 import { Effect, pipe } from "effect";
-import { PermissionError } from "~/config/exceptions";
-import { loginDto } from "~/dto/user.dto";
-import { validateBody } from "~/libs/request.helpers";
-import { login, loginWithPhoneNumber } from "~/services/auth.service";
-import { runLive } from "~/utils/effect";
+import { PermissionError } from "../../../../config/exceptions";
+import { loginDto } from "../../../../dto/user.dto";
+import { validateBody } from "../../../../libs/request.helpers";
+import { login, loginWithPhoneNumber } from "../../../../services/auth.service";
+import { runLive } from "../../../../utils/effect";
 
 export default eventHandler(async (event) => {
   const program = pipe(
