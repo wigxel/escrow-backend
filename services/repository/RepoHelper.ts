@@ -15,8 +15,6 @@ import type {
   SearchableParams,
 } from "~/services/repository/repo.types";
 import { SearchOps } from "../search/sql-search-resolver";
-import { escrowTransactionTable } from "~/migrations/schema";
-import { asc, desc } from "drizzle-orm";
 
 // biome-ignore lint/suspicious/noExplicitAny: Required for inference to work well
 export type DrizzleTableWithColumns = PgTableWithColumns<any>;
@@ -28,7 +26,13 @@ export type KeyofTableColumns<
   ? keyof Config["columns"]
   : Fallback;
 
-const DrizzleRepoProto = {
+const DrizzleRepoProto = ({
+  table,
+  queryReferenceKey,
+}: {
+  table: DrizzleTableWithColumns;
+  queryReferenceKey: string;
+}) => ({
   __relations: [],
 
   $helper: {} as RepoHelperInner<DrizzleTableWithColumns>,
@@ -66,13 +70,10 @@ const DrizzleRepoProto = {
 
   paginate(filters: SearchableParams) {
     return runDrizzleQuery((db) => {
-      return db.query.escrowTransactionTable.findMany({
+      return db.query[queryReferenceKey].findMany({
         offset: filters.pageNumber,
         limit: filters.pageSize,
-        where: queryFiltersToWhere(
-          escrowTransactionTable,
-          SearchOps.reduce(filters.where),
-        ),
+        where: queryFiltersToWhere(table, SearchOps.reduce(filters.where)),
         orderBy: toSortOrder(filters.orderBy),
         with: Object.fromEntries(this.__relations.map((e) => [e, true])),
       });
@@ -83,7 +84,7 @@ const DrizzleRepoProto = {
     this.__relations.push(name);
     return this;
   },
-};
+});
 
 export const DrizzleRepo = <
   const Table extends DrizzleTableWithColumns,
@@ -91,13 +92,19 @@ export const DrizzleRepo = <
 >(
   table: Table,
   primaryColumn: KeyofTableColumns<Table>,
-  params: Partial<{ relationship: TRelationship[] }> = {},
+  params: Partial<{
+    relationship: TRelationship[];
+    queryReferenceKey: string;
+  }> = {},
 ) => {
   function DrizzleRepoClass() {}
 
   DrizzleRepoClass.prototype = {
     primaryColumn,
-    ...DrizzleRepoProto,
+    ...DrizzleRepoProto({
+      table,
+      queryReferenceKey: params?.queryReferenceKey,
+    }),
     $helper: createRepoHelpers(table),
   };
 

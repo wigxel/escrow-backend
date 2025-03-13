@@ -72,7 +72,7 @@ export const createUserDto = z
     businessName: z
       .string({ required_error: "Business name required" })
       .min(3)
-      .nullable(),
+      .optional(),
     referralSourceId: z.number({
       coerce: true,
       required_error: "Referral required",

@@ -1,7 +1,5 @@
-import { and, count, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
-import { head } from "effect/Array";
-import type { TEscrowTransactionFilter } from "~/dto/escrowTransactions.dto";
 import { notNil, runDrizzleQuery } from "~/libs/query.helpers";
 import { escrowTransactionTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
@@ -11,6 +9,7 @@ export class EscrowTransactionRepository extends DrizzleRepo(
   "id",
   {
     relationship: ["paymentDetails", "escrowWalletDetails"],
+    queryReferenceKey: "escrowTransactionTable",
   },
 ) {
   getEscrowDetails(escrowId: string) {
