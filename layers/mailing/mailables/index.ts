@@ -1,9 +1,9 @@
 import { Equivalence } from "effect";
-import type { MailerInterface } from "~/layers/mailing";
-import { Content } from "~/layers/mailing/mailables/Content";
-import { Address, Envelope } from "~/layers/mailing/mailables/Envelope";
-import type { AddressUnion, MailAddress } from "~/layers/mailing/types";
-import type { MailMessage } from "~/layers/notification/MailMessage";
+import type { MailerInterface } from "../../../layers/mailing";
+import { Content } from "../../../layers/mailing/mailables/Content";
+import { Address, Envelope } from "../../../layers/mailing/mailables/Envelope";
+import type { AddressUnion, MailAddress } from "../../../layers/mailing/types";
+import type { MailMessage } from "../../../layers/notification/MailMessage";
 
 type AddressInput = AddressUnion | Address;
 

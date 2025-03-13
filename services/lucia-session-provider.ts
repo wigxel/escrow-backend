@@ -8,10 +8,10 @@ import { NoSuchElementException } from "effect/Cause";
 import { isNullable } from "effect/Predicate";
 import { type Adapter, Lucia } from "lucia";
 import uncrypto from "uncrypto";
-import { DatabaseResource } from "~/config/database";
-import { SessionProvider } from "~/layers/session-provider";
-import { sessionUser } from "~/migrations/tables/session-table";
-import { userTable } from "~/migrations/tables/user-table";
+import { DatabaseResource } from "../config/database";
+import { SessionProvider } from "../layers/session-provider";
+import { sessionUser } from "../migrations/tables/session-table";
+import { userTable } from "../migrations/tables/user-table";
 
 // polyfill stable crypto global
 Object.defineProperty(globalThis, "crypto", { value: uncrypto });

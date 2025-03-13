@@ -1,12 +1,12 @@
 import { Effect } from "effect";
 import { NoSuchElementException } from "effect/Cause";
-import { ExpectedError } from "~/config/exceptions";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
-import type { TTBAccount, TTBTransfer } from "~/utils/tigerBeetle/type/type";
+import { ExpectedError } from "../config/exceptions";
+import { TigerBeetleRepoLayer } from "../repositories/tigerbeetle/tigerbeetle.repo";
+import type { TTBAccount, TTBTransfer } from "../utils/tigerBeetle/type/type";
 import {
   handleCreateAccountErrors,
   handleCreateTransferErrors,
-} from "~/utils/tigerBeetle/utils";
+} from "../utils/tigerBeetle/utils";
 
 export const createAccount = (params: TTBAccount) => {
   return Effect.gen(function* (_) {

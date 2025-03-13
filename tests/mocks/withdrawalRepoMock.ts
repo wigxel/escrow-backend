@@ -3,7 +3,7 @@ import { extendMockImplementation } from "./helpers";
 import {
   WithdrawalRepo,
   type WithdrawalRepository,
-} from "~/repositories/withdrawal.repo";
+} from "../../repositories/withdrawal.repo";
 
 const mock: WithdrawalRepository = {
   create: (data) => {

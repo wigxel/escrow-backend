@@ -1,5 +1,5 @@
 import { Context, Effect, Layer } from "effect";
-import type { ReversibleHashInterface } from "~/layers/encryption/reversible";
+import type { ReversibleHashInterface } from "../../layers/encryption/reversible";
 
 export class ReversibleHash extends Context.Tag("ReversibleHash")<
   ReversibleHash,

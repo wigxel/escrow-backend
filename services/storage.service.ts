@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { FileStorage } from "~/layers/storage/layer";
-import { extractResourcePathFromUrl } from "~/layers/storage/presets/cloudinary";
+import { FileStorage } from "../layers/storage/layer";
+import { extractResourcePathFromUrl } from "../layers/storage/presets/cloudinary";
 
 export const ImageTags = {
   inUse: "in-use", // used in the database

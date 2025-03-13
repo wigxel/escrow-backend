@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import type {
   NotificationChannel,
   NotificationEvent,
-} from "~/layers/notification/types";
+} from "../../layers/notification/types";
 
 export abstract class AbstractNotificationChannel
   implements NotificationChannel

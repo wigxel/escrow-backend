@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { z } from "zod";
-import { validateBody } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { addNewBankAccount } from "~/services/bank.service";
+import { validateBody } from "../../../libs/request.helpers";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { addNewBankAccount } from "../../../services/bank.service";
 
 export default eventHandler(async (event) => {
   const program = Effect.gen(function* (_) {

@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { handleSuccessPaymentEvents } from "~/services/paystack/payment.service";
+import { handleSuccessPaymentEvents } from "../../services/paystack/payment.service";
 
 export default eventHandler(async (event) => {
   const body = await readBody(event);

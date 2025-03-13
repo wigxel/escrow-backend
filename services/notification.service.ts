@@ -1,13 +1,13 @@
 import { Effect } from "effect";
 import type { z } from "zod";
-import { unserializeNotification } from "~/app/notifications/notification.utils";
-import { ExpectedError } from "~/config/exceptions";
-import type { notificationIdSchema } from "~/dto/notification.dto";
-import { NotificationRepoLayer } from "~/repositories/notification.repo";
-import { PaginationService } from "~/services/search/pagination.service";
+import { unserializeNotification } from "../app/notifications/notification.utils";
+import { ExpectedError } from "../config/exceptions";
+import type { notificationIdSchema } from "../dto/notification.dto";
+import { NotificationRepoLayer } from "../repositories/notification.repo";
+import { PaginationService } from "../services/search/pagination.service";
 import type { PaginationQuery } from "./search/primitives";
 import { SearchOps } from "./search/sql-search-resolver";
-import { dataResponse } from "~/libs/response";
+import { dataResponse } from "../libs/response";
 
 export const getUnreadNotification = (currentUserId: string) => {
   return Effect.gen(function* (_) {

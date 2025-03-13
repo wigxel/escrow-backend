@@ -1,6 +1,6 @@
 import { Config, Effect } from "effect";
-import { type MailerInterface, MailingError } from "~/layers/mailing";
-import type { MailAddress, SendMailParams } from "~/layers/mailing/types";
+import { type MailerInterface, MailingError } from "../../layers/mailing";
+import type { MailAddress, SendMailParams } from "../../layers/mailing/types";
 
 export class FakeMaker implements MailerInterface {
   send(params: SendMailParams) {

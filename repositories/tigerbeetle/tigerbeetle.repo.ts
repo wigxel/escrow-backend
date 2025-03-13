@@ -1,7 +1,10 @@
 import { Config, Context, Effect, Layer, pipe } from "effect";
 import type { UnknownException } from "effect/Cause";
-import { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
-import type { TTBAccount, TTBTransfer } from "~/utils/tigerBeetle/type/type";
+import { TigerBeetleAdapter } from "../../utils/tigerBeetle/tigerbeetle";
+import type {
+  TTBAccount,
+  TTBTransfer,
+} from "../../utils/tigerBeetle/type/type";
 
 export class TigerBeetleRepository {
   constructor(private client: TigerBeetleAdapter) {

@@ -1,6 +1,6 @@
 import { Column, Img, Link, Row, Section, Text } from "@react-email/components";
 import { createElement as h } from "react";
-import { TextBase } from "~/resources/view/mail/shared/_text-base";
+import { TextBase } from "../../../../resources/view/mail/shared/_text-base";
 
 export function Footer({ baseUrl = "" }) {
   return (

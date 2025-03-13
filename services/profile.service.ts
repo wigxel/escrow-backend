@@ -1,14 +1,14 @@
 import { Effect } from "effect";
-import type { User } from "~/migrations/schema";
-import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
+import type { User } from "../migrations/schema";
+import { UserRepo, UserRepoLayer } from "../repositories/user.repository";
 import {
   deleteResource,
   FileStorage,
   FileUploadException,
-} from "~/layers/storage/layer";
+} from "../layers/storage/layer";
 import { getResource } from "./storage.service";
-import { dataResponse } from "~/libs/response";
-import { ExpectedError } from "~/config/exceptions";
+import { dataResponse } from "../libs/response";
+import { ExpectedError } from "../config/exceptions";
 
 export const getProfile = (userId: string) => {
   return Effect.gen(function* () {

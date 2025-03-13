@@ -4,7 +4,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   DisputeResolutionsRepo,
   type DisputeResolutionsRepository,
-} from "~/repositories/disputeResolution.repo";
+} from "../../../repositories/disputeResolution.repo";
 
 const mock: DisputeResolutionsRepository = {
   create: (data) => {

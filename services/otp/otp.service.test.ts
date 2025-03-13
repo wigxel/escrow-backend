@@ -1,5 +1,5 @@
 import { ConfigProvider, Effect, Layer } from "effect";
-import { readOTPSecret } from "~/services/otp/otp.service";
+import { readOTPSecret } from "../../services/otp/otp.service";
 
 const config = Layer.setConfigProvider(
   ConfigProvider.fromJson({

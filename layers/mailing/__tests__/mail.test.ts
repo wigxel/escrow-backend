@@ -1,10 +1,10 @@
 import { ConfigProvider, Effect, Layer, pipe } from "effect";
-import { Mailer } from "~/layers/mailing";
-import { Mail, MailLive } from "~/layers/mailing/mail";
-import { Mailable } from "~/layers/mailing/mailables";
-import { Content } from "~/layers/mailing/mailables/Content";
-import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import type { SendMailParams } from "~/layers/mailing/types";
+import { Mailer } from "../../../layers/mailing";
+import { Mail, MailLive } from "../../../layers/mailing/mail";
+import { Mailable } from "../../../layers/mailing/mailables";
+import { Content } from "../../../layers/mailing/mailables/Content";
+import { Envelope } from "../../../layers/mailing/mailables/Envelope";
+import type { SendMailParams } from "../../../layers/mailing/types";
 
 class OrderFulfilledMail extends Mailable {
   constructor(public data: { name: string }) {

@@ -2,8 +2,8 @@ import { Effect, Layer } from "effect";
 import {
   TigerBeetleRepo,
   TigerBeetleRepository,
-} from "~/repositories/tigerbeetle/tigerbeetle.repo";
-import type { TigerBeetleAdapter } from "~/utils/tigerBeetle/tigerbeetle";
+} from "../../repositories/tigerbeetle/tigerbeetle.repo";
+import type { TigerBeetleAdapter } from "../../utils/tigerBeetle/tigerbeetle";
 import { extendMockImplementation } from "./helpers";
 import type { Account } from "tigerbeetle-node";
 

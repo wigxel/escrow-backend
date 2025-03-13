@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { notNil } from "~/libs/query.helpers";
+import { notNil } from "../libs/query.helpers";
 import {
   createDispute,
   createMessagingChannel,
@@ -7,7 +7,7 @@ import {
   inviteMember,
   removeMember,
   updateDisputeStatus,
-} from "~/services/dispute/dispute.service";
+} from "../services/dispute/dispute.service";
 import { runTest } from "./mocks/app";
 import { extendDisputeMemberRepo } from "./mocks/dispute/disputeMembersRepo";
 import { extendDisputeRepo } from "./mocks/dispute/disputeRepoMock";

@@ -8,10 +8,10 @@ import {
 } from "@react-email/components";
 import { createElement as h } from "react";
 import { z } from "zod";
-import { BaseButton } from "~/resources/view/mail/shared/_base-button";
-import { Footer } from "~/resources/view/mail/shared/_footer";
-import { Header } from "~/resources/view/mail/shared/_header";
-import { TextBase } from "~/resources/view/mail/shared/_text-base";
+import { BaseButton } from "../../../resources/view/mail/shared/_base-button";
+import { Footer } from "../../../resources/view/mail/shared/_footer";
+import { Header } from "../../../resources/view/mail/shared/_header";
+import { TextBase } from "../../../resources/view/mail/shared/_text-base";
 
 const schema = z.object({
   productName: z.string(),

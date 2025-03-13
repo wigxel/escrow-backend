@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { pushTokenTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { pushTokenTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class PushTokenRepository extends DrizzleRepo(pushTokenTable, "id") {}
 

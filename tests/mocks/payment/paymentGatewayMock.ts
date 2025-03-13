@@ -2,13 +2,13 @@ import { Effect, Layer } from "effect";
 import {
   PaymentGateway,
   type TPaymentGateway,
-} from "~/layers/payment/payment-gateway";
+} from "../../../layers/payment/payment-gateway";
 import { extendMockImplementation } from "../helpers";
 import type {
   TBankListResponse,
   TCreateTransferRecipientResponse,
   TInitiateTransferResponse,
-} from "~/utils/paystack/type/types";
+} from "../../../utils/paystack/type/types";
 
 const mock: TPaymentGateway = {
   createSession() {

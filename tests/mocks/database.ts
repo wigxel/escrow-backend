@@ -2,7 +2,7 @@ import { Effect, Layer } from "effect";
 import {
   DatabaseConnection,
   type DatabaseResourceInterface,
-} from "~/config/database";
+} from "../../config/database";
 
 const DatabaseResourceTest = Effect.acquireRelease(
   Effect.suspend(() =>

@@ -1,34 +1,34 @@
 import { Effect } from "effect";
 import { head } from "effect/Array";
-import { EmailVerificationMail } from "~/app/mail/email-verification";
-import { PasswordResetMail } from "~/app/mail/password-reset";
-import { ExpectedError } from "~/config/exceptions";
-import { PasswordHasherError } from "~/layers/encryption";
-import { hashPassword } from "~/layers/encryption/helpers";
-import { Session } from "~/layers/session";
-import { OtpRepo } from "~/repositories/otp.repository";
-import { UserRepoLayer } from "~/repositories/user.repository";
+import { EmailVerificationMail } from "../app/mail/email-verification";
+import { PasswordResetMail } from "../app/mail/password-reset";
+import { ExpectedError } from "../config/exceptions";
+import { PasswordHasherError } from "../layers/encryption";
+import { hashPassword } from "../layers/encryption/helpers";
+import { Session } from "../layers/session";
+import { OtpRepo } from "../repositories/otp.repository";
+import { UserRepoLayer } from "../repositories/user.repository";
 import { generateOTP, verifyOTP } from "./otp/otp.service";
 import { SearchOps } from "./search/sql-search-resolver";
-import type { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
+import type { confirmEscrowRequestRules } from "../dto/escrowTransactions.dto";
 import type { z } from "zod";
-import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
+import { ReferralSourcesRepoLayer } from "../repositories/referralSource.repo";
 import type {
   createUserDto,
   passwordResetDto,
   verifyEmailDto,
-} from "~/dto/user.dto";
+} from "../dto/user.dto";
 import { id } from "tigerbeetle-node";
 import { createAccount, getAccountBalance } from "./tigerbeetle.service";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
-import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
-import { NotificationFacade } from "~/layers/notification/layer";
-import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.notify";
-import type { SessionUser } from "~/layers/session-provider";
+import { TBAccountCode } from "../utils/tigerBeetle/type/type";
+import { UserWalletRepoLayer } from "../repositories/userWallet.repo";
+import { NotificationFacade } from "../layers/notification/layer";
+import { EscrowUserAccounntMail } from "../app/mail/escrow/escrowUserAccount.notify";
+import type { SessionUser } from "../layers/session-provider";
 import { convertCurrencyUnit } from "./escrow/escrow.utils";
-import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
-import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
-import { dataResponse } from "~/libs/response";
+import { EscrowParticipantRepoLayer } from "../repositories/escrow/escrowParticipant.repo";
+import { PushTokenRepoLayer } from "../repositories/pushToken.repo";
+import { dataResponse } from "../libs/response";
 import cuid2 from "@paralleldrive/cuid2";
 
 const getSuffix = cuid2.init({

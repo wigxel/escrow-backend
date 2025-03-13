@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { bankAccountTable, withdrawalTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { bankAccountTable, withdrawalTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class WithdrawalRepository extends DrizzleRepo(withdrawalTable, "id") {}
 

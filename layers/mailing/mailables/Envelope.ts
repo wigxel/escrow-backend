@@ -1,4 +1,4 @@
-import type { AddressUnion, MailAddress } from "~/layers/mailing/types";
+import type { AddressUnion, MailAddress } from "../../../layers/mailing/types";
 
 /**
  * Class representing an email address with optional display name

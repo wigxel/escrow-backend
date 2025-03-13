@@ -1,6 +1,6 @@
 import { Config, Effect, Exit, Runtime, pipe } from "effect";
 import nodemailer from "nodemailer";
-import type { SendMailRaw } from "~/types/types";
+import type { SendMailRaw } from "../types/types";
 
 const MailConfig = Effect.gen(function* () {
   const env = yield* Config.string("APP_ENV");

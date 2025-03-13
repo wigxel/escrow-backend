@@ -1,5 +1,5 @@
 import { Context, Layer } from "effect";
-import type { Storage } from "~/layers/storage/types";
+import type { Storage } from "../../layers/storage/types";
 import { extendMockImplementation } from "./helpers";
 
 class mock implements Storage {

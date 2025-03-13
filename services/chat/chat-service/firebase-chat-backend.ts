@@ -24,7 +24,7 @@ import {
   type EnrichUsersChannel,
 } from "./factories";
 import type { FirebaseStoragePaths } from "./shared";
-import { safeArray, safeObj } from "~/libs/data.helpers";
+import { safeArray, safeObj } from "../../../libs/data.helpers";
 
 export class FirebaseChatBackend<TMessage extends { id: string }>
   implements ChatBackendInterface<TMessage>

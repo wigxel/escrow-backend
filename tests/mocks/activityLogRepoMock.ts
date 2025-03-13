@@ -4,7 +4,7 @@ import { head } from "effect/Array";
 import {
   ActivityLogRepo,
   type ActivityLogRepository,
-} from "~/repositories/activityLog.repo";
+} from "../../repositories/activityLog.repo";
 import { extendMockImplementation } from "./helpers";
 
 const mock: ActivityLogRepository = {

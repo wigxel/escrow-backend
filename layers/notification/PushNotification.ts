@@ -1,10 +1,10 @@
 import { Console, Effect } from "effect";
-import { AbstractNotificationChannel } from "~/layers/notification/Channel";
+import { AbstractNotificationChannel } from "../../layers/notification/Channel";
 import {
   Notification,
   type NotificationEvent,
-} from "~/layers/notification/types";
-import { PushService } from "~/services/pushNotification/push";
+} from "../../layers/notification/types";
+import { PushService } from "../../services/pushNotification/push";
 
 export type PushNotificationEvent = NotificationEvent<
   "push",

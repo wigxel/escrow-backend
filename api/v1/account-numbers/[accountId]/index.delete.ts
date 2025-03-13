@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { z } from "zod";
-import { validateParams } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { deleteBankAcounts } from "~/services/bank.service";
+import { validateParams } from "../../../../libs/request.helpers";
+import { getSessionInfo } from "../../../../libs/session.helpers";
+import { deleteBankAcounts } from "../../../../services/bank.service";
 
 export default eventHandler(async (event) => {
   const bankAccountId = getRouterParam(event, "accountId");

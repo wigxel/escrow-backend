@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { z } from "zod";
-import { validateBody } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { deleteReview } from "~/services/reviews.service";
+import { validateBody } from "../../../libs/request.helpers";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { deleteReview } from "../../../services/reviews.service";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {

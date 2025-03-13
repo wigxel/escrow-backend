@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { bankAccountVerificationTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { bankAccountVerificationTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class BankAccountVerificationRepository extends DrizzleRepo(
   bankAccountVerificationTable,

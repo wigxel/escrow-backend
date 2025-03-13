@@ -1,7 +1,10 @@
 import { Effect, Layer } from "effect";
-import type { TUser, User } from "~/migrations/schema";
-import { UserRepo, type UserRepository } from "~/repositories/user.repository";
-import { extendMockImplementation } from "~/tests/mocks/helpers";
+import type { TUser, User } from "../../../migrations/schema";
+import {
+  UserRepo,
+  type UserRepository,
+} from "../../../repositories/user.repository";
+import { extendMockImplementation } from "../../../tests/mocks/helpers";
 
 const UserMock: UserRepository = {
   count() {

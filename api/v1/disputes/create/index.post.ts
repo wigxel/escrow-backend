@@ -1,8 +1,8 @@
 import { Effect } from "effect";
-import { newDisputeSchema } from "~/dto/dispute.dto";
-import { validateBody, validateParams } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { createDispute } from "~/services/dispute/dispute.service";
+import { newDisputeSchema } from "../../../../dto/dispute.dto";
+import { validateBody, validateParams } from "../../../../libs/request.helpers";
+import { getSessionInfo } from "../../../../libs/session.helpers";
+import { createDispute } from "../../../../services/dispute/dispute.service";
 import { validateFile } from "../../profile/avatar.post";
 
 export default eventHandler((event) => {

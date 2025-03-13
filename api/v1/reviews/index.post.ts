@@ -1,8 +1,8 @@
 import { Effect } from "effect";
-import { createReviewDto } from "~/dto/review.dto";
-import { validateBody } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { createReview } from "~/services/reviews.service";
+import { createReviewDto } from "../../../dto/review.dto";
+import { validateBody } from "../../../libs/request.helpers";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { createReview } from "../../../services/reviews.service";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {

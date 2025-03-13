@@ -3,16 +3,16 @@ import { NoSuchElementException } from "effect/Cause";
 import { id } from "tigerbeetle-node";
 import { randomUUID } from "uncrypto";
 import type { z } from "zod";
-import { ExpectedError } from "~/config/exceptions";
-import { PaymentGateway } from "~/layers/payment/payment-gateway";
-import type { SessionUser } from "~/layers/session-provider";
-import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
-import { BankAccountVerificationRepoLayer } from "~/repositories/bankAccountVerification.repo";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
-import type { resolveAccountNumberRules } from "~/dto/accountNumber.dto";
+import { ExpectedError } from "../config/exceptions";
+import { PaymentGateway } from "../layers/payment/payment-gateway";
+import type { SessionUser } from "../layers/session-provider";
+import { BankAccountRepoLayer } from "../repositories/accountNumber.repo";
+import { BankAccountVerificationRepoLayer } from "../repositories/bankAccountVerification.repo";
+import { TigerBeetleRepoLayer } from "../repositories/tigerbeetle/tigerbeetle.repo";
+import { TBAccountCode } from "../utils/tigerBeetle/type/type";
+import type { resolveAccountNumberRules } from "../dto/accountNumber.dto";
 import { SearchOps } from "./search/sql-search-resolver";
-import { dataResponse } from "~/libs/response";
+import { dataResponse } from "../libs/response";
 
 export const getBankList = () => {
   return Effect.gen(function* (_) {

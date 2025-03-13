@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { createSeed } from "~/migrations/seeds/setup";
-import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
+import { createSeed } from "../../migrations/seeds/setup";
+import { ReferralSourcesRepoLayer } from "../../repositories/referralSource.repo";
 
 export const runSeed = createSeed(
   "DIsputeResolutionSeed",

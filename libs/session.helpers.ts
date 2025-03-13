@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 // @ts-expect-error
 import type { H3Event, HTTPHeaderName } from "h3";
-import { PermissionError } from "~/config/exceptions";
-import { Session } from "~/layers/session";
+import { PermissionError } from "../config/exceptions";
+import { Session } from "../layers/session";
 
 export function getBearerToken(
   headers: Partial<Record<HTTPHeaderName, string>>,

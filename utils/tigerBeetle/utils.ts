@@ -5,7 +5,7 @@ import {
   type CreateTransfersError,
 } from "tigerbeetle-node";
 import { type ILedger, LedgerType } from "./type/type";
-import { ExpectedError } from "~/config/exceptions";
+import { ExpectedError } from "../../config/exceptions";
 import { Effect } from "effect";
 
 //======= LEDGER DATA =====

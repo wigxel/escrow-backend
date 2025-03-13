@@ -1,10 +1,10 @@
 import { Effect, Layer } from "effect";
-import type { PaymentDetail } from "~/migrations/tables/interfaces";
+import type { PaymentDetail } from "../../../migrations/tables/interfaces";
 
 import {
   PaymentRepo,
   type PaymentRepository,
-} from "~/repositories/payment.repository";
+} from "../../../repositories/payment.repository";
 import { extendMockImplementation } from "../helpers";
 
 const PaymentMock: PaymentRepository = {

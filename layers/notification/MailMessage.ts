@@ -1,5 +1,5 @@
-import { Address } from "~/layers/mailing/mailables/Envelope";
-import { SimpleMessage } from "~/layers/notification/SimpleMessage";
+import { Address } from "../../layers/mailing/mailables/Envelope";
+import { SimpleMessage } from "../../layers/notification/SimpleMessage";
 
 type ViewData = {
   html: string;

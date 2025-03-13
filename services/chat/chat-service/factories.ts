@@ -1,5 +1,5 @@
 import { formatDistance, isValid } from "date-fns";
-import { safeArray } from "~/libs/data.helpers";
+import { safeArray } from "../../../libs/data.helpers";
 
 export type ChannelUser = {
   id: string;

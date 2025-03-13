@@ -1,13 +1,13 @@
 import { eq, like, or } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
-import { notNil, runDrizzleQuery } from "~/libs/query.helpers";
-import { userTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { notNil, runDrizzleQuery } from "../libs/query.helpers";
+import { userTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 import type {
   FilterQuery,
   PaginationQuery,
-} from "~/services/search/primitives";
+} from "../services/search/primitives";
 
 export class UserRepository extends DrizzleRepo(userTable, "id") {
   getUserById(id: string) {

@@ -4,7 +4,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   DisputeCategoryRepo,
   type DisputeCategoryRepository,
-} from "~/repositories/disputeCategories.repo";
+} from "../../../repositories/disputeCategories.repo";
 
 const disputeCategoryMock: DisputeCategoryRepository = {
   create: (data) => {

@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { createSeed } from "~/migrations/seeds/setup";
-import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
+import { createSeed } from "../../migrations/seeds/setup";
+import { DisputeCategorysRepoLayer } from "../../repositories/disputeCategories.repo";
 
 export const runSeed = createSeed(
   "DIsputeCategorySeed",

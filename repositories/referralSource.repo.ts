@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { referralSourceTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { referralSourceTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class ReferralSourceRepository extends DrizzleRepo(
   referralSourceTable,

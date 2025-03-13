@@ -3,7 +3,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   PushTokenRepo,
   type PushTokenRepository,
-} from "~/repositories/pushToken.repo";
+} from "../../../repositories/pushToken.repo";
 
 const mock: PushTokenRepository = {
   create: (data) => {

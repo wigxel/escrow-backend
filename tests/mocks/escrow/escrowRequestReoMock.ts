@@ -3,7 +3,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   EscrowRequestRepo,
   type EscrowRequestRepository,
-} from "~/repositories/escrow/escrowRequest.repo";
+} from "../../../repositories/escrow/escrowRequest.repo";
 
 const mock: EscrowRequestRepository = {
   create: (data) => {

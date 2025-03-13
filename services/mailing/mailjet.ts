@@ -1,8 +1,8 @@
-import { safeArray, safeObj } from "~/libs/data.helpers";
+import { safeArray, safeObj } from "../../libs/data.helpers";
 import type { AxiosError } from "axios";
 import { Config, Effect, Layer, pipe } from "effect";
 import Mailjet from "node-mailjet";
-import { Mailer, MailingError } from "~/layers/mailing";
+import { Mailer, MailingError } from "../../layers/mailing";
 
 const readInstance = pipe(
   Config.all([

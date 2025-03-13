@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { getDisputesByUserId } from "~/services/dispute/dispute.service";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { getDisputesByUserId } from "../../../services/dispute/dispute.service";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {

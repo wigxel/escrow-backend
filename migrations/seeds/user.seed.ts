@@ -1,7 +1,7 @@
 import { Console, Effect } from "effect";
-import { UserFactory, generatePassword } from "~/migrations/factories";
-import { createSeed } from "~/migrations/seeds/setup";
-import { UserRepo } from "~/repositories/user.repository";
+import { UserFactory, generatePassword } from "../../migrations/factories";
+import { createSeed } from "../../migrations/seeds/setup";
+import { UserRepo } from "../../repositories/user.repository";
 
 export const runSeed = createSeed(
   "UserSeed",

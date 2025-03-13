@@ -1,7 +1,7 @@
 import { fromUnixTime, getUnixTime, isPast } from "date-fns";
 import { Config, Context, Effect, type Record, Redacted } from "effect";
 import { z } from "zod";
-import { createReversibleHash } from "~/layers/encryption/presets/reversible-hasher";
+import { createReversibleHash } from "../layers/encryption/presets/reversible-hasher";
 import { ReversibleHash } from "./encryption/reversible";
 import type { EmailTokenImplementation } from "./mailing/hashing";
 

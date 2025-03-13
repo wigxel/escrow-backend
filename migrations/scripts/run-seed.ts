@@ -10,16 +10,16 @@ import {
   Logger,
 } from "effect";
 import { capitalize, toLowerCase } from "effect/String";
-import { DatabaseConnection, DatabaseResource } from "~/config/database";
-import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
-import { runSeed as seedUser } from "~/migrations/seeds/user.seed";
-import { runSeed as seedDisputeCategories } from "~/migrations/seeds/disputeCategory.seed";
-import { runSeed as seedDisputeResolution } from "~/migrations/seeds/disputeResolution.seed";
-import { runSeed as seedReferralSource } from "~/migrations/seeds/referralSource.seed";
-import { UserRepoLayer } from "~/repositories/user.repository";
-import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
-import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
-import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
+import { DatabaseConnection, DatabaseResource } from "../../config/database";
+import { Argon2dHasherLive } from "../../layers/encryption/presets/argon2d";
+import { runSeed as seedUser } from "../../migrations/seeds/user.seed";
+import { runSeed as seedDisputeCategories } from "../../migrations/seeds/disputeCategory.seed";
+import { runSeed as seedDisputeResolution } from "../../migrations/seeds/disputeResolution.seed";
+import { runSeed as seedReferralSource } from "../../migrations/seeds/referralSource.seed";
+import { UserRepoLayer } from "../../repositories/user.repository";
+import { DisputeCategorysRepoLayer } from "../../repositories/disputeCategories.repo";
+import { DisputeResolutionssRepoLayer } from "../../repositories/disputeResolution.repo";
+import { ReferralSourcesRepoLayer } from "../../repositories/referralSource.repo";
 
 const minimumLogLevel = Config.string("LOG_LEVEL").pipe(
   Effect.map((level) => {

@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { Session, type SessionImpl } from "~/layers/session";
+import { Session, type SessionImpl } from "../../../layers/session";
 
 export const SesssionTest = Layer.effect(
   Session,

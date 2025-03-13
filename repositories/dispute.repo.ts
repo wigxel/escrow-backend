@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { Context, Layer } from "effect";
-import { allColumns, runDrizzleQuery } from "~/libs/query.helpers";
-import { disputeMembersTable, disputeTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { allColumns, runDrizzleQuery } from "../libs/query.helpers";
+import { disputeMembersTable, disputeTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class DisputeRepository extends DrizzleRepo(disputeTable, "id") {
   getByUserId(params: { currentUserId: string }) {

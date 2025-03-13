@@ -1,6 +1,9 @@
 import { Effect } from "effect";
-import { hashPassword, verifyPassword } from "~/layers/encryption/helpers";
-import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
+import {
+  hashPassword,
+  verifyPassword,
+} from "../../../layers/encryption/helpers";
+import { Argon2dHasherLive } from "../../../layers/encryption/presets/argon2d";
 
 describe("Argon2d PasswordHasher", () => {
   it("should pass for similar password", async () => {

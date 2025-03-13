@@ -1,6 +1,9 @@
 import { Effect, Layer, pipe } from "effect";
 import { Argon2id } from "oslo/password";
-import { PasswordHasher, PasswordHasherError } from "~/layers/encryption";
+import {
+  PasswordHasher,
+  PasswordHasherError,
+} from "../../../layers/encryption";
 
 export const Argon2dPasswordHasher = {
   name: "Argon2d",

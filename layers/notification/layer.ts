@@ -1,14 +1,14 @@
 import { Context, Effect, Layer } from "effect";
-import { EmailChannel } from "~/layers/notification/EmailChannel";
-import { PushNotificationChannel } from "~/layers/notification/PushNotification";
-import type { SMSChannel } from "~/layers/notification/SMSChannel";
+import { EmailChannel } from "../../layers/notification/EmailChannel";
+import { PushNotificationChannel } from "../../layers/notification/PushNotification";
+import type { SMSChannel } from "../../layers/notification/SMSChannel";
 import {
   AnonymousNotifiable,
   type Notifiable,
   type Notification,
   type NotificationChannel,
   type NotificationMediator,
-} from "~/layers/notification/types";
+} from "../../layers/notification/types";
 import { InAppChannel } from "./in-app.Channel";
 import type { Mailable } from "../mailing/mailables";
 

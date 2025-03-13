@@ -1,6 +1,6 @@
-import { MailMessage } from "~/layers/notification/MailMessage";
-import { type Notifiable, Notification } from "~/layers/notification/types";
-import type { User } from "~/migrations/tables/interfaces";
+import { MailMessage } from "../../layers/notification/MailMessage";
+import { type Notifiable, Notification } from "../../layers/notification/types";
+import type { User } from "../../migrations/tables/interfaces";
 
 export class OrderProcessingNotification extends Notification {
   constructor(public user: Pick<User, "firstName">) {

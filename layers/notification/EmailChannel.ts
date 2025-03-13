@@ -1,11 +1,11 @@
 import { Config, Console, Effect } from "effect";
-import { Mailer } from "~/layers/mailing";
-import { Mailable } from "~/layers/mailing/mailables";
-import { AbstractNotificationChannel } from "~/layers/notification/Channel";
+import { Mailer } from "../../layers/mailing";
+import { Mailable } from "../../layers/mailing/mailables";
+import { AbstractNotificationChannel } from "../../layers/notification/Channel";
 import {
   Notification,
   type NotificationEvent,
-} from "~/layers/notification/types";
+} from "../../layers/notification/types";
 
 type EmailEvent = NotificationEvent<"mail", { address: string }>;
 

@@ -1,6 +1,6 @@
 import { Console, Effect } from "effect";
-import { AbstractNotificationChannel } from "~/layers/notification/Channel";
-import type { NotificationEvent } from "~/layers/notification/types";
+import { AbstractNotificationChannel } from "../../layers/notification/Channel";
+import type { NotificationEvent } from "../../layers/notification/types";
 
 type SMSEvent = NotificationEvent<"sms", { phoneNumber: string }>;
 

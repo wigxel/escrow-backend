@@ -1,7 +1,7 @@
 import { Effect, Option, pipe } from "effect";
-import { ExpectedError } from "~/config/exceptions";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { uploadAvatarImage } from "~/services/profile.service";
+import { ExpectedError } from "../../../config/exceptions";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { uploadAvatarImage } from "../../../services/profile.service";
 
 export default eventHandler((event) => {
   const updateProfileProgram = pipe(

@@ -1,12 +1,12 @@
 import { Config, Effect, pipe } from "effect";
 import { OAuth2Client } from "oslo/oauth2";
 import { z } from "zod";
-import { ExpectedError } from "~/config/exceptions";
-import { UserRepo } from "~/repositories/user.repository";
-import { defineAppHandler } from "~/utils/effect";
-import { Session } from "~/layers/session";
-import { dataResponse } from "~/libs/response";
-import { validateQuery } from "~/libs/request.helpers";
+import { ExpectedError } from "../../../../config/exceptions";
+import { UserRepo } from "../../../../repositories/user.repository";
+import { defineAppHandler } from "../../../../utils/effect";
+import { Session } from "../../../../layers/session";
+import { dataResponse } from "../../../../libs/response";
+import { validateQuery } from "../../../../libs/request.helpers";
 
 /**
  * Schema for validating Google OAuth callback parameters

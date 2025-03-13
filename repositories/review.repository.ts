@@ -2,11 +2,11 @@ import { and, count, eq } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
 import { head } from "effect/Array";
 import type { z } from "zod";
-import type { reviewFilterDto } from "~/dto/review.dto";
-import { runDrizzleQuery } from "~/libs/query.helpers";
-import { reviewsTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
-import type { PaginationQuery } from "~/services/search/primitives";
+import type { reviewFilterDto } from "../dto/review.dto";
+import { runDrizzleQuery } from "../libs/query.helpers";
+import { reviewsTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
+import type { PaginationQuery } from "../services/search/primitives";
 
 export class ReviewRepository extends DrizzleRepo(reviewsTable, "id") {
   reviewCount(filters: z.infer<typeof reviewFilterDto>) {

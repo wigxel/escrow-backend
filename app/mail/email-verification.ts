@@ -1,9 +1,9 @@
 import { render } from "@react-email/render";
-import { Mailable } from "~/layers/mailing/mailables";
-import { Content } from "~/layers/mailing/mailables/Content";
-import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import type { User } from "~/migrations/tables/interfaces";
-import { EmailVerifcationView } from "~/resources/view/mail/auth/email-verification";
+import { Mailable } from "../../layers/mailing/mailables";
+import { Content } from "../../layers/mailing/mailables/Content";
+import { Envelope } from "../../layers/mailing/mailables/Envelope";
+import type { User } from "../../migrations/tables/interfaces";
+import { EmailVerifcationView } from "../../resources/view/mail/auth/email-verification";
 
 export class EmailVerificationMail extends Mailable {
   constructor(

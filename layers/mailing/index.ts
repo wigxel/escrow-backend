@@ -1,7 +1,7 @@
 import { Config, type ConfigError, Context, type Effect } from "effect";
 import { TaggedError } from "effect/Data";
-import type { SentMessage } from "~/layers/mailing/SentMessage";
-import type { SendMailParams } from "~/layers/mailing/types";
+import type { SentMessage } from "../../layers/mailing/SentMessage";
+import type { SendMailParams } from "../../layers/mailing/types";
 
 export const MailerConfig = Config.all([
   Config.string("MAIL_HOST"),

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TextBase } from "~/resources/view/mail/shared/_text-base";
+import { TextBase } from "../../../../resources/view/mail/shared/_text-base";
 import Layout from "../shared/_layout";
 import { createElement as h } from "react";
 

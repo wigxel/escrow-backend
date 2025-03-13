@@ -1,8 +1,8 @@
 import { Effect } from "effect";
-import { addPushTokenDto } from "~/dto/push-token.dto";
-import { validateBody } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { deleteUserPushToken } from "~/services/user.service";
+import { addPushTokenDto } from "../../../dto/push-token.dto";
+import { validateBody } from "../../../libs/request.helpers";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { deleteUserPushToken } from "../../../services/user.service";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {

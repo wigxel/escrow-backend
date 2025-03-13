@@ -3,7 +3,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   type BankAccountVerificationRepository,
   BankAccountVerificationRepo,
-} from "~/repositories/bankAccountVerification.repo";
+} from "../../../repositories/bankAccountVerification.repo";
 
 export const bankAccountMockData = {
   id: "1",

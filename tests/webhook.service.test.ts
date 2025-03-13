@@ -3,8 +3,8 @@ import { extendWithdrawalRepo } from "./mocks/withdrawalRepoMock";
 import {
   transferSuccessEvent,
   unsuccessfulTransferEvent,
-} from "~/services/webhook.service";
-import type { TPaystackTransferWebhookEvent } from "~/utils/paystack/type/types";
+} from "../services/webhook.service";
+import type { TPaystackTransferWebhookEvent } from "../utils/paystack/type/types";
 import { runTest } from "./mocks/app";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 import { extendAccountStatementRepo } from "./mocks/accountStatementRepoMock";

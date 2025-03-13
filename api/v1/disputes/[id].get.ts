@@ -1,7 +1,7 @@
 import { Effect } from "effect";
-import { ExpectedError } from "~/config/exceptions";
-import { dataResponse } from "~/libs/response";
-import { DisputeRepo } from "~/repositories/dispute.repo";
+import { ExpectedError } from "../../../config/exceptions";
+import { dataResponse } from "../../../libs/response";
+import { DisputeRepo } from "../../../repositories/dispute.repo";
 
 export default eventHandler((event) => {
   const { id } = getRouterParams(event);

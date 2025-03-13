@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { activityLogTable } from "~/migrations/tables/activitylog.table";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { activityLogTable } from "../migrations/tables/activitylog.table";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class ActivityLogRepository extends DrizzleRepo(
   activityLogTable,

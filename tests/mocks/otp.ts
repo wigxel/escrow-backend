@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import { extendMockImplementation } from "./helpers";
-import { OtpRepo, type OtpRepository } from "~/repositories/otp.repository";
+import { OtpRepo, type OtpRepository } from "../../repositories/otp.repository";
 
 const mock: OtpRepository = {
   create: (data) => {

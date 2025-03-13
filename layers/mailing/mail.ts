@@ -1,9 +1,9 @@
 import { Config, Context, Effect, Layer } from "effect";
-import type { SentMessage } from "~/layers/mailing/SentMessage";
-import { Mailer, type MailingErrors } from "~/layers/mailing/index";
-import type { Mailable } from "~/layers/mailing/mailables";
-import { Address } from "~/layers/mailing/mailables/Envelope";
-import type { AddressUnion } from "~/layers/mailing/types";
+import type { SentMessage } from "../../layers/mailing/SentMessage";
+import { Mailer, type MailingErrors } from "../../layers/mailing/index";
+import type { Mailable } from "../../layers/mailing/mailables";
+import { Address } from "../../layers/mailing/mailables/Envelope";
+import type { AddressUnion } from "../../layers/mailing/types";
 
 export class MailImpl {
   private $to: Address[] = [];

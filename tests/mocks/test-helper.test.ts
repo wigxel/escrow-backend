@@ -1,4 +1,4 @@
-import { overwriteObject } from "~/tests/mocks/helpers";
+import { overwriteObject } from "../../tests/mocks/helpers";
 
 it("should proxy object properties and methods", () => {
   class A {

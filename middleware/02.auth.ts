@@ -1,5 +1,5 @@
 import { Cause, Exit, pipe } from "effect";
-import { getBearerToken, validateSession } from "~/libs/session.helpers";
+import { getBearerToken, validateSession } from "../libs/session.helpers";
 
 export default defineEventHandler(async (event) => {
   const { pathname } = getRequestURL(event);

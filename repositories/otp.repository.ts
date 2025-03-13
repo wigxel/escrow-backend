@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { otpTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { otpTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
 
 export class OtpRepository extends DrizzleRepo(otpTable, "id") {}
 

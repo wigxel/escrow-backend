@@ -3,9 +3,9 @@ import { relations } from "drizzle-orm";
 import {
   disputeMembersTable,
   disputeTable,
-} from "~/migrations/tables/dispute-table";
+} from "../../migrations/tables/dispute-table";
 
-import { userTable } from "~/migrations/tables/user-table";
+import { userTable } from "../../migrations/tables/user-table";
 import { addressTable } from "./address-table";
 import {
   escrowParticipantsTable,

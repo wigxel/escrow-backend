@@ -3,8 +3,8 @@ import { extendMockImplementation } from "../helpers";
 import {
   EscrowTransactionRepo,
   type EscrowTransactionRepository,
-} from "~/repositories/escrow/escrowTransaction.repo";
-import { notNil } from "~/libs/query.helpers";
+} from "../../../repositories/escrow/escrowTransaction.repo";
+import { notNil } from "../../../libs/query.helpers";
 
 const escrowTransactionMock: EscrowTransactionRepository = {
   create: (data) => {

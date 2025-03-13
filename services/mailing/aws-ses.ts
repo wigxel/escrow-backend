@@ -9,8 +9,8 @@ import {
   MailerConfig,
   type MailerInterface,
   MailingError,
-} from "~/layers/mailing";
-import type { MailAddress, SendMailParams } from "~/layers/mailing/types";
+} from "../../layers/mailing";
+import type { MailAddress, SendMailParams } from "../../layers/mailing/types";
 
 const sesClient = pipe(
   MailerConfig,

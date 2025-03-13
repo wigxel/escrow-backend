@@ -1,9 +1,9 @@
 import { render } from "@react-email/render";
-import { Mailable } from "~/layers/mailing/mailables";
-import { Content } from "~/layers/mailing/mailables/Content";
-import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import type { User } from "~/migrations/tables/interfaces";
-import { TransactionInvitation } from "~/resources/view/mail/transaction/transaction-invitation";
+import { Mailable } from "../../../layers/mailing/mailables";
+import { Content } from "../../../layers/mailing/mailables/Content";
+import { Envelope } from "../../../layers/mailing/mailables/Envelope";
+import type { User } from "../../../migrations/tables/interfaces";
+import { TransactionInvitation } from "../../../resources/view/mail/transaction/transaction-invitation";
 
 export class TransactionInvitationMail extends Mailable {
   public constructor(public user: Pick<User, "lastName">) {

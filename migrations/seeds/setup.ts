@@ -4,7 +4,7 @@ import { Console, type Context, Effect } from "effect";
 import * as Arr from "effect/Array";
 import { head } from "effect/Array";
 import { TaggedError } from "effect/Data";
-import type { InferReturnEffect } from "~/context/effect_utils";
+import type { InferReturnEffect } from "../../context/effect_utils";
 
 // ---- SEEDER ------
 export function createSeed<A, E, R>(

@@ -1,8 +1,8 @@
-import type { TEscrowParticipant } from "~/migrations/schema";
+import type { TEscrowParticipant } from "../migrations/schema";
 import {
   canTransitionEscrowStatus,
   getBuyerAndSellerFromParticipants,
-} from "~/services/escrow/escrow.utils";
+} from "../services/escrow/escrow.utils";
 import { runTest } from "./mocks/app";
 
 describe("Escrow utility", () => {

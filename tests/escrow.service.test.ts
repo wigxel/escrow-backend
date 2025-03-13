@@ -6,7 +6,7 @@ import {
   initializeEscrowDeposit,
   updateEscrowTransactionStatus,
   validateUserStatusUpdate,
-} from "~/services/escrow/escrowTransactionServices";
+} from "../services/escrow/escrowTransactionServices";
 import { runTest } from "./mocks/app";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 import { Effect, Layer } from "effect";
@@ -17,7 +17,7 @@ import { extendEscrowPaymentRepo } from "./mocks/escrow/escrowPaymentRepoMock";
 import { extendEscrowRequestRepo } from "./mocks/escrow/escrowRequestReoMock";
 import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
-import type { escrowStatusRules } from "~/dto/escrowTransactions.dto";
+import type { escrowStatusRules } from "../dto/escrowTransactions.dto";
 import type { z } from "zod";
 
 describe("Escrow transaction service", () => {

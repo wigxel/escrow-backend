@@ -1,7 +1,7 @@
 import { Effect } from "effect";
-import { dataResponse } from "~/libs/response";
-import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
-import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
+import { dataResponse } from "../../libs/response";
+import { DisputeCategorysRepoLayer } from "../../repositories/disputeCategories.repo";
+import { DisputeResolutionssRepoLayer } from "../../repositories/disputeResolution.repo";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {

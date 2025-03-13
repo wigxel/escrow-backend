@@ -1,10 +1,10 @@
 import { Effect } from "effect";
-import { AbstractNotificationChannel } from "~/layers/notification/Channel";
+import { AbstractNotificationChannel } from "../../layers/notification/Channel";
 import {
   Notification,
   type NotificationEvent,
-} from "~/layers/notification/types";
-import { NotificationRepoLayer } from "~/repositories/notification.repo";
+} from "../../layers/notification/types";
+import { NotificationRepoLayer } from "../../repositories/notification.repo";
 
 type InAppEvent = NotificationEvent<"in-app", { userId?: string }>;
 

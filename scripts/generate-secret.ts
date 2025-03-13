@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Effect, Exit } from "effect";
 import { HMAC } from "oslo/crypto";
-import { arrayBufferToBase64 } from "~/services/otp/otp.util";
+import { arrayBufferToBase64 } from "../services/otp/otp.util";
 
 const generateSecretHash = Effect.gen(function* (_) {
   const secret = new HMAC("SHA-1");

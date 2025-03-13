@@ -1,6 +1,6 @@
 import type { Address } from "nodemailer/lib/mailer";
 import type { z } from "zod";
-import type { activityLogSchema } from "~/dto/activityLog.dto";
+import type { activityLogSchema } from "../dto/activityLog.dto";
 
 export type ApiResponse<T = null> = {
   success: boolean;

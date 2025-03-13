@@ -1,6 +1,6 @@
 import { Context, Layer } from "effect";
-import { escrowRequestTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { escrowRequestTable } from "../../migrations/schema";
+import { DrizzleRepo } from "../../services/repository/RepoHelper";
 
 export class EscrowRequestRepository extends DrizzleRepo(
   escrowRequestTable,

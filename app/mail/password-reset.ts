@@ -1,9 +1,9 @@
 import { render } from "@react-email/render";
-import { Mailable } from "~/layers/mailing/mailables";
-import { Content } from "~/layers/mailing/mailables/Content";
-import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import type { User } from "~/migrations/tables/interfaces";
-import { PasswordResetView } from "~/resources/view/mail/auth/passaword-reset";
+import { Mailable } from "../../layers/mailing/mailables";
+import { Content } from "../../layers/mailing/mailables/Content";
+import { Envelope } from "../../layers/mailing/mailables/Envelope";
+import type { User } from "../../migrations/tables/interfaces";
+import { PasswordResetView } from "../../resources/view/mail/auth/passaword-reset";
 
 export class PasswordResetMail extends Mailable {
   constructor(

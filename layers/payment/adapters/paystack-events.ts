@@ -3,7 +3,7 @@ import {
   PaymentGatewayEvent,
   type PaymentGatewayEvents,
   PaymentGatewayEventService,
-} from "~/layers/payment/payment-events";
+} from "../../../layers/payment/payment-events";
 
 export const PaystackEvent = PaymentGatewayEventService.of({
   resolve(ev: object) {

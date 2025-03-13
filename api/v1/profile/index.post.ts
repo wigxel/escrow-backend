@@ -1,8 +1,8 @@
 import { Effect, pipe } from "effect";
-import { updateUserDto } from "~/dto/user.dto";
-import { validateBody } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { editProfile } from "~/services/profile.service";
+import { updateUserDto } from "../../../dto/user.dto";
+import { validateBody } from "../../../libs/request.helpers";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { editProfile } from "../../../services/profile.service";
 
 export default eventHandler(async (event) => {
   const updateProfileProgram = pipe(

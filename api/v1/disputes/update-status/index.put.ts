@@ -1,8 +1,8 @@
 import { Effect } from "effect";
-import { disputeStatusUpdateSchema } from "~/dto/dispute.dto";
-import { validateBody } from "~/libs/request.helpers";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { updateDisputeStatus } from "~/services/dispute/dispute.service";
+import { disputeStatusUpdateSchema } from "../../../../dto/dispute.dto";
+import { validateBody } from "../../../../libs/request.helpers";
+import { getSessionInfo } from "../../../../libs/session.helpers";
+import { updateDisputeStatus } from "../../../../services/dispute/dispute.service";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* (_) {

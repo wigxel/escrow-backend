@@ -2,11 +2,11 @@ import {
   editProfile,
   getProfile,
   uploadAvatarImage,
-} from "~/services/profile.service";
+} from "../services/profile.service";
 import { runTest } from "./mocks/app";
 import { extendUserRepoMock } from "./mocks/user/user";
 import { Effect, Layer } from "effect";
-import { notNil } from "~/libs/query.helpers";
+import { notNil } from "../libs/query.helpers";
 import { extendFileStorageTest } from "./mocks/filestorageMock";
 
 describe("Profile service", () => {

@@ -5,7 +5,7 @@ import {
   getNotifications,
   getUnreadNotification,
   markAsRead,
-} from "~/services/notification.service";
+} from "../services/notification.service";
 import { runTest } from "./mocks/app";
 
 describe("notification serivce", () => {

@@ -1,4 +1,4 @@
-import { canTransitionDisputeStatus } from "~/services/dispute/dispute.util";
+import { canTransitionDisputeStatus } from "../services/dispute/dispute.util";
 
 describe("Transition dispute status", () => {
   test("should transition dispute status successfully", () => {

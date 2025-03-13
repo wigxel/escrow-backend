@@ -1,10 +1,10 @@
 import { and, count, desc, eq } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
 import { head } from "effect/Array";
-import { runDrizzleQuery } from "~/libs/query.helpers";
-import { type Notification, notificationTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
-import type { PaginationQuery } from "~/services/search/primitives";
+import { runDrizzleQuery } from "../libs/query.helpers";
+import { type Notification, notificationTable } from "../migrations/schema";
+import { DrizzleRepo } from "../services/repository/RepoHelper";
+import type { PaginationQuery } from "../services/search/primitives";
 
 class NotificationRepository extends DrizzleRepo(notificationTable, "id") {
   getTotalCount(type: "all" | "unread", currentUserId: string) {

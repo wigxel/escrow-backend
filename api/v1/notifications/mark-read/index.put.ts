@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { markAsRead } from "~/services/notification.service";
+import { getSessionInfo } from "../../../../libs/session.helpers";
+import { markAsRead } from "../../../../services/notification.service";
 
 export default eventHandler(async (event) => {
   const program = Effect.gen(function* () {

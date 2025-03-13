@@ -6,7 +6,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { DrizzleRepo } from "../../services/repository/RepoHelper";
 import type { InferResult } from "../effect.util";
 
 //////// SCHEMA

@@ -6,39 +6,39 @@ import {
 import {
   ExpectedError,
   InsufficientBalanceException,
-} from "~/config/exceptions";
-import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
+} from "../../config/exceptions";
+import { EscrowWalletRepoLayer } from "../../repositories/escrow/escrowWallet.repo";
 import {
   createTransfer as createTBTransfer,
   getAccountBalance,
 } from "../tigerbeetle.service";
 import { id, TransferFlags } from "tigerbeetle-node";
-import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
-import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
-import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
-import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
+import { AccountStatementRepoLayer } from "../../repositories/accountStatement.repo";
+import { TBTransferCode } from "../../utils/tigerBeetle/type/type";
+import { TigerBeetleRepoLayer } from "../../repositories/tigerbeetle/tigerbeetle.repo";
+import { UserWalletRepoLayer } from "../../repositories/userWallet.repo";
+import { EscrowTransactionRepoLayer } from "../../repositories/escrow/escrowTransaction.repo";
 import { NoSuchElementException } from "effect/Cause";
-import type { SessionUser } from "~/layers/session-provider";
+import type { SessionUser } from "../../layers/session-provider";
 import {
   canTransitionEscrowStatus,
   convertCurrencyUnit,
-} from "~/services/escrow/escrow.utils";
-import type { TSuccessPaymentMetaData } from "~/types/types";
-import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
-import { PaymentGateway } from "~/layers/payment/payment-gateway";
-import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
+} from "../../services/escrow/escrow.utils";
+import type { TSuccessPaymentMetaData } from "../../types/types";
+import { WithdrawalRepoLayer } from "../../repositories/withdrawal.repo";
+import { PaymentGateway } from "../../layers/payment/payment-gateway";
+import { BankAccountRepoLayer } from "../../repositories/accountNumber.repo";
 import type { z } from "zod";
-import type { withdrawalRules } from "~/dto/withdrawal.dto";
+import type { withdrawalRules } from "../../dto/withdrawal.dto";
 import { randomUUID } from "uncrypto";
-import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
+import type { TPaystackPaymentWebhookEvent } from "../../utils/paystack/type/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
-import { NotificationFacade } from "~/layers/notification/layer";
-import { UserRepoLayer } from "~/repositories/user.repository";
-import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
-import { UserWalletPaymentNotification } from "~/app/notifications/in-app/escrow/userWallet-payment.notify";
-import { dataResponse } from "~/libs/response";
+import { NotificationFacade } from "../../layers/notification/layer";
+import { UserRepoLayer } from "../../repositories/user.repository";
+import { EscrowPaymentNotification } from "../../app/notifications/in-app/escrow/escrow-payment.notify";
+import { UserWalletPaymentNotification } from "../../app/notifications/in-app/escrow/userWallet-payment.notify";
+import { dataResponse } from "../../libs/response";
 
 export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentWebhookEvent,

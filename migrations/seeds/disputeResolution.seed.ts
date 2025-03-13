@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { createSeed } from "~/migrations/seeds/setup";
-import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
+import { createSeed } from "../../migrations/seeds/setup";
+import { DisputeResolutionssRepoLayer } from "../../repositories/disputeResolution.repo";
 
 export const runSeed = createSeed(
   "DIsputeResolutionSeed",

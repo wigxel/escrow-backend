@@ -1,15 +1,15 @@
 import type { Effect } from "effect";
 import type { NoSuchElementException, UnknownException } from "effect/Cause";
-import type { DatabaseConnection } from "~/config/database";
+import type { DatabaseConnection } from "../../config/database";
 import type {
   DrizzleTableWithColumns,
   KeyofTableColumns,
-} from "~/services/repository/RepoHelper";
+} from "../../services/repository/RepoHelper";
 import type {
   FilterOrLogicOperator,
   FilterQuery,
   PaginationQuery,
-} from "~/services/search/primitives";
+} from "../../services/search/primitives";
 
 export type RepoQueryErrors = UnknownException | Error | NoSuchElementException;
 

@@ -10,11 +10,11 @@ import {
   resendEmailVerificationOtp,
   UserBalance,
   verifyUserEmail,
-} from "~/services/user.service";
-import { runTest } from "~/tests/mocks/app";
-import { extendOtpRepo } from "~/tests/mocks/otp";
+} from "../services/user.service";
+import { runTest } from "../tests/mocks/app";
+import { extendOtpRepo } from "../tests/mocks/otp";
 import { extendUserRepoMock } from "./mocks/user/user";
-import { notNil } from "~/libs/query.helpers";
+import { notNil } from "../libs/query.helpers";
 import { extendReferralSourceRepo } from "./mocks/referralSourceRepoMock";
 import { extendUserWalletRepo } from "./mocks/user/userWalletMock";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";

@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { getSessionInfo } from "~/libs/session.helpers";
-import { UserBalance } from "~/services/user.service";
+import { getSessionInfo } from "../../../libs/session.helpers";
+import { UserBalance } from "../../../services/user.service";
 
 export default eventHandler((event) => {
   const program = Effect.gen(function* () {

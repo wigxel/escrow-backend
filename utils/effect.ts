@@ -1,10 +1,10 @@
-import { safeObj } from "~/libs/data.helpers";
+import { safeObj } from "../libs/data.helpers";
 import { Effect, Match, type Scope, pipe } from "effect";
 import type { H3Event } from "h3";
-import { AppLive } from "~/config/app";
-import type { AppExceptions } from "~/config/exceptions";
-import { resolveErrorResponse } from "~/libs/response";
-import type { InferRequirements } from "~/services/effect.util";
+import { AppLive } from "../config/app";
+import type { AppExceptions } from "../config/exceptions";
+import { resolveErrorResponse } from "../libs/response";
+import type { InferRequirements } from "../services/effect.util";
 
 /**
  * Runs the Effect program with the `AppLive` as the Requirements and `NewModelDatabase` as Scope

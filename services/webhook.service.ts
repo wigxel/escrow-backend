@@ -1,22 +1,22 @@
 import { Effect } from "effect";
-import { ExpectedError } from "~/config/exceptions";
+import { ExpectedError } from "../config/exceptions";
 import {
   PaymentGatewayEvent,
   PaymentGatewayEventService,
-} from "~/layers/payment/payment-events";
-import { PaymentGateway } from "~/layers/payment/payment-gateway";
+} from "../layers/payment/payment-events";
+import { PaymentGateway } from "../layers/payment/payment-gateway";
 import type {
   TPaystackPaymentWebhookEvent,
   TPaystackTransferWebhookEvent,
   TPaystackWebookEvent,
-} from "~/utils/paystack/type/types";
+} from "../utils/paystack/type/types";
 import { handleSuccessPaymentEvents } from "./paystack/payment.service";
-import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
+import { WithdrawalRepoLayer } from "../repositories/withdrawal.repo";
 import { NoSuchElementException } from "effect/Cause";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
-import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
+import { TigerBeetleRepoLayer } from "../repositories/tigerbeetle/tigerbeetle.repo";
+import { TBTransferCode } from "../utils/tigerBeetle/type/type";
 import { id, TransferFlags } from "tigerbeetle-node";
-import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
+import { AccountStatementRepoLayer } from "../repositories/accountStatement.repo";
 import { SearchOps } from "./search/sql-search-resolver";
 
 export const handlePaystackWebhook = (

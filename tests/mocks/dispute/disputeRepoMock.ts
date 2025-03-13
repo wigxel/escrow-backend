@@ -3,7 +3,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   DisputeRepo,
   type DisputeRepository,
-} from "~/repositories/dispute.repo";
+} from "../../../repositories/dispute.repo";
 import { head } from "effect/Array";
 
 const mock: DisputeRepository = {

@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import {
   ReviewRepo,
   type ReviewRepository,
-} from "~/repositories/review.repository";
+} from "../../repositories/review.repository";
 import { extendMockImplementation } from "./helpers";
 
 export const mock: ReviewRepository = {

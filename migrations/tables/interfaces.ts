@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { otpTable } from "~/migrations/tables/otp-table";
-import { memberRole, type userTable } from "~/migrations/tables/user-table";
+import type { otpTable } from "../../migrations/tables/otp-table";
+import { memberRole, type userTable } from "../../migrations/tables/user-table";
 import type { addressTable } from "./address-table";
 import type {
   disputeMembersTable,

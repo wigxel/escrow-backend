@@ -6,8 +6,8 @@ import {
   ReviewFactory,
   UserFactory,
   generatePassword,
-} from "~/migrations/factories";
-import { createSeed } from "~/migrations/seeds/setup";
+} from "../../migrations/factories";
+import { createSeed } from "../../migrations/seeds/setup";
 
 export const runSeed = createSeed(
   "ReviewSeed",

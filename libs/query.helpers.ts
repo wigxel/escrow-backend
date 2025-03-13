@@ -1,4 +1,4 @@
-import { safeObj } from "~/libs/data.helpers";
+import { safeObj } from "../libs/data.helpers";
 import {
   type SQLWrapper,
   and,
@@ -26,16 +26,16 @@ import { head } from "effect/Array";
 import { NoSuchElementException, UnknownException } from "effect/Cause";
 import { isNullable } from "effect/Predicate";
 import { is } from "ramda";
-import { DatabaseConnection, type DrizzlePgDatabase } from "~/config/database";
-import { QueryError } from "~/config/exceptions";
-import type { SearchableParams } from "~/services/repository/repo.types";
-import type { DrizzleTableWithColumns } from "~/services/repository/RepoHelper";
-import { PaginationService } from "~/services/search/pagination.service";
+import { DatabaseConnection, type DrizzlePgDatabase } from "../config/database";
+import { QueryError } from "../config/exceptions";
+import type { SearchableParams } from "../services/repository/repo.types";
+import type { DrizzleTableWithColumns } from "../services/repository/RepoHelper";
+import { PaginationService } from "../services/search/pagination.service";
 import type {
   FilterOrLogicOperator,
   PaginationQuery,
-} from "~/services/search/primitives";
-import { buildWhereQueryFilterResolver } from "~/services/search/sql-search-resolver";
+} from "../services/search/primitives";
+import { buildWhereQueryFilterResolver } from "../services/search/sql-search-resolver";
 
 export const resolveQueryError = (err: unknown) => {
   if (typeof err === "string") return new Error(err);

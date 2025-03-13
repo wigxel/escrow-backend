@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
-import { notNil, runDrizzleQuery } from "~/libs/query.helpers";
-import { escrowParticipantsTable } from "~/migrations/schema";
-import { DrizzleRepo } from "~/services/repository/RepoHelper";
+import { notNil, runDrizzleQuery } from "../../libs/query.helpers";
+import { escrowParticipantsTable } from "../../migrations/schema";
+import { DrizzleRepo } from "../../services/repository/RepoHelper";
 
 export class EscrowParticipantRepository extends DrizzleRepo(
   escrowParticipantsTable,

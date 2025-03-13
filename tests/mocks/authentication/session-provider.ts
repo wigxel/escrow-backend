@@ -3,8 +3,8 @@ import { NoSuchElementException } from "effect/Cause";
 import {
   SessionProvider,
   type SessionProviderImpl,
-} from "~/layers/session-provider";
-import { extendMockImplementation } from "~/tests/mocks/helpers";
+} from "../../../layers/session-provider";
+import { extendMockImplementation } from "../../../tests/mocks/helpers";
 
 export const Mock: SessionProviderImpl = {
   createSession: (user_id: string) => {

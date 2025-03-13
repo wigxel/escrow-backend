@@ -4,8 +4,8 @@ import {
   queryFiltersToWhere,
   runDrizzleQuery,
   toSortOrder,
-} from "~/libs/query.helpers";
-import { createRepoHelpers } from "~/services/repository/drizzle-repo-helper";
+} from "../../libs/query.helpers";
+import { createRepoHelpers } from "../../services/repository/drizzle-repo-helper";
 import type {
   FindArg1,
   FindArg2,
@@ -13,7 +13,7 @@ import type {
   RepoHelperInner,
   RepoModelIdType,
   SearchableParams,
-} from "~/services/repository/repo.types";
+} from "../../services/repository/repo.types";
 import { SearchOps } from "../search/sql-search-resolver";
 
 // biome-ignore lint/suspicious/noExplicitAny: Required for inference to work well

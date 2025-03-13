@@ -3,11 +3,11 @@ import {
   createReview,
   deleteReview,
   getReviews,
-} from "~/services/reviews.service";
-import { runTest } from "~/tests/mocks/app";
+} from "../services/reviews.service";
+import { runTest } from "../tests/mocks/app";
 import { extendReviewRepoMock } from "./mocks/review";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
-import { notNil } from "~/libs/query.helpers";
+import { notNil } from "../libs/query.helpers";
 import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
 
 describe("Review service", () => {

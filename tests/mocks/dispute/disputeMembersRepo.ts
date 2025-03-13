@@ -3,7 +3,7 @@ import { head } from "effect/Array";
 import {
   DisputeMemberRepo,
   type DisputeMemberRepository,
-} from "~/repositories/disputeMember.repo";
+} from "../../../repositories/disputeMember.repo";
 import { extendMockImplementation } from "../helpers";
 
 const disputeMemberMock: DisputeMemberRepository = {

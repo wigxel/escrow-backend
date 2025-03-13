@@ -1,5 +1,8 @@
-import { MailMessage } from "~/layers/notification/MailMessage";
-import { type Notifiable, Notification } from "~/layers/notification/types";
+import { MailMessage } from "../../../../layers/notification/MailMessage";
+import {
+  type Notifiable,
+  Notification,
+} from "../../../../layers/notification/types";
 
 export class EscrowPaymentNotification extends Notification {
   constructor(

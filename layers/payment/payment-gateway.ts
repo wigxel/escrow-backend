@@ -6,14 +6,14 @@ import type {
   TCreateTransferRecipientData,
   TInitializeTransactionData,
   TInitiateTransferData,
-} from "~/utils/paystack/type/data";
+} from "../../utils/paystack/type/data";
 import type {
   TBankListResponse,
   TCreateTransferRecipientResponse,
   TinitializeResponse,
   TInitiateTransferResponse,
   TResolveAccountResponse,
-} from "~/utils/paystack/type/types";
+} from "../../utils/paystack/type/types";
 
 type TPaymentGateWayErrors =
   | ConfigError.ConfigError

@@ -1,11 +1,11 @@
-import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
+import type { TPaystackPaymentWebhookEvent } from "../utils/paystack/type/types";
 import { extendEscrowWalletRepo } from "./mocks/escrow/escrowWalletRepoMock";
 import { Effect, Layer } from "effect";
 import {
   handleSuccessPaymentEvents,
   releaseFunds,
   withdrawFromWallet,
-} from "~/services/paystack/payment.service";
+} from "../services/paystack/payment.service";
 import { runTest } from "./mocks/app";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 import { extendAccountStatementRepo } from "./mocks/accountStatementRepoMock";

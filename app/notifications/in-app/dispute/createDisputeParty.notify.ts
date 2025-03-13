@@ -1,4 +1,4 @@
-import { Notification } from "~/layers/notification/types";
+import { Notification } from "../../../../layers/notification/types";
 
 export class CreateDisputePartyNotification extends Notification {
   constructor(

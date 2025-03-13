@@ -1,5 +1,5 @@
 import { Context, Layer } from "effect";
-import type { ChatBackendInterface } from "~/services/chat/chat-service/firebase-chat-backend";
+import type { ChatBackendInterface } from "../../services/chat/chat-service/firebase-chat-backend";
 import { extendMockImplementation } from "./helpers";
 
 export interface ChatServiceInterface

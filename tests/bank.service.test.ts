@@ -4,13 +4,13 @@ import {
   getBankList,
   getUserBankAccounts,
   resolveAccountNumber,
-} from "~/services/bank.service";
+} from "../services/bank.service";
 import { runTest } from "./mocks/app";
 import { extendBankAccountRepo } from "./mocks/user/bankAccountMock";
 import { Effect, Layer } from "effect";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
 import { extendBankAccountVerificationRepo } from "./mocks/user/bankVerificationMock";
-import type { TCreateTransferRecipientResponse } from "~/utils/paystack/type/types";
+import type { TCreateTransferRecipientResponse } from "../utils/paystack/type/types";
 import { extendTigerBeetleRepo } from "./mocks/tigerBeetleRepoMock";
 
 describe("Bank service", () => {

@@ -2,7 +2,7 @@ import { Config, Effect, Redacted } from "effect";
 import { TaggedError } from "effect/Data";
 import { TimeSpan } from "oslo";
 import { TOTPController } from "oslo/otp";
-import { base64ToArrayBuffer } from "~/services/otp/otp.util";
+import { base64ToArrayBuffer } from "../../services/otp/otp.util";
 
 export const readOTPSecret = Effect.cached(
   Effect.gen(function* () {

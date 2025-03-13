@@ -1,10 +1,10 @@
-import { Paystack } from "~/utils/paystack/paystack";
+import { Paystack } from "../../../utils/paystack/paystack";
 import { PaymentGateway, type TPaymentGateway } from "../payment-gateway";
 import type {
   TCreateTransferRecipientData,
   TInitializeTransactionData,
   TInitiateTransferData,
-} from "~/utils/paystack/type/data";
+} from "../../../utils/paystack/type/data";
 import { Config, Effect, Layer, pipe, Redacted } from "effect";
 import { PaystackEventLive } from "./paystack-events";
 import type { UnknownException } from "effect/Cause";

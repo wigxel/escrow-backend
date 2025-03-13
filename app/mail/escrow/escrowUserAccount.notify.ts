@@ -1,8 +1,8 @@
 import { render } from "@react-email/render";
-import { Mailable } from "~/layers/mailing/mailables";
-import { Content } from "~/layers/mailing/mailables/Content";
-import { Envelope } from "~/layers/mailing/mailables/Envelope";
-import { EscrowUserAccountView } from "~/resources/view/mail/auth/escrowuseraccount";
+import { Mailable } from "../../../layers/mailing/mailables";
+import { Content } from "../../../layers/mailing/mailables/Content";
+import { Envelope } from "../../../layers/mailing/mailables/Envelope";
+import { EscrowUserAccountView } from "../../../resources/view/mail/auth/escrowuseraccount";
 
 export class EscrowUserAccounntMail extends Mailable {
   public constructor(public username: string) {

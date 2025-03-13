@@ -3,7 +3,7 @@ import { extendMockImplementation } from "../helpers";
 import {
   EscrowPaymentRepo,
   type EscrowPaymentRepository,
-} from "~/repositories/escrow/escrowPayment.repo";
+} from "../../../repositories/escrow/escrowPayment.repo";
 
 const mockData = {
   id: "test-id",

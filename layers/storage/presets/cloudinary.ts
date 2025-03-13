@@ -8,9 +8,9 @@ import type {
   GetFileOptions,
   FileMetadata,
 } from "../types";
-import { arrayBufferToBase64 } from "~/services/otp/otp.util";
+import { arrayBufferToBase64 } from "../../../services/otp/otp.util";
 import { NoSuchElementException } from "effect/Cause";
-import { safeArray } from "~/libs/data.helpers";
+import { safeArray } from "../../../libs/data.helpers";
 
 export const cloudinaryConfig = Effect.gen(function* () {
   const cloudinarySecretKey = yield* Config.string("CLOUDINARY_SECRET_KEY");
