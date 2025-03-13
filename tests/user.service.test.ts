@@ -480,7 +480,7 @@ describe("User services", () => {
     const params = {
       escrowId: "MOCK_ESCROW_ID",
       customerEmail: "MOCK_EMAIL",
-      customerPhone: 11222333,
+      customerPhone: "11222333",
       customerUsername: "MOCK_USERNAME",
     };
     test("should fail if email or phone already exists", () => {

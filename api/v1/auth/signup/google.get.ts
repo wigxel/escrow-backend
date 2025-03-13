@@ -128,8 +128,8 @@ const findOrCreateUser = (userData: GoogleUserData) => {
       Effect.head,
     );
 
-    // Check if user already exists
-    yield* userRepo
+    // Check if user already exists and return the user
+    return yield* userRepo
       .firstOrThrow({ email: userData.email })
       .pipe(Effect.catchTag("NoSuchElementException", () => createUser));
   });
