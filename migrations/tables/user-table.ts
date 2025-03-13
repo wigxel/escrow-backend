@@ -34,6 +34,7 @@ export const userTable = pgTable(
     businessName: varchar("business_name"),
     businessType: varchar("business-type"),
     referralSourceId: smallint("referral_source_id"),
+    googleId: varchar("google_id"),
     ...timestamps,
   },
   (table) => {
