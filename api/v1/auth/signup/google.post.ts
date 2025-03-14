@@ -22,7 +22,7 @@ export default eventHandler(async (event) => {
 
 const createGoogleAuthURL = () => {
   return Effect.gen(function* () {
-    const serverUrl = yield* Config.string("SERVER_URL");
+    const serverUrl = yield* Config.string("APP_URL");
     const clientId = yield* Config.string("GOOGLE_CLIENT_ID");
 
     const state = generateState();

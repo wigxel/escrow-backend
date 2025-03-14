@@ -4,8 +4,8 @@ dist
 .nitro
 .cache
 .output
-.env
 db.json
 /.idea
 *.tigerbeetle
 .claude
+.env*

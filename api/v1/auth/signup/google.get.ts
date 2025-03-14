@@ -56,7 +56,7 @@ export default defineAppHandler((event) => {
 
 const authenticateWithGoogle = (params: GoogleAuthParams) => {
   return Effect.gen(function* (_) {
-    const serverUrl = yield* Config.string("SERVER_URL");
+    const serverUrl = yield* Config.string("APP_URL");
     const clientId = yield* Config.string("GOOGLE_CLIENT_ID");
     const clientSecret = yield* Config.string("GOOGLE_CLIENT_SECRET");
 
