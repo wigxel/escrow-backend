@@ -1,18 +1,40 @@
-FROM node:22
+FROM ubuntu:22.04
 
-WORKDIR /
+# Install Node.js and dependencies
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends \
+    curl \
+    gnupg \
+    apt-transport-https \
+    build-essential \
+    ca-certificates && \
+    curl --silent --location https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install --yes nodejs && \
+    npm install -g pnpm && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY package*.json .
-## Add the tigerbeetle patches
+WORKDIR /app
+
+# Copy package files first to leverage Docker layer caching
+COPY package*.json ./
 COPY patches ./patches
 
-RUN npm install -g pnpm && pnpm install
+# Install dependencies
+RUN pnpm install # --frozen-lockfile
 
+# Copy application code
 COPY . .
 
+# Build the application
 RUN pnpm rebuild && pnpm run build
 
+# Set environment variables
 ENV PORT=8080
+ENV NODE_ENV=production
+
+# Expose the port
 EXPOSE $PORT
 
+# Start the application
 CMD ["pnpm", "run", "start"]
