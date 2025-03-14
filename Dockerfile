@@ -1,16 +1,18 @@
-FROM node:22-alpine
+FROM node:22
 
 WORKDIR /
 
 COPY package*.json .
+## Add the tigerbeetle patches
+COPY patches ./patches
 
-RUN npm install -g pnpm bun && pnpm install
+RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
-RUN pnpm run build
+RUN pnpm rebuild && pnpm run build
 
-ENV PORT=${PORT:-3000}
-EXPOSE ${PORT}
+ENV PORT=8080
+EXPOSE $PORT
 
-CMD ["bun", "run", ".output/server/index.mjs"]
+CMD ["pnpm", "run", "start"]
