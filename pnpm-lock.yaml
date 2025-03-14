@@ -82,12 +82,6 @@ importers:
       react-email:
         specifier: ^3.0.6
         version: 3.0.6(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      std-env:
-        specifier: ^3.7.0
-        version: 3.8.0
-      stripe:
-        specifier: ^16.8.0
-        version: 16.12.0
       supertest:
         specifier: ^6.0.2
         version: 6.3.4
@@ -131,6 +125,9 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.3.1
+      std-env:
+        specifier: ^3.8.0
+        version: 3.8.0
       tsx:
         specifier: ^4.15.7
         version: 4.19.2
@@ -4421,10 +4418,6 @@ packages:
 
   strip-literal@2.1.1:
     resolution: {integrity: sha512-631UJ6O00eNGfMiWG78ck80dfBab8X6IVFB51jZK5Icd7XAs60Z5y7QdSd/wGIklnWvRbUNloVzhOKKmutxQ6Q==}
-
-  stripe@16.12.0:
-    resolution: {integrity: sha512-H7eFVLDxeTNNSn4JTRfL2//LzCbDrMSZ+2q1c7CanVWgK2qIW5TwS+0V7N9KcKZZNpYh/uCqK0PyZh/2UsaAtQ==}
-    engines: {node: '>=12.*'}
 
   strnum@1.1.2:
     resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
@@ -9114,11 +9107,6 @@ snapshots:
   strip-literal@2.1.1:
     dependencies:
       js-tokens: 9.0.1
-
-  stripe@16.12.0:
-    dependencies:
-      '@types/node': 22.13.0
-      qs: 6.14.0
 
   strnum@1.1.2:
     optional: true
