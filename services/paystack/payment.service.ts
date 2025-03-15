@@ -36,8 +36,8 @@ import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 import { NotificationFacade } from "~/layers/notification/layer";
 import { UserRepoLayer } from "~/repositories/user.repository";
-import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
-import { UserWalletPaymentNotification } from "~/app/notifications/in-app/escrow/userWallet-payment.notify";
+import { EscrowPaymentNotification } from "~/app/notifications/escrow/escrow-payment.notify";
+import { UserWalletPaymentNotification } from "~/app/notifications/escrow/userWallet-payment.notify";
 import { dataResponse } from "~/libs/response";
 
 export const handleSuccessPaymentEvents = (

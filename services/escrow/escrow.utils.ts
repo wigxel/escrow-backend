@@ -5,8 +5,8 @@ import type { TEscrowParticipant } from "~/migrations/schema";
 import type { CurrencyUnit } from "~/types/types";
 
 const escrowStatusTransitions = {
-  created: ["deposit.pending", "cancelled"],
-  "deposit.pending": ["deposit.success", "cancelled"],
+  created: ["deposit.pending", "cancelled", "expired"],
+  "deposit.pending": ["deposit.success", "cancelled", "expired"],
   "deposit.success": [
     "service.pending",
     "service.confirmed",
@@ -15,7 +15,11 @@ const escrowStatusTransitions = {
   ],
   "service.pending": ["service.confirmed"],
   "service.confirmed": ["dispute", "completed"],
+  dispute: [],
   cancelled: [],
+  refunded: [],
+  completed: [],
+  expired: [],
 } as const;
 
 /**

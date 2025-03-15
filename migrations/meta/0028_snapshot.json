@@ -1,5 +1,5 @@
 {
-  "id": "c5dfcb27-6a67-4f04-ba33-6b16168df6cb",
+  "id": "c953fdd5-6887-4f13-b5ed-bec4b4d3d04a",
   "prevId": "910dd54e-ac2f-4f42-934d-41beece755db",
   "version": "7",
   "dialect": "postgresql",
@@ -1126,6 +1126,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp (6) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp (6) with time zone",
@@ -1141,7 +1147,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "expires_processed_at_Idx": {
+          "name": "expires_processed_at_Idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "processed_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

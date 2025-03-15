@@ -356,7 +356,7 @@ export const finalizeEscrowTransaction = (
     yield* _(
       escrowRequestRepo.update(
         { escrowId: params.escrowId },
-        { status: "accepted" },
+        { status: "accepted", processedAt: new Date() },
       ),
     );
 
