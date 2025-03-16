@@ -7,9 +7,9 @@ import {
   index,
   numeric,
   varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { userTable } from "./user-table";
-import { table } from "effect/Console";
 
 export const escrowStatus = pgEnum("escrow_status", [
   "created",
@@ -131,7 +131,8 @@ export const escrowRequestTable = pgTable(
   (table) => {
     return {
       expiresProcessedAtIdx: index("expires_processed_at_Idx").on(
-        table.expiresAt,table.processedAt
+        table.expiresAt,
+        table.processedAt,
       ),
     };
   },
@@ -158,6 +159,6 @@ export const AccountStatementTable = pgTable("account_statement", {
   type: statementType("type"),
   tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
   status: AccountStatementStatus("status").default("completed"),
-  metadata: text("metadata"),
+  metadata: jsonb("metadata").default({}),
   ...timestamps,
 });

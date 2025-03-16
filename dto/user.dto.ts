@@ -127,3 +127,11 @@ export const loginDto = z.object({
   email: z.string().email().min(1, "Email is required").optional(),
   password: passwordValidator,
 });
+
+export const accountStatementRules = z.object({
+  type: z
+    .enum(["escrow.deposit", "wallet.deposit", "wallet.withdraw"], {
+      message: `please provide of the following 'escrow.deposit', 'wallet.deposit', 'wallet.withdraw'`,
+    })
+    .optional(),
+});

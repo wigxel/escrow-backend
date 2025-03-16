@@ -441,6 +441,12 @@ export const updateEscrowTransactionStatus = (params: {
   });
 };
 
+/**
+ * this makes sure the qualified user is the one making update to the transaction
+ * status
+ * @param params
+ * @returns
+ */
 export const validateUserStatusUpdate = (params: {
   escrowId: string;
   status: string;

@@ -1,8 +1,10 @@
 import { Context, Layer } from "effect";
-import { bankAccountTable, withdrawalTable } from "~/migrations/schema";
+import { withdrawalTable } from "~/migrations/schema";
 import { DrizzleRepo } from "~/services/repository/RepoHelper";
 
-export class WithdrawalRepository extends DrizzleRepo(withdrawalTable, "id") {}
+export class WithdrawalRepository extends DrizzleRepo(withdrawalTable, "id", {
+  queryReferenceKey: "withdrawalTable",
+}) {}
 
 export class WithdrawalRepo extends Context.Tag("WithdrawalRepo")<
   WithdrawalRepo,

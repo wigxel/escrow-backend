@@ -80,7 +80,7 @@ export const handleSuccessPaymentEvents = (
       creatorId: metadata.customerDetails.userId,
       tigerbeetleTransferId: transactionId,
       relatedUserId: metadata.relatedUserId,
-      metadata: JSON.stringify({
+      metadata: {
         escrowId: metadata.escrowId,
         from: { accountId: orgAccountId, name: "organization wallet" },
         to: {
@@ -88,7 +88,7 @@ export const handleSuccessPaymentEvents = (
           name: "escrow wallet",
         },
         description: "payment into escrow wallet",
-      }),
+      },
     });
 
     yield* finalizeEscrowTransaction({
@@ -187,15 +187,17 @@ export const releaseFunds = (params: {
     // to the recipient wallet
     yield* _(
       Effect.all([
-        tigerBeetleRepo.createTransfers({
+        createTBTransfer({
           transferId,
+          debit_account_id:
+            escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
+          credit_account_id: recipientWallet.tigerbeetleAccountId,
           amount: convertCurrencyUnit(
             escrowDetails.paymentDetails.amount,
             "naira-kobo",
           ),
-          debit_account_id:
-            escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
-          credit_account_id: recipientWallet.tigerbeetleAccountId,
+          code: TBTransferCode.RELEASE_ESCROW_FUNDS,
+          ledger: "ngnLedger",
         }),
 
         accountStatementRepo.create({
@@ -204,7 +206,7 @@ export const releaseFunds = (params: {
           relatedUserId: recipient.userId,
           type: "wallet.deposit",
           tigerbeetleTransferId: transferId,
-          metadata: JSON.stringify({
+          metadata: {
             escrowId: escrowDetails.id,
             from: {
               accountId: escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
@@ -215,7 +217,7 @@ export const releaseFunds = (params: {
               name: "user wallet",
             },
             description: "Release of funds from escrow to user wallet",
-          }),
+          },
         }),
       ]),
     );
@@ -346,7 +348,7 @@ export const withdrawFromWallet = (
       creatorId: params.currentUser.id,
       tigerbeetleTransferId: tigerbeetleTransferId,
       status: "pending",
-      metadata: JSON.stringify({
+      metadata: {
         escrowId: null,
         from: { accountId: wallet.tigerbeetleAccountId, name: "user wallet" },
         to: {
@@ -354,7 +356,7 @@ export const withdrawFromWallet = (
           name: "user bank account",
         },
         description: `withdrawing N${params.amount} from wallet to bank account`,
-      }),
+      },
     });
 
     return dataResponse({ message: "Withdrawal processed successfully" });
