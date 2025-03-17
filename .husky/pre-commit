@@ -1,2 +1,2 @@
-pnpm biome format --write --staged . &&
+pnpm biome format --write --staged . && git add .
 echo "Formatting complete"

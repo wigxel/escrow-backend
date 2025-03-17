@@ -13,11 +13,11 @@ import type {
 import { handleSuccessPaymentEvents } from "./paystack/payment.service";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { NoSuchElementException } from "effect/Cause";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
 import { SearchOps } from "./search/sql-search-resolver";
+import { createTransfer as createTBTransfer } from "./tigerbeetle.service";
 
 export const handlePaystackWebhook = (
   res: TPaystackWebookEvent,
@@ -67,7 +67,6 @@ export const handlePaystackWebhook = (
 export const transferSuccessEvent = (res: TPaystackTransferWebhookEvent) => {
   return Effect.gen(function* (_) {
     const withdrawalRepo = yield* _(WithdrawalRepoLayer.tag);
-    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
 
     const withdrawalDetails = yield* _(
@@ -87,7 +86,7 @@ export const transferSuccessEvent = (res: TPaystackTransferWebhookEvent) => {
           { status: res.data.status },
         ),
 
-        tigerBeetleRepo.createTransfers({
+        createTBTransfer({
           transferId: String(id()),
           pendingId: withdrawalDetails.tigerbeetleTransferId,
           credit_account_id: "0",
@@ -112,7 +111,6 @@ export const unsuccessfulTransferEvent = (
 ) => {
   return Effect.gen(function* (_) {
     const withdrawalRepo = yield* _(WithdrawalRepoLayer.tag);
-    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
 
     const withdrawalDetails = yield* _(
@@ -133,7 +131,7 @@ export const unsuccessfulTransferEvent = (
           },
         ),
 
-        tigerBeetleRepo.createTransfers({
+        createTBTransfer({
           amount: 0,
           credit_account_id: "0",
           debit_account_id: "0",

@@ -15,7 +15,6 @@ import {
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
 import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { NoSuchElementException } from "effect/Cause";
@@ -143,7 +142,6 @@ export const releaseFunds = (params: {
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
-    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
 
@@ -270,7 +268,6 @@ export const withdrawFromWallet = (
 ) => {
   return Effect.gen(function* (_) {
     const withdrawalRepo = yield* _(WithdrawalRepoLayer.tag);
-    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const paystack = yield* PaymentGateway;
     const bankAccountRepo = yield* BankAccountRepoLayer.tag;
@@ -329,13 +326,14 @@ export const withdrawFromWallet = (
           tigerbeetleTransferId,
         }),
 
-        tigerBeetleRepo.createTransfers({
+        createTBTransfer({
           amount,
           credit_account_id: bankAccountDetails.tigerbeetleAccountId,
           debit_account_id: wallet.tigerbeetleAccountId,
           transferId: tigerbeetleTransferId,
           code: TBTransferCode.WALLET_WITHDRAWAL,
           flags: TransferFlags.pending,
+          ledger: "ngnLedger",
         }),
       ]),
     );
