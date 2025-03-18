@@ -7,7 +7,7 @@ import { SessionProviderTest } from "~/tests/mocks/authentication/session-provid
 import { UserRepoTest } from "~/tests/mocks/user/user";
 import { DisputeMemberRepoTest } from "./dispute/disputeMembersRepo";
 import { DisputeRepoTest } from "./dispute/disputeRepoMock";
-import { ReviewTest } from "./review";
+import { ReviewTest } from "./review/review";
 import { SesssionTest } from "./authentication/session";
 import { resolveErrorResponse } from "~/libs/response";
 import { EscrowParticipantRepoTest } from "./escrow/escrowParticipantsRepoMock";
@@ -35,8 +35,12 @@ import { EscrowPaymentRepoTest } from "./escrow/escrowPaymentRepoMock";
 import { EscrowWalletRepoTest } from "./escrow/escrowWalletRepoMock";
 import { WithdrawalRepoTest } from "./withdrawalRepoMock";
 import { AccountStatementRepoTest } from "./accountStatementRepoMock";
+import { CommentsTestRepoTest } from "./review/commentsRepoMock";
 
-const ReviewModuleTest = Layer.empty.pipe(Layer.provideMerge(ReviewTest));
+const ReviewModuleTest = Layer.empty.pipe(
+  Layer.provideMerge(ReviewTest),
+  Layer.provideMerge(CommentsTestRepoTest),
+);
 
 const mailService = {
   send(params: SendMailParams) {

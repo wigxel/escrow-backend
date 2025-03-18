@@ -42,6 +42,11 @@ const mock: ReferralSourceRepository = {
   update: () => {
     return Effect.succeed([{}]);
   },
+
+  paginate: () => {
+    throw new Error("Function not implemented.");
+  },
+  with: () => this,
 };
 
 export const extendReferralSourceRepo = extendMockImplementation(
