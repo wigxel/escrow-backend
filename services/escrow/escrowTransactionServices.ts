@@ -255,7 +255,7 @@ export const initializeEscrowDeposit = (
     }
 
     const tx_details = yield* _(
-      escrowTransactionRepo.find(input.escrowId),
+      escrowTransactionRepo.firstOrThrow({ id: input.escrowId }),
       Effect.mapError(
         () => new NoSuchElementException("Invalid escrow transaction id"),
       ),
