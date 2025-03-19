@@ -255,7 +255,7 @@ export const initializeEscrowDeposit = (
     }
 
     const tx_details = yield* _(
-      escrowTransactionRepo.find(input.escrowId),
+      escrowTransactionRepo.firstOrThrow({ id: input.escrowId }),
       Effect.mapError(
         () => new NoSuchElementException("Invalid escrow transaction id"),
       ),
@@ -356,7 +356,7 @@ export const finalizeEscrowTransaction = (
     yield* _(
       escrowRequestRepo.update(
         { escrowId: params.escrowId },
-        { status: "accepted" },
+        { status: "accepted", processedAt: new Date() },
       ),
     );
 
@@ -441,6 +441,12 @@ export const updateEscrowTransactionStatus = (params: {
   });
 };
 
+/**
+ * this makes sure the qualified user is the one making update to the transaction
+ * status
+ * @param params
+ * @returns
+ */
 export const validateUserStatusUpdate = (params: {
   escrowId: string;
   status: string;

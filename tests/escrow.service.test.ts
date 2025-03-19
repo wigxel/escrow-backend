@@ -19,6 +19,7 @@ import { extendActivityLogRepo } from "./mocks/activityLogRepoMock";
 import { extendPaymentGateway } from "./mocks/payment/paymentGatewayMock";
 import type { escrowStatusRules } from "~/dto/escrowTransactions.dto";
 import type { z } from "zod";
+import { NoSuchElementException } from "effect/Cause";
 
 describe("Escrow transaction service", () => {
   const currentUser = {
@@ -34,10 +35,10 @@ describe("Escrow transaction service", () => {
       amount: 10000,
       creatorRole: "seller" as const,
       customerEmail: "MOCK_EMAIL",
-      customerPhone: 11222333,
+      customerPhone: "11222333",
       customerUsername: "MOCK_USERNAME",
       description: "description",
-      terms: "terms",
+      terms: true,
       title: "title",
     };
 
@@ -69,6 +70,7 @@ describe("Escrow transaction service", () => {
               id: "test-id",
               status: "deposit.success",
               title: "",
+              kind: "",
               description: "",
               createdBy: "",
               createdAt: new Date(2025, 2, 20),
@@ -160,7 +162,7 @@ describe("Escrow transaction service", () => {
       });
       const result = runTest(Effect.provide(program, escrowRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        "[NoSuchElementException: invalid escrow id: no escrow transaction found]",
+        "[NoSuchElementException: Invalid escrow id: no escrow transaction found]",
       );
     });
 
@@ -232,6 +234,9 @@ describe("Escrow transaction service", () => {
       });
 
       const activityLogMock = extendActivityLogRepo({
+        firstOrThrow() {
+          return Effect.fail(new NoSuchElementException());
+        },
         create() {
           activityLogCreated = true;
           return Effect.succeed([]);
@@ -278,7 +283,7 @@ describe("Escrow transaction service", () => {
     const params = {
       escrowId: "MOCK_ESCROW_ID",
       customerEmail: "MOCK_EMAIL",
-      customerPhone: 11222333,
+      customerPhone: "11222333",
       customerUsername: "MOCK_USERNAME",
     };
 
@@ -307,7 +312,7 @@ describe("Escrow transaction service", () => {
       const program = initializeEscrowDeposit(params, currentUser);
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
-        "[ExpectedError: Please click the link sent to you to proceed with payment]",
+        "[ExpectedError: Please click the link sent to you to proceed with payment MOCK_ESCROW_ID]",
       );
     });
 

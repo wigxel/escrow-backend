@@ -14,6 +14,7 @@ import type { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
 import type { z } from "zod";
 import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
 import type {
+  accountStatementRules,
   createUserDto,
   passwordResetDto,
   verifyEmailDto,
@@ -30,6 +31,8 @@ import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticip
 import { PushTokenRepoLayer } from "~/repositories/pushToken.repo";
 import { dataResponse } from "~/libs/response";
 import cuid2 from "@paralleldrive/cuid2";
+import { searchRepo } from "./search";
+import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
 
 const getSuffix = cuid2.init({
   length: 4,
@@ -399,5 +402,27 @@ export const deleteUserPushToken = (params: {
     );
 
     return dataResponse({ message: "User device push token deleted" });
+  });
+};
+
+export const accountStatements = (
+  filters: z.infer<typeof accountStatementRules>,
+  currentUser: SessionUser,
+) => {
+  return Effect.gen(function* (_) {
+    const statementRepo = yield* AccountStatementRepoLayer.tag;
+
+    const statements = yield* searchRepo(statementRepo, () => ({
+      where: SearchOps.and(
+        filters.type ? SearchOps.eq("type", filters.type) : SearchOps.none(),
+        SearchOps.or(
+          SearchOps.eq("creatorId", currentUser.id),
+          SearchOps.eq("relatedUserId", currentUser.id),
+        ),
+      ),
+      orderBy: { createdAt: "desc" },
+    }));
+
+    return dataResponse(statements);
   });
 };

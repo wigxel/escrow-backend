@@ -15,7 +15,6 @@ import {
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
 import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
-import { TigerBeetleRepoLayer } from "~/repositories/tigerbeetle/tigerbeetle.repo";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { NoSuchElementException } from "effect/Cause";
@@ -36,8 +35,8 @@ import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 import { NotificationFacade } from "~/layers/notification/layer";
 import { UserRepoLayer } from "~/repositories/user.repository";
-import { EscrowPaymentNotification } from "~/app/notifications/in-app/escrow/escrow-payment.notify";
-import { UserWalletPaymentNotification } from "~/app/notifications/in-app/escrow/userWallet-payment.notify";
+import { EscrowPaymentNotification } from "~/app/notifications/escrow/escrow-payment.notify";
+import { UserWalletPaymentNotification } from "~/app/notifications/escrow/userWallet-payment.notify";
 import { dataResponse } from "~/libs/response";
 
 export const handleSuccessPaymentEvents = (
@@ -80,7 +79,7 @@ export const handleSuccessPaymentEvents = (
       creatorId: metadata.customerDetails.userId,
       tigerbeetleTransferId: transactionId,
       relatedUserId: metadata.relatedUserId,
-      metadata: JSON.stringify({
+      metadata: {
         escrowId: metadata.escrowId,
         from: { accountId: orgAccountId, name: "organization wallet" },
         to: {
@@ -88,7 +87,7 @@ export const handleSuccessPaymentEvents = (
           name: "escrow wallet",
         },
         description: "payment into escrow wallet",
-      }),
+      },
     });
 
     yield* finalizeEscrowTransaction({
@@ -143,7 +142,6 @@ export const releaseFunds = (params: {
     const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
-    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
 
@@ -187,15 +185,17 @@ export const releaseFunds = (params: {
     // to the recipient wallet
     yield* _(
       Effect.all([
-        tigerBeetleRepo.createTransfers({
+        createTBTransfer({
           transferId,
+          debit_account_id:
+            escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
+          credit_account_id: recipientWallet.tigerbeetleAccountId,
           amount: convertCurrencyUnit(
             escrowDetails.paymentDetails.amount,
             "naira-kobo",
           ),
-          debit_account_id:
-            escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
-          credit_account_id: recipientWallet.tigerbeetleAccountId,
+          code: TBTransferCode.RELEASE_ESCROW_FUNDS,
+          ledger: "ngnLedger",
         }),
 
         accountStatementRepo.create({
@@ -204,7 +204,7 @@ export const releaseFunds = (params: {
           relatedUserId: recipient.userId,
           type: "wallet.deposit",
           tigerbeetleTransferId: transferId,
-          metadata: JSON.stringify({
+          metadata: {
             escrowId: escrowDetails.id,
             from: {
               accountId: escrowDetails.escrowWalletDetails.tigerbeetleAccountId,
@@ -215,7 +215,7 @@ export const releaseFunds = (params: {
               name: "user wallet",
             },
             description: "Release of funds from escrow to user wallet",
-          }),
+          },
         }),
       ]),
     );
@@ -268,7 +268,6 @@ export const withdrawFromWallet = (
 ) => {
   return Effect.gen(function* (_) {
     const withdrawalRepo = yield* _(WithdrawalRepoLayer.tag);
-    const tigerBeetleRepo = yield* TigerBeetleRepoLayer.Tag;
     const userWalletRepo = yield* UserWalletRepoLayer.tag;
     const paystack = yield* PaymentGateway;
     const bankAccountRepo = yield* BankAccountRepoLayer.tag;
@@ -327,13 +326,14 @@ export const withdrawFromWallet = (
           tigerbeetleTransferId,
         }),
 
-        tigerBeetleRepo.createTransfers({
+        createTBTransfer({
           amount,
           credit_account_id: bankAccountDetails.tigerbeetleAccountId,
           debit_account_id: wallet.tigerbeetleAccountId,
           transferId: tigerbeetleTransferId,
           code: TBTransferCode.WALLET_WITHDRAWAL,
           flags: TransferFlags.pending,
+          ledger: "ngnLedger",
         }),
       ]),
     );
@@ -346,7 +346,7 @@ export const withdrawFromWallet = (
       creatorId: params.currentUser.id,
       tigerbeetleTransferId: tigerbeetleTransferId,
       status: "pending",
-      metadata: JSON.stringify({
+      metadata: {
         escrowId: null,
         from: { accountId: wallet.tigerbeetleAccountId, name: "user wallet" },
         to: {
@@ -354,7 +354,7 @@ export const withdrawFromWallet = (
           name: "user bank account",
         },
         description: `withdrawing N${params.amount} from wallet to bank account`,
-      }),
+      },
     });
 
     return dataResponse({ message: "Withdrawal processed successfully" });

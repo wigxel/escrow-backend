@@ -30,7 +30,7 @@ export function createReview(
     );
 
     //check if user already reviewed
-    const r = yield* _(
+    yield* _(
       reviewRepo.firstOrThrow({
         reviewerId: currentUser.id,
         escrowId: escrowDetails.id,

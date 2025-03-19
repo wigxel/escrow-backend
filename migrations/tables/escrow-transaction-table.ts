@@ -7,6 +7,7 @@ import {
   index,
   numeric,
   varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { userTable } from "./user-table";
 
@@ -106,21 +107,36 @@ export const escrowParticipantsTable = pgTable("escrow_participants", {
   status: participantStatus("status").default("active"),
 });
 
-export const escrowRequestTable = pgTable("escrow_request", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  escrowId: uuid("escrow_id").notNull(),
-  senderId: uuid("sender_id"),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  customerRole: roles("customer_role"),
-  customerUsername: varchar("customer_username"),
-  customerPhone: varchar("customer_phone"),
-  customerEmail: varchar("customer_email"),
-  status: invitationStatus("status").default("pending"),
-  accessCode: varchar("access-code"),
-  authorizationUrl: text("authorization_url"),
-  expiresAt: timestamp("expires_at", { withTimezone: true, precision: 6 }),
-  ...timestamps,
-});
+export const escrowRequestTable = pgTable(
+  "escrow_request",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    escrowId: uuid("escrow_id").notNull(),
+    senderId: uuid("sender_id"),
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    customerRole: roles("customer_role"),
+    customerUsername: varchar("customer_username"),
+    customerPhone: varchar("customer_phone"),
+    customerEmail: varchar("customer_email"),
+    status: invitationStatus("status").default("pending"),
+    accessCode: varchar("access-code"),
+    authorizationUrl: text("authorization_url"),
+    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 6 }),
+    processedAt: timestamp("processed_at", {
+      withTimezone: true,
+      precision: 6,
+    }),
+    ...timestamps,
+  },
+  (table) => {
+    return {
+      expiresProcessedAtIdx: index("expires_processed_at_Idx").on(
+        table.expiresAt,
+        table.processedAt,
+      ),
+    };
+  },
+);
 
 export const escrowWalletTable = pgTable("escrow_wallet", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -143,6 +159,6 @@ export const AccountStatementTable = pgTable("account_statement", {
   type: statementType("type"),
   tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
   status: AccountStatementStatus("status").default("completed"),
-  metadata: text("metadata"),
+  metadata: jsonb("metadata").default({}),
   ...timestamps,
 });

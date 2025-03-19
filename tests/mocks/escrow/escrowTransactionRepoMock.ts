@@ -13,6 +13,7 @@ const escrowTransactionMock: EscrowTransactionRepository = {
         id: "test-id",
         status: "created",
         title: "",
+        kind: "escrow_tx",
         description: "",
         createdBy: "",
         createdAt: new Date(2025, 2, 20),

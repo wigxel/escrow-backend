@@ -5,10 +5,11 @@ import {
   getReviews,
 } from "~/services/reviews.service";
 import { runTest } from "~/tests/mocks/app";
-import { extendReviewRepoMock } from "./mocks/review";
+import { extendReviewRepoMock } from "./mocks/review/review";
 import { extendEscrowTransactionRepo } from "./mocks/escrow/escrowTransactionRepoMock";
 import { notNil } from "~/libs/query.helpers";
 import { extendEscrowParticipantRepo } from "./mocks/escrow/escrowParticipantsRepoMock";
+import { extendCommentsRepoMock } from "./mocks/review/commentsRepoMock";
 
 describe("Review service", () => {
   const currentUser = {
@@ -139,19 +140,48 @@ describe("Review service", () => {
 
     test("should create Review", async () => {
       let isReviewCreated = false;
+      let isCommentCreated = false;
+
       const reviewRepo = extendReviewRepoMock({
         firstOrThrow() {
           return Effect.succeed(undefined).pipe(Effect.flatMap(notNil));
         },
         create() {
           isReviewCreated = true;
-          return Effect.succeed([]);
+          return Effect.succeed([
+            {
+              id: "review-id",
+              escrowId: "escrow-id",
+              reviewerId: "reviewer-id",
+              revieweeId: "reviewe-id",
+              rating: 5,
+              createdAt: new Date(2025, 2, 21),
+              updatedAt: new Date(2025, 2, 21),
+            },
+          ]);
+        },
+      });
+
+      const commentRepo = extendCommentsRepoMock({
+        create(payload) {
+          isCommentCreated = true;
+          return Effect.succeed([
+            {
+              id: "comment-id",
+              userId: "user-id",
+              reviewId: "review-id",
+              comment: "sample-comment",
+              createdAt: new Date(2025, 3, 18),
+              updatedAt: new Date(2025, 3, 18),
+            },
+          ]);
         },
       });
 
       const escrowRepo = extendEscrowTransactionRepo({
         firstOrThrow() {
           return Effect.succeed({
+            id: "escrow-id",
             status: "completed",
           });
         },
@@ -162,9 +192,16 @@ describe("Review service", () => {
         id: "buyer-id",
       });
       const result = await runTest(
-        Effect.provide(program, Layer.merge(reviewRepo, escrowRepo)),
+        Effect.provide(
+          program,
+          reviewRepo.pipe(
+            Layer.provideMerge(escrowRepo),
+            Layer.provideMerge(commentRepo),
+          ),
+        ),
       );
       expect(isReviewCreated).toBeTruthy();
+      expect(isCommentCreated).toBeTruthy();
       expect(result).toMatchInlineSnapshot(`
         {
           "data": null,
@@ -191,7 +228,16 @@ describe("Review service", () => {
         {
           "data": [
             {
-              "comment": "nice transaction",
+              "comments": [
+                {
+                  "comment": "sample-comment",
+                  "createdAt": 2025-04-17T23:00:00.000Z,
+                  "id": "comment-id",
+                  "reviewId": "review-id",
+                  "updatedAt": 2025-04-17T23:00:00.000Z,
+                  "userId": "user-id",
+                },
+              ],
               "createdAt": 2025-03-20T23:00:00.000Z,
               "escrowId": "escrow-id",
               "id": "review-id",

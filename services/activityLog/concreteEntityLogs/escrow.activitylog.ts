@@ -94,7 +94,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
-        summary: "Escrow transaction expired",
+        summary: "Transaction timed-out. Customer didn't pay in time",
         params,
       },
     };

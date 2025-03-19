@@ -3,7 +3,7 @@ import {
   ReviewRepo,
   type ReviewRepository,
 } from "~/repositories/review.repository";
-import { extendMockImplementation } from "./helpers";
+import { extendMockImplementation } from "../helpers";
 
 export const mock: ReviewRepository = {
   create(data) {
@@ -13,7 +13,6 @@ export const mock: ReviewRepository = {
         escrowId: "escrow-id",
         reviewerId: "reviewer-id",
         revieweeId: "reviewe-id",
-        comment: "nice transaction",
         rating: 5,
         createdAt: new Date(2025, 2, 21),
         updatedAt: new Date(2025, 2, 21),
@@ -28,8 +27,17 @@ export const mock: ReviewRepository = {
         escrowId: "escrow-id",
         reviewerId: "reviewer-id",
         revieweeId: "reviewe-id",
-        comment: "nice transaction",
         rating: 5,
+        comments: [
+          {
+            id: "comment-id",
+            userId: "user-id",
+            reviewId: "review-id",
+            comment: "sample-comment",
+            createdAt: new Date(2025, 3, 18),
+            updatedAt: new Date(2025, 3, 18),
+          },
+        ],
         createdAt: new Date(2025, 2, 21),
         updatedAt: new Date(2025, 2, 21),
       },
@@ -42,7 +50,16 @@ export const mock: ReviewRepository = {
       escrowId: "escrow-id",
       reviewerId: "reviewer-id",
       revieweeId: "reviewe-id",
-      comment: "nice transaction",
+      comments: [
+        {
+          id: "comment-id",
+          userId: "user-id",
+          reviewId: "review-id",
+          comment: "sample-comment",
+          createdAt: new Date(2025, 3, 18),
+          updatedAt: new Date(2025, 3, 18),
+        },
+      ],
       rating: 5,
       createdAt: new Date(2025, 2, 21),
       updatedAt: new Date(2025, 2, 21),
