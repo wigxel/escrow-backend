@@ -4,19 +4,19 @@ SOURCE_DIR=${SOURCE_DIR:-"src"}
 
 # Run npm install
 echo "Installing..."
-pnpm install
+npm install
 
 echo "Manipulating node memory...."
 export NODE_OPTIONS=--max-old-space-size=4096
 
 # Build the application
 echo "Building the application..."
-pnpm build
+npm build
 
 # Database migration and seeding
 echo "Migrating and seeding database..."
-pnpm run db:migrate --env=production
-pnpm run db:seed --env=production
+npm run db:migrate --env=production
+npm run db:seed --env=production
 
 # PM2 process management
 echo "Managing PM2 process..."
