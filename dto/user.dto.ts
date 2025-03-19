@@ -108,7 +108,7 @@ export const verifyEmailDto = z.object({
 });
 
 export const sendEmailDto = z.object({
-  email: z.string().email(),
+  identifier: z.union([z.string().email(), phoneValidator]),
 });
 
 export const passwordResetDto = z.object({

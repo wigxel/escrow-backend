@@ -33,6 +33,7 @@ import { dataResponse } from "~/libs/response";
 import cuid2 from "@paralleldrive/cuid2";
 import { searchRepo } from "./search";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
+import { NoSuchElementException } from "effect/Cause";
 
 const getSuffix = cuid2.init({
   length: 4,
@@ -128,7 +129,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
 
     return dataResponse({
@@ -161,7 +162,7 @@ export function resendEmailVerificationOtp(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
 
     return dataResponse({ message: "Email resend successful" });
@@ -203,7 +204,9 @@ export function forgotPassword(email: string) {
 
     const user = yield* _(
       userRepo.firstOrThrow({ email }),
-      Effect.mapError(() => new ExpectedError("Request is being processed")),
+      Effect.catchTag("NoSuchElementException", () => {
+        return new NoSuchElementException(`No user found with ${email}`);
+      }),
     );
 
     yield* _(
@@ -224,10 +227,8 @@ export function forgotPassword(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
-
-    return dataResponse({ message: "Forget password successful" });
   });
 }
 
