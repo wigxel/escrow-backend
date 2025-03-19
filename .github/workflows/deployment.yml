@@ -49,4 +49,4 @@ jobs:
           script: |
             export PM2_APP="escrow-backend-alt"
             cd ~/app/backend
-            sh ./script/start.sh
+            sh ./scripts/start.sh
