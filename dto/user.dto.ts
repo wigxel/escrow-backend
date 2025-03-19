@@ -71,8 +71,8 @@ export const createUserDto = z
     hasBusiness: z.boolean(),
     businessName: z
       .string({ required_error: "Business name required" })
-      .min(3)
-      .optional(),
+      .min(3, { message: "Business must be a minimum of 3 characters" })
+      .nullish(),
     referralSourceId: z.number({
       coerce: true,
       required_error: "Referral required",
