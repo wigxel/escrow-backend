@@ -1,11 +1,11 @@
 import { Effect } from "effect";
 import { sendEmailDto } from "~/dto/user.dto";
 import { validateBody } from "~/libs/request.helpers";
-import { resendEmailVerificationOtp } from "~/services/user.service";
+import { resendOtp } from "~/services/user.service";
 
 export default eventHandler(async (event) => {
   const program = validateBody(event, sendEmailDto).pipe(
-    Effect.flatMap((body) => resendEmailVerificationOtp(body.email)),
+    Effect.flatMap((body) => resendOtp(body.identifier, body.type)),
   );
   return runLive(event, program);
 });

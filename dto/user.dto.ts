@@ -20,7 +20,9 @@ export const emailValidator = z
   .string({
     required_error: "Email address required",
   })
-  .email();
+  .email()
+  .min(1, "Email is required")
+  .refine(e => e.toLowerCase())
 
 export const amountValidator = z
   .number({
@@ -103,17 +105,19 @@ export const updateUserDto = z.object({
 });
 
 export const verifyEmailDto = z.object({
-  email: z.string().email(),
+  email: emailValidator,
   otp: z.string().length(6),
 });
 
 export const sendEmailDto = z.object({
+  // don't export the values
+  type: z.enum(['password-reset', 'verification']),
   identifier: z.union([z.string().email(), phoneValidator]),
 });
 
 export const passwordResetDto = z.object({
   password: passwordValidator,
-  email: z.string().email(),
+  email: emailValidator,
   otp: z.string().length(6),
 });
 
@@ -124,7 +128,7 @@ export const passwordChangeDto = z.object({
 
 export const loginDto = z.object({
   phone: z.string().min(1, "Phone is required").optional(),
-  email: z.string().email().min(1, "Email is required").optional(),
+  email: emailValidator.optional(),
   password: passwordValidator,
 });
 

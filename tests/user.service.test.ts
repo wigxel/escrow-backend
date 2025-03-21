@@ -7,7 +7,7 @@ import {
   getUserPushTokens,
   handleUserCreationFromEscrow,
   passwordReset,
-  resendEmailVerificationOtp,
+  resendOtp,
   UserBalance,
   verifyUserEmail,
 } from "~/services/user.service";
@@ -209,7 +209,7 @@ describe("User services", () => {
         },
       });
 
-      const program = resendEmailVerificationOtp(email);
+      const program = resendOtp(email, "verification");
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
         `[ExpectedError: User with email doesn't exist]`,
@@ -217,7 +217,7 @@ describe("User services", () => {
     });
 
     test("should fail if email is already verified", async () => {
-      const program = resendEmailVerificationOtp(email);
+      const program = resendOtp(email, "verification");
       const result = runTest(program);
       expect(result).resolves.toMatchInlineSnapshot(
         "[ExpectedError: Email already verified]",
@@ -263,7 +263,7 @@ describe("User services", () => {
         },
       });
 
-      const program = resendEmailVerificationOtp(email);
+      const program = resendOtp(email, "verification");
       const result = await runTest(
         Effect.provide(
           program,

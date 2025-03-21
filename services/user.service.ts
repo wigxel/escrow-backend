@@ -139,7 +139,8 @@ export function createUser(data: z.infer<typeof createUserDto>) {
   });
 }
 
-export function resendEmailVerificationOtp(email: string) {
+
+export function resendOtp(email: string, type: "verification" | "password-reset") {
   return Effect.gen(function* (_) {
     const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
@@ -153,7 +154,9 @@ export function resendEmailVerificationOtp(email: string) {
       ),
     );
 
-    if (user.emailVerified) yield* new ExpectedError("Email already verified");
+    if (type === 'verification') {
+      if (user.emailVerified) yield* new ExpectedError("Email already verified");
+    }
 
     const otp = yield* generateOTP();
     yield* otpRepo.update({ email: user.email }, { value: otp });
@@ -161,6 +164,7 @@ export function resendEmailVerificationOtp(email: string) {
     yield* _(
       notify
         .route("mail", { address: user.email })
+        // @todo: Add Password Reset Mail
         .notify(new EmailVerificationMail(user, otp)),
       Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
     );
