@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Effect } from "effect";
-import { UserFactory, generatePassword } from "../../migrations/factories";
+import { UserFactory, generatePassword } from "../factories/user.factory";
 import { createSeed } from "../../migrations/seeds/setup";
 
 export const runSeed = createSeed(

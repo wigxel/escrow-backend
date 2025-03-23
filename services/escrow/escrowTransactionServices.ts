@@ -201,8 +201,27 @@ export const getEscrowRequestDetails = (data: {
         escrowId: data.escrowId,
         status: "pending",
       }),
+      Effect.mapError(
+        () =>
+          new NoSuchElementException("Invalid escrow id: No request details"),
+      ),
+    );
+
+    const escrowDetails = yield* _(
+      escrowTransactionRepo.firstOrThrow({ id: data.escrowId }),
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
     );
+
+    console.log(escrowDetails);
+
+    if (!canTransitionEscrowStatus(escrowDetails.status, "deposit.pending")) {
+      return dataResponse({
+        data: {
+          requestDetails: escrowRequestDetails,
+          isAuthenticated: !!data.currentUser,
+        },
+      });
+    }
 
     // update the escrow transaction status to "deposit.pending"
     // TODO: Move this logic out of this function
@@ -216,12 +235,12 @@ export const getEscrowRequestDetails = (data: {
       escrowActivityLog.depositPending({ id: escrowRequestDetails.escrowId }),
     );
 
-    return {
+    return dataResponse({
       data: {
         requestDetails: escrowRequestDetails,
         isAuthenticated: !!data.currentUser,
       },
-    };
+    });
   });
 };
 

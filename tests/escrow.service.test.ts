@@ -204,7 +204,7 @@ describe("Escrow transaction service", () => {
   });
 
   describe("Get escrow request details", () => {
-    test("should fail if invalid escrow id", () => {
+    test("should fail if invalid escrow request id", () => {
       const escrowRequestRepo = extendEscrowRequestRepo({
         firstOrThrow() {
           return Effect.fail(new Error(""));
@@ -218,7 +218,25 @@ describe("Escrow transaction service", () => {
 
       const result = runTest(Effect.provide(program, escrowRequestRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        "[NoSuchElementException: Invalid escrow id]",
+        `[NoSuchElementException: Invalid escrow id: No request details]`,
+      );
+    });
+
+    test("should fail if invalid escrow id", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow() {
+          return Effect.fail(new Error(""));
+        },
+      });
+
+      const program = getEscrowRequestDetails({
+        currentUser,
+        escrowId: "MOCK_ESCROW_ID",
+      });
+
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[NoSuchElementException: Invalid escrow id]`,
       );
     });
 
@@ -227,6 +245,17 @@ describe("Escrow transaction service", () => {
       let activityLogCreated = false;
 
       const escrowRepo = extendEscrowTransactionRepo({
+        firstOrThrow: (arg) => {
+          return Effect.succeed({
+            id: "test-id",
+            status: "created",
+            title: "",
+            description: "",
+            createdBy: "",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+          });
+        },
         update() {
           isUpdated = true;
           return Effect.succeed([]);
@@ -274,6 +303,7 @@ describe("Escrow transaction service", () => {
               "updatedAt": 2025-03-22T23:00:00.000Z,
             },
           },
+          "status": "success",
         }
       `);
     });
@@ -422,7 +452,7 @@ describe("Escrow transaction service", () => {
             authorizationUrl: null,
             createdAt: new Date(2025, 2, 23),
             updatedAt: new Date(2025, 2, 23),
-            expiresAt: new Date(2025, 2, 22),
+            expiresAt: new Date(2026, 2, 22),
           });
         },
       });
@@ -472,7 +502,7 @@ describe("Escrow transaction service", () => {
             authorizationUrl: null,
             createdAt: new Date(2025, 2, 23),
             updatedAt: new Date(2025, 2, 23),
-            expiresAt: new Date(2025, 2, 22),
+            expiresAt: new Date(2026, 2, 22),
           });
         },
 
