@@ -9,7 +9,10 @@ const success_payload = {
 };
 
 export default eventHandler(async (event) => {
-  const program = validateBody(event, sendEmailDto.pick({ identifier: true })).pipe(
+  const program = validateBody(
+    event,
+    sendEmailDto.pick({ identifier: true }),
+  ).pipe(
     Effect.flatMap((body) => forgotPassword(body.identifier)),
     Effect.map(() => success_payload),
     Effect.catchTag("NoSuchElementException", () => {

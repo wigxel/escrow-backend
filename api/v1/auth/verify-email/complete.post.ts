@@ -10,7 +10,7 @@ import { runLive } from "~/utils/effect";
 export default eventHandler(async (event) => {
   const program = Effect.gen(function* () {
     const session = yield* Session;
-    const userRepo = yield* UserRepoLayer.Tag
+    const userRepo = yield* UserRepoLayer.Tag;
 
     const body = yield* validateBody(event, verifyEmailDto);
     yield* verifyUserEmail(body);
@@ -19,8 +19,8 @@ export default eventHandler(async (event) => {
     return dataResponse({
       message: "Account verified",
       data: yield* session.create(user.id),
-    })
-  })
+    });
+  });
 
   return runLive(event, program);
 });

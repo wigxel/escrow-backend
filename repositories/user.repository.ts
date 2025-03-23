@@ -9,7 +9,9 @@ import type {
   PaginationQuery,
 } from "~/services/search/primitives";
 
-export class UserRepository extends DrizzleRepo(userTable, "id") {
+export class UserRepository extends DrizzleRepo(userTable, "id", {
+  queryReferenceKey: "userTable"
+}) {
   getUserById(id: string) {
     return runDrizzleQuery((db) => {
       return db.query.userTable.findFirst({
@@ -45,7 +47,7 @@ export class UserRepository extends DrizzleRepo(userTable, "id") {
 export class UserRepo extends Context.Tag("UserRepo")<
   UserRepo,
   UserRepository
->() {}
+>() { }
 
 export const UserRepoLayer = {
   Tag: UserRepo,

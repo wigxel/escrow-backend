@@ -68,6 +68,15 @@ const DrizzleRepoProto = ({
     return this.$helper.delete(params);
   },
 
+  first(where: SearchableParams['where']) {
+    return runDrizzleQuery((db) => {
+      return db.query[queryReferenceKey].findFirst({
+        where: queryFiltersToWhere(table, SearchOps.reduce(where)),
+        with: Object.fromEntries(this.__relations.map((e) => [e, true])),
+      });
+    });
+  },
+
   paginate(filters: SearchableParams) {
     return runDrizzleQuery((db) => {
       return db.query[queryReferenceKey].findMany({
@@ -97,7 +106,7 @@ export const DrizzleRepo = <
     queryReferenceKey: string;
   }> = {},
 ) => {
-  function DrizzleRepoClass() {}
+  function DrizzleRepoClass() { }
 
   DrizzleRepoClass.prototype = {
     primaryColumn,

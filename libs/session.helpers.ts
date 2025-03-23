@@ -29,6 +29,7 @@ export function validateSession(token: string) {
 
     return yield* _(
       session.validate(token), // Query -> 50ms
+      Effect.tapError(() => Effect.logDebug("Validating: Token failed")),
       Effect.mapError(() => new PermissionError("Access denied")),
     );
   });

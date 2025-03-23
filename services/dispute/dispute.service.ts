@@ -228,7 +228,7 @@ export function createMessagingChannel({
       participants.map((user) => {
         const randomNumber = Math.random() * 100;
         const username = toLower(
-          `${user.firstName}.${user.lastName}${randomNumber}`,
+          `${user.firstName}${user.lastName}${randomNumber}`,
         );
 
         return {

@@ -4,6 +4,7 @@ import {
   emailValidator,
   phoneValidator,
   usernameValidator,
+  uuidValidator,
 } from "./user.dto";
 
 export const USER_ROLE = ["seller"] as const;
@@ -58,3 +59,18 @@ export const escrowTransactionFilterDto = z.object({
 export type TEscrowTransactionFilter = z.infer<
   typeof escrowTransactionFilterDto
 >;
+
+export const paymentMetaSchema = z.object({
+  amount: z.string({ required_error: "amount is missing" }),
+  metadata: z.object({
+    customerDetails: z.object({
+      userId: uuidValidator('User ID'),
+      email: emailValidator,
+      username: usernameValidator,
+      phone: phoneValidator,
+      role: z.any()
+    }),
+    escrowId: uuidValidator('Escrow ID'),
+    relatedUserId: z.any(),
+  })
+});

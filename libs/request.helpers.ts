@@ -1,6 +1,5 @@
 import { safeObj } from "~/libs/data.helpers";
 import { type Cause, Effect, pipe } from "effect";
-// @ts-expect-error
 import type { H3Event } from "h3";
 import type { SafeParseReturnType, z } from "zod";
 import { ValidationError } from "~/config/exceptions";
@@ -29,7 +28,7 @@ export const validateBody = <T>(event: H3Event, schema: z.Schema<T>) =>
       catch: () => new Error("Error reading Request Body"),
     }),
     Effect.flatMap((body) =>
-      validateZod(async () => schema.safeParseAsync(body)),
+      validateZod(async () => schema.safeParseAsync(safeObj(body))),
     ),
   );
 
@@ -40,5 +39,5 @@ export const validateQuery = <T>(event: H3Event, schema: z.Schema<T>) =>
 
 export const validateParams = <T>(schema: z.Schema<T>, data: unknown) =>
   Effect.suspend(() =>
-    validateZod<z.infer<typeof schema>>(async () => schema.safeParse(data)),
+    validateZod<z.infer<typeof schema>>(async () => schema.safeParse(safeObj(data))),
   );

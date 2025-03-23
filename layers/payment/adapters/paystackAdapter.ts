@@ -12,7 +12,7 @@ import type { UnknownException } from "effect/Cause";
 class PaystackGateway implements TPaymentGateway {
   provider = "Paystack";
 
-  constructor(private paystack: Paystack) {}
+  constructor(private paystack: Paystack) { }
 
   run<T>(
     fn: (gateway: Paystack) => Promise<T>,
@@ -59,7 +59,7 @@ class PaystackGateway implements TPaymentGateway {
 }
 
 export const PaystackGatewayLive = pipe(
-  Config.redacted("PSK_PUBLIC_KEY"),
+  Config.redacted("PSK_SECRET_KEY"),
   Effect.map((redacted_secret) => {
     const paystack = new Paystack(Redacted.value(redacted_secret));
 

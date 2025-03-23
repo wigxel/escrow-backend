@@ -49,7 +49,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
     const referralSourceRepo = yield* ReferralSourcesRepoLayer.Tag;
 
     const username =
-      `${data.firstName}.${data.lastName}.${getSuffix()}`.toLowerCase();
+      `${data.firstName}_${data.lastName}_${getSuffix()}`.toLowerCase();
     yield* checkUsername(username);
 
     yield* _(
@@ -139,8 +139,10 @@ export function createUser(data: z.infer<typeof createUserDto>) {
   });
 }
 
-
-export function resendOtp(email: string, type: "verification" | "password-reset") {
+export function resendOtp(
+  email: string,
+  type: "verification" | "password-reset",
+) {
   return Effect.gen(function* (_) {
     const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
@@ -154,8 +156,9 @@ export function resendOtp(email: string, type: "verification" | "password-reset"
       ),
     );
 
-    if (type === 'verification') {
-      if (user.emailVerified) yield* new ExpectedError("Email already verified");
+    if (type === "verification") {
+      if (user.emailVerified)
+        yield* new ExpectedError("Email already verified");
     }
 
     const otp = yield* generateOTP();

@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { validateBody, validateParams } from "~/libs/request.helpers";
+import { validateBody } from "~/libs/request.helpers";
 import { getSessionInfo } from "~/libs/session.helpers";
 import { updateEscrowTransactionStatus } from "~/services/escrow/escrowTransactionServices";
 import { escrowStatusRules } from "~/dto/escrowTransactions.dto";
@@ -16,5 +16,6 @@ export default eventHandler(async (event) => {
       status: data.status,
     });
   });
+
   return runLive(event, program);
 });

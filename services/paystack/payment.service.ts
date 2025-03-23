@@ -1,4 +1,4 @@
-import { Config, Effect } from "effect";
+import { Effect } from "effect";
 import {
   finalizeEscrowTransaction,
   validateUserStatusUpdate,
@@ -10,7 +10,7 @@ import {
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
 import {
   createTransfer as createTBTransfer,
-  getAccountBalance,
+  getAccountBalance
 } from "../tigerbeetle.service";
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
@@ -27,10 +27,9 @@ import type { TSuccessPaymentMetaData } from "~/types/types";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { PaymentGateway } from "~/layers/payment/payment-gateway";
 import { BankAccountRepoLayer } from "~/repositories/accountNumber.repo";
-import type { z } from "zod";
+import { z } from "zod";
 import type { withdrawalRules } from "~/dto/withdrawal.dto";
 import { randomUUID } from "uncrypto";
-import type { TPaystackPaymentWebhookEvent } from "~/utils/paystack/type/types";
 import { createActivityLog } from "../activityLog/activityLog.service";
 import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.activitylog";
 import { NotificationFacade } from "~/layers/notification/layer";
@@ -38,15 +37,24 @@ import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowPaymentNotification } from "~/app/notifications/escrow/escrow-payment.notify";
 import { UserWalletPaymentNotification } from "~/app/notifications/escrow/userWallet-payment.notify";
 import { dataResponse } from "~/libs/response";
+import { paymentMetaSchema } from "~/dto/escrowTransactions.dto";
+import { organizationAccountId } from "~/config/environment";
+
+const schema = paymentMetaSchema.merge(
+  z.object({
+    status: z.any(),
+    channel: z.any()
+  })
+)
 
 export const handleSuccessPaymentEvents = (
-  res: TPaystackPaymentWebhookEvent,
+  data: z.infer<typeof schema>,
 ) => {
   return Effect.gen(function* (_) {
     const escrowWalletRepo = yield* EscrowWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;
     const notify = yield* NotificationFacade;
-    const metadata = res.data.metadata as TSuccessPaymentMetaData;
+    const metadata = data.metadata as TSuccessPaymentMetaData;
     const userRepo = yield* UserRepoLayer.Tag;
 
     const escrowWallet = yield* _(
@@ -56,25 +64,28 @@ export const handleSuccessPaymentEvents = (
       ),
     );
 
-    //credit the escrow wallet in tigerbeetle database
+    // credit the escrow wallet in tigerbeetle database
     const transactionId = String(id());
-    const orgAccountId = yield* Config.string("ORG_ACCOUNT_ID");
+
+    const orgAccountId = yield* organizationAccountId;
+
+    // TODO: ADD A MIGRATION SCRIPT THAT CREATES A TIGERBEETLE ACCOUNT FOR THE ORGANIZATION
     yield* _(
       createTBTransfer({
         transferId: transactionId,
         credit_account_id: escrowWallet.tigerbeetleAccountId,
         debit_account_id: orgAccountId,
-        //note amount is in smallet currency unit eg Kobo set by paystack data
-        amount: Number(res.data.amount),
+        // note amount is in smallet currency unit eg Kobo set by paystack data
+        amount: Number(data.amount),
         code: TBTransferCode.ESCROW_PAYMENT,
         ledger: "ngnLedger",
       }),
     );
 
-    //add transaction statement entry;
+    // add transaction statement entry;
     yield* accountStatementRepo.create({
-      //convert from kobo to naira
-      amount: String(convertCurrencyUnit(res.data.amount, "kobo-naira")),
+      // convert from kobo to naira
+      amount: String(convertCurrencyUnit(data.amount, "kobo-naira")),
       type: "escrow.deposit",
       creatorId: metadata.customerDetails.userId,
       tigerbeetleTransferId: transactionId,
@@ -94,9 +105,9 @@ export const handleSuccessPaymentEvents = (
       escrowId: metadata.escrowId,
       customerDetails: metadata.customerDetails,
       paymentDetails: {
-        amount: Number(res.data.amount),
-        status: res.data.status,
-        paymentMethod: res.data.channel,
+        amount: Number(data.amount),
+        status: data.status,
+        paymentMethod: data.channel,
       },
       relatedUserId: metadata.relatedUserId,
     });
@@ -118,7 +129,7 @@ export const handleSuccessPaymentEvents = (
         ),
       );
 
-    //notify customer
+    // notify customer
     yield* notify
       .route("in-app", { userId: metadata.customerDetails.userId })
       .route("mail", { address: metadata.customerDetails.email })

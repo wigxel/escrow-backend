@@ -22,7 +22,7 @@ export const emailValidator = z
   })
   .email()
   .min(1, "Email is required")
-  .refine(e => e.toLowerCase())
+  .refine((e) => e.toLowerCase());
 
 export const amountValidator = z
   .number({
@@ -50,6 +50,10 @@ export const addressSchema = z.object({
     })
     .min(3),
 });
+
+export const uuidValidator = (field_name: string) => z.string({
+  required_error: `${field_name}`
+}).uuid({ message: "Invalid UUID provided" });
 
 export const createUserDto = z
   .object({
@@ -111,7 +115,7 @@ export const verifyEmailDto = z.object({
 
 export const sendEmailDto = z.object({
   // don't export the values
-  type: z.enum(['password-reset', 'verification']),
+  type: z.enum(["password-reset", "verification"]),
   identifier: z.union([z.string().email(), phoneValidator]),
 });
 
