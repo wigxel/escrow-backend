@@ -13,13 +13,14 @@ export const UserFactory = createFactory(UserRepo, ($faker) => {
 
     return {
       firstName: $faker.person.firstName(),
+      username: $faker.internet.userName(),
       lastName: $faker.person.lastName(),
       email: toLower($faker.internet.email()),
       emailVerified: $faker.helpers.arrayElement([true, false]),
       password: password,
       phone: $faker.phone.number(),
       createdAt: $faker.date.past(),
-      role: $faker.helpers.arrayElement(["user", "admin"]),
+      role: $faker.helpers.arrayElement(["user"]),
     } satisfies typeof userTable.$inferInsert;
   });
 });

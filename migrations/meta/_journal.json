@@ -211,6 +211,13 @@
       "when": 1742154751277,
       "tag": "0029_soft_rocket_raccoon",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1742766627384,
+      "tag": "0030_bright_forge",
+      "breakpoints": true
     }
   ]
 }

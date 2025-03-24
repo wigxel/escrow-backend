@@ -1,27 +1,37 @@
-import { faker } from "@faker-js/faker";
 import { Effect } from "effect";
-import { UserFactory, generatePassword } from "../factories/user.factory";
 import { createSeed } from "../../migrations/seeds/setup";
+import { CommentFactory, ReviewFactory } from "../factories/review.factory";
+import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
+import { UserRepoLayer } from "~/repositories/user.repository";
 
-export const runSeed = createSeed(
+export const seedReview = createSeed(
   "ReviewSeed",
   Effect.gen(function* () {
-    // Create user to make actions with
-    const password = yield* generatePassword;
-    const user = yield* UserFactory.create({
-      emailVerified: true,
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      email: faker.internet.email(),
-      password: password,
-      phone: faker.phone.number(),
-      createdAt: faker.date.past(),
-      role: "user", // Changed from "BUYER"/"SELLER" to "user"/"admin" to match the factory type
+    const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
+    const userRepo = yield* UserRepoLayer.Tag;
+
+    const users = yield* userRepo.all();
+    const escrows = yield* escrowRepo.all();
+
+    const writes = escrows.map((escrow) => {
+      const reviewer = users.filter((v) => v.id !== escrow.createdBy)[0];
+
+      return Effect.gen(function* (_) {
+        // Create reviews
+        const review = yield* ReviewFactory.create({
+          escrowId: escrow.id,
+          reviewerId: reviewer.id,
+          revieweeId: escrow.createdBy,
+        });
+
+        // Create comments on reviews
+        yield* CommentFactory.create({
+          reviewId: review.id,
+          userId: reviewer.id,
+        });
+      });
     });
 
-    // This seed function now just creates a user
-    // The product, review, and comment creation has been removed
-    // as the factories for these are missing
-    console.log("Created user:", user.email);
+    yield* Effect.all(writes, { concurrency: "unbounded" });
   }),
 );

@@ -212,8 +212,6 @@ export const getEscrowRequestDetails = (data: {
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
     );
 
-    console.log(escrowDetails);
-
     if (!canTransitionEscrowStatus(escrowDetails.status, "deposit.pending")) {
       return dataResponse({
         data: {
