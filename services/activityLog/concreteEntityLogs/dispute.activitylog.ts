@@ -6,6 +6,7 @@ export const disputeActivityLog = {
       kind: "Dispute",
       entityId: params?.id,
       data: {
+        status: "created",
         summary: "Dispute created",
         params,
       },
@@ -16,6 +17,7 @@ export const disputeActivityLog = {
       kind: "Dispute",
       entityId: params?.id,
       data: {
+        status: "opened",
         summary: "Dispute opened",
         params,
       },
@@ -27,6 +29,7 @@ export const disputeActivityLog = {
       kind: "Dispute",
       entityId: params?.id,
       data: {
+        status: "resolved",
         summary: "Dispute has been resolved",
         params,
       },
