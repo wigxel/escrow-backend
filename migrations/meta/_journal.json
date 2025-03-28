@@ -218,6 +218,13 @@
       "when": 1742766627384,
       "tag": "0030_bright_forge",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1743161073908,
+      "tag": "0031_useful_captain_cross",
+      "breakpoints": true
     }
   ]
 }

@@ -1,17 +1,21 @@
-import { Console, Effect } from "effect";
+import { Effect } from "effect";
+import { id } from "tigerbeetle-node";
 import {
   UserFactory,
   generatePassword,
 } from "~/migrations/factories/user.factory";
 import { createSeed } from "~/migrations/seeds/setup";
 import { UserRepo } from "~/repositories/user.repository";
+import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { createAccount } from "~/services/tigerbeetle.service";
+import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
 
 export const runSeed = createSeed(
   "UserSeed",
   Effect.gen(function* (_) {
     const repo = yield* UserRepo;
     const password = yield* generatePassword;
+    const userWalletRepo = yield* UserWalletRepoLayer.tag;
 
     yield* repo.find("email", "user@gmail.com").pipe(
       Effect.catchTag("NoSuchElementException", () => {
@@ -34,6 +38,17 @@ export const runSeed = createSeed(
       yield* UserFactory.count(5).create({
         emailVerified: false,
       });
+    }
+
+    const users = yield* repo.all();
+
+    for (const user of users) {
+      const accountId = String(id());
+      yield* userWalletRepo.create({
+        userId: user.id,
+        tigerbeetleAccountId: accountId,
+      });
+      yield* createAccount({ accountId, code: TBAccountCode.USER_WALLET });
     }
   }),
 );

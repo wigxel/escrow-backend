@@ -8,7 +8,11 @@ import type {
   escrowStatusRules,
   TEscrowTransactionFilter,
 } from "~/dto/escrowTransactions.dto";
-import type { TEscrowRequest, TUser } from "~/migrations/schema";
+import type {
+  TEscrowRequest,
+  TEscrowTransaction,
+  TUser,
+} from "~/migrations/schema";
 import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
@@ -22,6 +26,7 @@ import { handleUserCreationFromEscrow } from "../user.service";
 import {
   canTransitionEscrowStatus,
   convertCurrencyUnit,
+  generateCustomReleaseCode,
   getBuyerAndSellerFromParticipants,
 } from "~/services/escrow/escrow.utils";
 import { id } from "tigerbeetle-node";
@@ -41,6 +46,9 @@ import { dataResponse } from "~/libs/response";
 import { searchRepo } from "../search";
 import { SearchOps } from "../search/sql-search-resolver";
 import { ReviewRepo, ReviewRepoLive } from "~/repositories/review.repository";
+import { NotificationFacade } from "~/layers/notification/layer";
+import { hashPassword } from "~/layers/encryption/helpers";
+import { ReleaseCodeNotification } from "~/app/notifications/releaseCode.notify";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -420,6 +428,8 @@ export const updateEscrowTransactionStatus = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
+    const userRepo = yield* UserRepoLayer.Tag;
+    const notifier = yield* NotificationFacade;
 
     const escrowDetails = yield* _(
       escrowRepo.firstOrThrow({ id: params.escrowId }),
@@ -438,16 +448,37 @@ export const updateEscrowTransactionStatus = (params: {
     }
 
     // makes certain the expected user is making the update
-    yield* validateUserStatusUpdate({
+    const { buyer } = yield* validateUserStatusUpdate({
       escrowId: escrowDetails.id,
       status: params.status,
       currentUser: params.currentUser,
     });
 
-    yield* escrowRepo.update(
-      { id: params.escrowId },
-      { status: params.status },
-    );
+    let updateData: TEscrowTransaction = { status: params.status };
+
+    if (params.status === "service.pending") {
+      const releaseCode = generateCustomReleaseCode();
+      const buyerDetails = yield* userRepo.firstOrThrow({ id: buyer.userId });
+      updateData = {
+        ...updateData,
+        releaseCode: yield* hashPassword(releaseCode),
+      };
+
+      //notify the user
+      yield* _(
+        notifier
+          .route("mail", { address: buyerDetails.email })
+          .notify(
+            new ReleaseCodeNotification(
+              { firstName: buyerDetails.firstName },
+              releaseCode,
+            ),
+          ),
+        Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      );
+    }
+
+    yield* escrowRepo.update({ id: params.escrowId }, updateData);
 
     yield* createActivityLog(
       escrowActivityLog.statusFactory(params.status)({ id: params.escrowId }),

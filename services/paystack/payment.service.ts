@@ -6,6 +6,7 @@ import {
 import {
   ExpectedError,
   InsufficientBalanceException,
+  PermissionError,
 } from "~/config/exceptions";
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
 import {
@@ -38,6 +39,7 @@ import { UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowPaymentNotification } from "~/app/notifications/escrow/escrow-payment.notify";
 import { UserWalletPaymentNotification } from "~/app/notifications/escrow/userWallet-payment.notify";
 import { dataResponse } from "~/libs/response";
+import { verifyPassword } from "~/layers/encryption/helpers";
 
 export const handleSuccessPaymentEvents = (
   res: TPaystackPaymentWebhookEvent,
@@ -136,6 +138,7 @@ export const handleSuccessPaymentEvents = (
 
 export const releaseFunds = (params: {
   escrowId: string;
+  releaseCode: string;
   currentUser: SessionUser;
 }) => {
   return Effect.gen(function* (_) {
@@ -149,6 +152,13 @@ export const releaseFunds = (params: {
       escrowRepo.getEscrowDetails(params.escrowId),
       Effect.mapError(
         () => new NoSuchElementException("Invalid escrow transaction id"),
+      ),
+    );
+
+    yield* _(
+      verifyPassword(params.releaseCode, escrowDetails.releaseCode),
+      Effect.mapError(
+        () => new PermissionError("Invalid release code provided"),
       ),
     );
 
