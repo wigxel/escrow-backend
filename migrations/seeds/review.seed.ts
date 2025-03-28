@@ -14,7 +14,9 @@ export const seedReview = createSeed(
     const escrows = yield* escrowRepo.all();
 
     const writes = escrows.map((escrow) => {
-      const reviewer = users.filter((v) => v.id !== escrow.createdBy)[0];
+      const filteredUsers = users.filter((v) => v.id !== escrow.createdBy);
+      const reviewer =
+        filteredUsers[Math.floor(Math.random() * filteredUsers.length)];
 
       return Effect.gen(function* (_) {
         // Create reviews

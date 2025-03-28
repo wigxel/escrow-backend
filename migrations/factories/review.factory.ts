@@ -8,7 +8,7 @@ export const ReviewFactory = createFactory(ReviewRepo, ($faker) => {
     escrowId: undefined,
     reviewerId: undefined,
     revieweeId: undefined,
-    rating: $faker.number.int({ min: 0, max: 5 }),
+    rating: $faker.number.int({ min: 1, max: 5 }),
   });
 });
 

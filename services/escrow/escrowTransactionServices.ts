@@ -40,6 +40,7 @@ import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.acti
 import { dataResponse } from "~/libs/response";
 import { searchRepo } from "../search";
 import { SearchOps } from "../search/sql-search-resolver";
+import { ReviewRepo, ReviewRepoLive } from "~/repositories/review.repository";
 
 export const createEscrowTransaction = (
   input: z.infer<typeof createEscrowTransactionRules>,
@@ -506,5 +507,52 @@ export const validateUserStatusUpdate = (params: {
     }
 
     return { seller, buyer };
+  });
+};
+
+export const releaseFundsInfo = (escrowId: string) => {
+  return Effect.gen(function* (_) {
+    const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
+    const partcipantsRepo = yield* EscrowParticipantRepoLayer.tag;
+    const reviewRepo = yield* ReviewRepo;
+    const paymentRepo = yield* EscrowPaymentRepoLayer.tag;
+    const userRepo = yield* UserRepoLayer.Tag;
+
+    const escrowDetails = yield* _(
+      escrowRepo.firstOrThrow({ id: escrowId }),
+      Effect.mapError(() => new ExpectedError("Invalid escrow id")),
+    );
+
+    const paymentDetails = yield* paymentRepo.firstOrThrow({ escrowId });
+
+    const participants = yield* partcipantsRepo.all({
+      where: SearchOps.eq("escrowId", escrowDetails.id),
+    });
+
+    const { seller, buyer } =
+      yield* getBuyerAndSellerFromParticipants(participants);
+    const userDetails = yield* userRepo.firstOrThrow({ id: seller.userId });
+
+    //get the sellers rating
+    const reviews = yield* reviewRepo.all({
+      where: SearchOps.eq("revieweeId", seller.userId),
+    });
+
+    const averageRating =
+      reviews.reduce((sum, rating) => sum + rating.rating, 0) / reviews.length;
+
+    return dataResponse({
+      data: {
+        userDetails: {
+          firstName: userDetails.firstName,
+          lastName: userDetails.lastName,
+          email: userDetails.email,
+          phone: userDetails.phone,
+          rating: averageRating,
+        },
+        escrowDetails,
+        paymentDetails,
+      },
+    });
   });
 };

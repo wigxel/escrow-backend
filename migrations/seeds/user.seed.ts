@@ -5,6 +5,7 @@ import {
 } from "~/migrations/factories/user.factory";
 import { createSeed } from "~/migrations/seeds/setup";
 import { UserRepo } from "~/repositories/user.repository";
+import { createAccount } from "~/services/tigerbeetle.service";
 
 export const runSeed = createSeed(
   "UserSeed",
