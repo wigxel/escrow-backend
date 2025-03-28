@@ -70,6 +70,7 @@ export const escrowTransactionTable = pgTable("escrow_transactions", {
   description: text("description"),
   status: escrowStatus("status").default("created"),
   createdBy: uuid("created_by").references(() => userTable.id),
+  releaseCode: varchar("release_code", { length: 255 }),
   ...timestamps,
 });
 
