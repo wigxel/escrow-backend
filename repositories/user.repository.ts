@@ -10,7 +10,7 @@ import type {
 } from "~/services/search/primitives";
 
 export class UserRepository extends DrizzleRepo(userTable, "id", {
-  queryReferenceKey: "userTable"
+  queryReferenceKey: "userTable",
 }) {
   getUserById(id: string) {
     return runDrizzleQuery((db) => {
@@ -47,7 +47,7 @@ export class UserRepository extends DrizzleRepo(userTable, "id", {
 export class UserRepo extends Context.Tag("UserRepo")<
   UserRepo,
   UserRepository
->() { }
+>() {}
 
 export const UserRepoLayer = {
   Tag: UserRepo,

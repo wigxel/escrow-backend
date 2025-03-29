@@ -68,7 +68,7 @@ const DrizzleRepoProto = ({
     return this.$helper.delete(params);
   },
 
-  first(where: SearchableParams['where']) {
+  first(where: SearchableParams["where"]) {
     return runDrizzleQuery((db) => {
       return db.query[queryReferenceKey].findFirst({
         where: queryFiltersToWhere(table, SearchOps.reduce(where)),
@@ -106,7 +106,7 @@ export const DrizzleRepo = <
     queryReferenceKey: string;
   }> = {},
 ) => {
-  function DrizzleRepoClass() { }
+  function DrizzleRepoClass() {}
 
   DrizzleRepoClass.prototype = {
     primaryColumn,

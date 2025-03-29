@@ -129,7 +129,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({
@@ -169,7 +169,7 @@ export function resendOtp(
         .route("mail", { address: user.email })
         // @todo: Add Password Reset Mail
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({ message: "Email resend successful" });
@@ -234,7 +234,7 @@ export function forgotPassword(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
   });
 }

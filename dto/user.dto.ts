@@ -51,9 +51,12 @@ export const addressSchema = z.object({
     .min(3),
 });
 
-export const uuidValidator = (field_name: string) => z.string({
-  required_error: `${field_name}`
-}).uuid({ message: "Invalid UUID provided" });
+export const uuidValidator = (field_name: string) =>
+  z
+    .string({
+      required_error: `${field_name}`,
+    })
+    .uuid({ message: "Invalid UUID provided" });
 
 export const createUserDto = z
   .object({

@@ -10,7 +10,7 @@ import {
 import { EscrowWalletRepoLayer } from "~/repositories/escrow/escrowWallet.repo";
 import {
   createTransfer as createTBTransfer,
-  getAccountBalance
+  getAccountBalance,
 } from "../tigerbeetle.service";
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
@@ -43,13 +43,11 @@ import { organizationAccountId } from "~/config/environment";
 const schema = paymentMetaSchema.merge(
   z.object({
     status: z.any(),
-    channel: z.any()
-  })
-)
+    channel: z.any(),
+  }),
+);
 
-export const handleSuccessPaymentEvents = (
-  data: z.infer<typeof schema>,
-) => {
+export const handleSuccessPaymentEvents = (data: z.infer<typeof schema>) => {
   return Effect.gen(function* (_) {
     const escrowWalletRepo = yield* EscrowWalletRepoLayer.tag;
     const accountStatementRepo = yield* AccountStatementRepoLayer.tag;

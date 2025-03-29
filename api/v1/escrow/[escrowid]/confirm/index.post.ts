@@ -8,7 +8,7 @@ import { confirmEscrowRequestRules } from "~/dto/escrowTransactions.dto";
 import { uuidValidator } from "~/dto/user.dto";
 
 const schema = z.object({
-  escrowId: uuidValidator('Escrow ID')
+  escrowId: uuidValidator("Escrow ID"),
 });
 
 export default eventHandler((event) => {
@@ -21,12 +21,14 @@ export default eventHandler((event) => {
       getSessionInfo(event),
       Effect.match({
         onSuccess: (v) => v.user,
-        onFailure: () => null
+        onFailure: () => null,
       }),
     );
 
     // validate payload if the user isn't authenticated
-    const data = user ? {} : yield* validateBody(event, confirmEscrowRequestRules)
+    const data = user
+      ? {}
+      : yield* validateBody(event, confirmEscrowRequestRules);
 
     return yield* initializeEscrowDeposit({ ...data, escrowId }, user);
   });

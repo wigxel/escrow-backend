@@ -35,8 +35,8 @@ export interface SortOrder {
 
 export interface SearchableParams
   extends PaginationQuery,
-  FilterQuery,
-  SortOrder {
+    FilterQuery,
+    SortOrder {
   where: FilterOrLogicOperator | Array<FilterOrLogicOperator>;
 }
 
@@ -96,16 +96,16 @@ export interface RepoClass<
   Table extends DrizzleTableWithColumns,
   TRelationship extends string,
 > {
-  new(): RepoHelperOuter<Table, TRelationship>;
+  new (): RepoHelperOuter<Table, TRelationship>;
 }
 
 export interface RepoHelperOuter<
   Table extends DrizzleTableWithColumns,
   TRelationship extends string,
 > extends Omit<
-  RepoHelperInner<Table, TRelationship>,
-  "find" | "firstOrThrow" | "update" | "with"
-> {
+    RepoHelperInner<Table, TRelationship>,
+    "find" | "firstOrThrow" | "update" | "with"
+  > {
   /**
    * ```ts
    *  Model.find(1)
@@ -134,16 +134,19 @@ export interface RepoHelperOuter<
   update(
     params: FindArg1,
     data: unknown,
-  ): ReturnType<RepoHelperInner<Table>["update"]>; with: (name: TRelationship) => this /**
+  ): ReturnType<RepoHelperInner<Table>["update"]>;
+  with: (name: TRelationship) => this /**
 
    * ```ts
    *  Model.with(relationship).first(1)
    *  Model.with(relationship).first({ name: "john" })
    *  Model.with(relationship).first(SearchOps.eq('name', 'Johns'))
    * ```
-   */
-  first: (arg1: FindArg1,
-    arg2?: FindArg2,) => ReturnType<RepoHelperInner<Table>["firstOrThrow"]>;
+   */;
+  first: (
+    arg1: FindArg1,
+    arg2?: FindArg2,
+  ) => ReturnType<RepoHelperInner<Table>["firstOrThrow"]>;
 }
 
 export interface RepoHelperInner<

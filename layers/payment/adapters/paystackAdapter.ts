@@ -12,7 +12,7 @@ import type { UnknownException } from "effect/Cause";
 class PaystackGateway implements TPaymentGateway {
   provider = "Paystack";
 
-  constructor(private paystack: Paystack) { }
+  constructor(private paystack: Paystack) {}
 
   run<T>(
     fn: (gateway: Paystack) => Promise<T>,

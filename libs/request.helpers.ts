@@ -39,5 +39,7 @@ export const validateQuery = <T>(event: H3Event, schema: z.Schema<T>) =>
 
 export const validateParams = <T>(schema: z.Schema<T>, data: unknown) =>
   Effect.suspend(() =>
-    validateZod<z.infer<typeof schema>>(async () => schema.safeParse(safeObj(data))),
+    validateZod<z.infer<typeof schema>>(async () =>
+      schema.safeParse(safeObj(data)),
+    ),
   );

@@ -1,4 +1,4 @@
-import { Config, Effect, LogLevel, pipe, Record } from "effect";
+import { Effect, pipe } from "effect";
 import type { z } from "zod";
 import type { SessionUser } from "~/layers/session-provider";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
@@ -83,7 +83,7 @@ export const createEscrowTransaction = (
       Effect.flatMap(head),
     );
 
-    yield* Effect.logDebug(`Escrow created with id — ${escrowTransaction.id}`)
+    yield* Effect.logDebug(`Escrow created with id — ${escrowTransaction.id}`);
     /**
      * create the escrow Wallet for the escrow transaction
      * create an account in tigerbeetle to track the escrow wallet transaction
@@ -181,12 +181,13 @@ export const getEscrowTransactionDetails = (params: {
     );
 
     yield* Effect.logDebug(`Reading account balance: ${params.escrowId}`);
-    const balance = yield* _(getAccountBalance(escrowDetails.escrowWalletDetails.tigerbeetleAccountId),
-      Effect.timeout('1 second'),
+    const balance = yield* _(
+      getAccountBalance(escrowDetails.escrowWalletDetails.tigerbeetleAccountId),
+      Effect.timeout("1 second"),
       Effect.catchTag("TimeoutException", () => {
-        return new TimeoutException("Taking too long to fetch account balance")
-      })
-    )
+        return new TimeoutException("Taking too long to fetch account balance");
+      }),
+    );
 
     return dataResponse({
       data: {
@@ -200,6 +201,11 @@ export const getEscrowTransactionDetails = (params: {
   });
 };
 
+/**
+ * Fetches
+ * @param
+ * @returns
+ */
 export const getEscrowRequestDetails = (data: {
   escrowId: string;
   currentUser: SessionUser | null;
@@ -218,11 +224,11 @@ export const getEscrowRequestDetails = (data: {
     );
 
     const sellerInfo = yield* _(
-      userRepo.with('rating').first("id", escrowRequestDetails.senderId),
+      userRepo.with("rating").first("id", escrowRequestDetails.senderId),
       Effect.catchTag("NoSuchElementException", () => {
-        return new NoSuchElementException("Seller information missing")
-      })
-    )
+        return new NoSuchElementException("Seller information missing");
+      }),
+    );
 
     // update the escrow transaction status to "deposit.pending"
     // TODO: Move this logic out of this function
@@ -240,23 +246,23 @@ export const getEscrowRequestDetails = (data: {
       data: {
         requestDetails: {
           ...escrowRequestDetails,
-          seller: pipe(sellerInfo, pick(
-            "id",
-            "firstName", "lastName", "rating"))
+          seller: pipe(
+            sellerInfo,
+            pick("id", "firstName", "lastName", "rating"),
+          ),
         },
         isAuthenticated: !!data.currentUser,
-      }
-    })
+      },
+    });
   });
 };
 
-
 /**
-* Creates an idempotent payment link.
-* @param input
-* @param currentUser
-* @returns
-*/
+ * Creates an idempotent payment link.
+ * @param input
+ * @param currentUser
+ * @returns
+ */
 export const initializeEscrowDeposit = (
   input: z.infer<typeof confirmEscrowRequestRules> & { escrowId: string },
   currentUser: SessionUser,
@@ -332,8 +338,8 @@ export const initializeEscrowDeposit = (
       yield* new ExpectedError("You can't fulfil a payout you created");
     }
 
-    yield* Effect.logDebug("Generating checkout session from PaymentGateway")
-    yield* Effect.logDebug({ customerDetails })
+    yield* Effect.logDebug("Generating checkout session from PaymentGateway");
+    yield* Effect.logDebug({ customerDetails });
 
     const payment_metadata = {
       customerDetails: {
@@ -345,7 +351,7 @@ export const initializeEscrowDeposit = (
       },
       escrowId: escrowRequestDetails.escrowId,
       relatedUserId: escrowRequestDetails.senderId,
-    }
+    };
 
     //convert to smallest currency unit kobo
     const amount = String(
@@ -359,7 +365,6 @@ export const initializeEscrowDeposit = (
       callback_url: "",
       metadata: payment_metadata,
     });
-
 
     // update the escrow request with the access code so one can resume payment session
     yield* escrowRequestRepo.update(
@@ -377,7 +382,10 @@ export const initializeEscrowDeposit = (
       data: {
         ...checkoutSession.data,
         //  this variable will only best in dev/staging
-        test_metadata: yield* derivePaymentMetadata({ amount, metadata: payment_metadata })
+        test_metadata: yield* derivePaymentMetadata({
+          amount,
+          metadata: payment_metadata,
+        }),
       },
       status: checkoutSession.status,
       message: checkoutSession.message,
@@ -390,20 +398,23 @@ export const initializeEscrowDeposit = (
     return Effect.gen(function* () {
       const app_env = yield* appEnv;
       if (app_env === "local") {
-        yield* Effect.logDebug("Validating Payment Params", JSON.stringify(params))
-        const payload = yield* validateZod(() => paymentMetaSchema.safeParseAsync({
-          amount,
-          metadata
-        }));
+        yield* Effect.logDebug(
+          "Validating Payment Params",
+          JSON.stringify(params),
+        );
+        const payload = yield* validateZod(() =>
+          paymentMetaSchema.safeParseAsync({
+            amount,
+            metadata,
+          }),
+        );
 
-        yield* Effect.logDebug("[!!important!!] Copy to clipboard for Test payment verification endpoint",
-          JSON.stringify(payload)
-        )
         return payload;
       }
 
+      // this function only return undefined if no value is present
       return undefined;
-    })
+    });
   }
 };
 

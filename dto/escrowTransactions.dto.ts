@@ -13,13 +13,11 @@ export const createEscrowTransactionRules = z.object({
   amount: amountValidator,
   title: z
     .string({ required_error: "Title field is required" })
-    .min(3)
-    .optional(),
+    .min(3),
   description: z
     .string({
       required_error: "Description field is required",
-    })
-    .optional(),
+    }),
   creatorRole: z.enum(USER_ROLE, { required_error: "Please provide a role" }),
   customerPhone: phoneValidator,
   customerUsername: usernameValidator.default("NONE"),
@@ -64,13 +62,13 @@ export const paymentMetaSchema = z.object({
   amount: z.string({ required_error: "amount is missing" }),
   metadata: z.object({
     customerDetails: z.object({
-      userId: uuidValidator('User ID'),
+      userId: uuidValidator("User ID"),
       email: emailValidator,
       username: usernameValidator,
       phone: phoneValidator,
-      role: z.any()
+      role: z.any(),
     }),
-    escrowId: uuidValidator('Escrow ID'),
+    escrowId: uuidValidator("Escrow ID"),
     relatedUserId: z.any(),
-  })
+  }),
 });

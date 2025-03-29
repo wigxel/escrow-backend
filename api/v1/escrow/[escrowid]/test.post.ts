@@ -9,16 +9,16 @@ export default defineAppHandler((event) => {
   return Effect.gen(function* () {
     const app_env = yield* appEnv;
 
-    if (app_env !== 'local') {
+    if (app_env !== "local") {
       yield* new UnknownException("Endpoint is for product alone");
     }
 
-    const payload = yield* validateBody(event, paymentMetaSchema)
+    const payload = yield* validateBody(event, paymentMetaSchema);
     yield* handleSuccessPaymentEvents(payload);
 
     return {
       status: "success",
-      message: "Fake transaction completed"
-    }
-  })
-})
+      message: "Fake transaction completed",
+    };
+  });
+});
