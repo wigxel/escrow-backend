@@ -129,7 +129,7 @@ export function createUser(data: z.infer<typeof createUserDto>) {
       notify
         .route("mail", { address: user.email })
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({
@@ -139,8 +139,10 @@ export function createUser(data: z.infer<typeof createUserDto>) {
   });
 }
 
-
-export function resendOtp(email: string, type: "verification" | "password-reset") {
+export function resendOtp(
+  email: string,
+  type: "verification" | "password-reset",
+) {
   return Effect.gen(function* (_) {
     const notify = yield* NotificationFacade;
     const userRepo = yield* UserRepoLayer.Tag;
@@ -154,8 +156,9 @@ export function resendOtp(email: string, type: "verification" | "password-reset"
       ),
     );
 
-    if (type === 'verification') {
-      if (user.emailVerified) yield* new ExpectedError("Email already verified");
+    if (type === "verification") {
+      if (user.emailVerified)
+        yield* new ExpectedError("Email already verified");
     }
 
     const otp = yield* generateOTP();
@@ -166,7 +169,7 @@ export function resendOtp(email: string, type: "verification" | "password-reset"
         .route("mail", { address: user.email })
         // @todo: Add Password Reset Mail
         .notify(new EmailVerificationMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
 
     return dataResponse({ message: "Email resend successful" });
@@ -231,8 +234,10 @@ export function forgotPassword(email: string) {
       notify
         .route("mail", { address: user.email })
         .notify(new PasswordResetMail(user, otp)),
-      Effect.match({ onFailure: () => { }, onSuccess: () => { } }),
+      Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
+
+    return dataResponse({ message: "Forgot password successful" });
   });
 }
 

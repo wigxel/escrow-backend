@@ -15,7 +15,8 @@ const escrowTransactionMock: EscrowTransactionRepository = {
         title: "",
         kind: "escrow_tx",
         description: "",
-        releaseCode:"$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
+        releaseCode:
+          "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
         createdBy: "",
         createdAt: new Date(2025, 2, 20),
         updatedAt: new Date(2025, 2, 20),
@@ -30,7 +31,8 @@ const escrowTransactionMock: EscrowTransactionRepository = {
       title: "",
       description: "",
       createdBy: "",
-      releaseCode:"$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
+      releaseCode:
+        "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
       createdAt: new Date(2025, 2, 20),
       updatedAt: new Date(2025, 2, 20),
       activitylog: [{}],
@@ -69,7 +71,8 @@ const escrowTransactionMock: EscrowTransactionRepository = {
       title: "",
       description: "",
       createdBy: "",
-      releaseCode:"$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
+      releaseCode:
+        "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
       createdAt: new Date(2025, 2, 20),
       updatedAt: new Date(2025, 2, 20),
     });

@@ -193,6 +193,7 @@ describe("Escrow transaction service", () => {
               {},
             ],
             "paymentDetails": {},
+            "releaseCode": "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
             "status": "created",
             "title": "",
             "updatedAt": 2025-03-19T23:00:00.000Z,
