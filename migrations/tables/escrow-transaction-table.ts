@@ -156,7 +156,6 @@ export const AccountStatementTable = pgTable("account_statement", {
   creatorId: uuid("creator_id"),
   relatedUserId: uuid("related_user_id"),
   amount: numeric("amount", { precision: 10, scale: 2 }),
-  balance: numeric("balance", { precision: 10, scale: 2 }),
   type: statementType("type"),
   tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
   status: AccountStatementStatus("status").default("completed"),

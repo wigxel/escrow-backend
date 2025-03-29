@@ -225,6 +225,13 @@
       "when": 1743161073908,
       "tag": "0031_useful_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1743271416701,
+      "tag": "0032_fixed_speedball",
+      "breakpoints": true
     }
   ]
 }

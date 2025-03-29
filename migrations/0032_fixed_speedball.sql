@@ -1,0 +1,1 @@
+ALTER TABLE "account_statement" DROP COLUMN IF EXISTS "balance";
