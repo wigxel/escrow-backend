@@ -347,11 +347,11 @@ describe("User services", () => {
       const program = forgotPassword(email);
       const result = runTest(Effect.provide(program, userRepo));
       expect(result).resolves.toMatchInlineSnapshot(
-        "[ExpectedError: Request is being processed]",
+        `[NoSuchElementException: No user found with email]`,
       );
     });
 
-    test("should create new otp on if otp not present for user", async () => {
+    test("should create new otp if otp not present for user", async () => {
       let otpCreated = false;
       let isNotified = false;
       const otpRepo = extendOtpRepo({
@@ -381,7 +381,7 @@ describe("User services", () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "data": null,
-          "message": "Forget password successful",
+          "message": "Forgot password successful",
           "status": "success",
         }
       `);
@@ -414,7 +414,7 @@ describe("User services", () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "data": null,
-          "message": "Forget password successful",
+          "message": "Forgot password successful",
           "status": "success",
         }
       `);

@@ -103,7 +103,11 @@ describe("Payment service", () => {
   });
 
   describe("Release funds", () => {
-    const params = { currentUser, escrowId: "MOCK_ESCROW_ID" };
+    const params = {
+      currentUser,
+      escrowId: "MOCK_ESCROW_ID",
+      releaseCode: "hKk-I1gWf4P-7rzGMt",
+    };
     test("should fail if invalid escrow id", () => {
       const escrowRepo = extendEscrowTransactionRepo({
         //@ts-expect-error
@@ -119,6 +123,41 @@ describe("Payment service", () => {
       );
     });
 
+    test("should if invalid release code", () => {
+      const escrowRepo = extendEscrowTransactionRepo({
+        //@ts-expect-error
+        getEscrowDetails() {
+          return Effect.succeed({
+            id: "test-id",
+            status: "completed",
+            title: "",
+            description: "",
+            createdBy: "",
+            releaseCode:
+              "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY,",
+            createdAt: new Date(2025, 2, 20),
+            updatedAt: new Date(2025, 2, 20),
+            activitylog: [{}],
+            paymentDetails: {},
+            participants: [{}],
+            escrowWalletDetails: {
+              id: "test-id",
+              escrowId: "escrow-id",
+              tigerbeetleAccountId: "1111111",
+              createdAt: new Date(2025, 2, 23),
+              updatedAt: new Date(2025, 2, 23),
+            },
+          });
+        },
+      });
+
+      const program = releaseFunds(params);
+      const result = runTest(Effect.provide(program, escrowRepo));
+      expect(result).resolves.toMatchInlineSnapshot(
+        `[PermissionError: Invalid release code provided]`,
+      );
+    });
+
     test("should fail if escrow status is completed", () => {
       const escrowRepo = extendEscrowTransactionRepo({
         //@ts-expect-error
@@ -128,6 +167,8 @@ describe("Payment service", () => {
             status: "completed",
             title: "",
             description: "",
+            releaseCode:
+              "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
             createdBy: "",
             createdAt: new Date(2025, 2, 20),
             updatedAt: new Date(2025, 2, 20),
@@ -170,6 +211,8 @@ describe("Payment service", () => {
             title: "",
             description: "",
             createdBy: "",
+            releaseCode:
+              "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
             createdAt: new Date(2025, 2, 20),
             updatedAt: new Date(2025, 2, 20),
             activitylog: [{}],
@@ -241,6 +284,8 @@ describe("Payment service", () => {
             title: "",
             description: "",
             createdBy: "",
+            releaseCode:
+              "$argon2id$v=19$m=19456,t=2,p=1$9GSSz5vugGBjZTY4t4XmmA$sKkQBR2TvVWcbFSfnZULHFjcrrCbRcK01VsxDS7TSKY",
             createdAt: new Date(2025, 2, 20),
             updatedAt: new Date(2025, 2, 20),
             activitylog: [{}],

@@ -38,6 +38,7 @@ import { CloudinaryStorageLive } from "~/layers/storage/presets/cloudinary";
 import { LuciaSessionProvider } from "~/services/lucia-session-provider";
 import { Argon2dHasherLive } from "~/layers/encryption/presets/argon2d";
 import { CommentRepoLayer } from "~/repositories/comment.repo";
+import { AddressRepoLayer } from "~/repositories/address.repo";
 
 export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(UserRepoLayer.Repo.Live),
@@ -49,6 +50,7 @@ export const UserModule = Layer.empty.pipe(
   Layer.provideMerge(CommentRepoLayer.live),
   Layer.provideMerge(ReferralSourcesRepoLayer.Repo.Live),
   Layer.provideMerge(PushTokenRepoLayer.live),
+  Layer.provideMerge(AddressRepoLayer.live),
 );
 
 const DisputeModule = Layer.empty.pipe(

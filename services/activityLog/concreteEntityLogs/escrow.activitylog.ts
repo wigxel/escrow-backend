@@ -4,6 +4,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "created",
         summary: "Escrow transaction created",
         params,
       },
@@ -14,6 +15,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params.id,
       data: {
+        status: "deposit.pending",
         summary: "Payer viewed the transaction",
         params,
       },
@@ -24,6 +26,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "deposit.success",
         summary: "Escrow deposit successful",
         params,
       },
@@ -34,6 +37,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "service.pending",
         summary: "Escrow service is pending",
         params,
       },
@@ -44,6 +48,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "deposit.confirmed",
         summary: "Escrow service confirmed",
         params,
       },
@@ -54,6 +59,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "completed",
         summary: "Escrow transaction completed. Funds released",
         params,
       },
@@ -64,6 +70,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "dispute",
         summary: "Escrow dispute initiated",
         params,
       },
@@ -74,6 +81,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "refunded",
         summary: "Escrow funds refunded",
         params,
       },
@@ -84,6 +92,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "cancelled",
         summary: "Escrow transaction cancelled",
         params,
       },
@@ -94,6 +103,7 @@ export const escrowActivityLog = {
       kind: "Escrow",
       entityId: params?.id,
       data: {
+        status: "expired",
         summary: "Transaction timed-out. Customer didn't pay in time",
         params,
       },
@@ -104,6 +114,7 @@ export const escrowActivityLog = {
     kind: string;
     entityId: string;
     data: {
+      status: string;
       summary: string;
       params: ParamsWithId;
     };

@@ -211,6 +211,27 @@
       "when": 1742154751277,
       "tag": "0029_soft_rocket_raccoon",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1742766627384,
+      "tag": "0030_bright_forge",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1743161073908,
+      "tag": "0031_useful_captain_cross",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1743271416701,
+      "tag": "0032_fixed_speedball",
+      "breakpoints": true
     }
   ]
 }

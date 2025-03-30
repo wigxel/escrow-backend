@@ -236,6 +236,8 @@ export function forgotPassword(email: string) {
         .notify(new PasswordResetMail(user, otp)),
       Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );
+
+    return dataResponse({ message: "Forgot password successful" });
   });
 }
 

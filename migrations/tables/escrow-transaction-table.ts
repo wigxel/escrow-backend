@@ -70,6 +70,7 @@ export const escrowTransactionTable = pgTable("escrow_transactions", {
   description: text("description"),
   status: escrowStatus("status").default("created"),
   createdBy: uuid("created_by").references(() => userTable.id),
+  releaseCode: varchar("release_code", { length: 255 }),
   ...timestamps,
 });
 
@@ -155,7 +156,6 @@ export const AccountStatementTable = pgTable("account_statement", {
   creatorId: uuid("creator_id"),
   relatedUserId: uuid("related_user_id"),
   amount: numeric("amount", { precision: 10, scale: 2 }),
-  balance: numeric("balance", { precision: 10, scale: 2 }),
   type: statementType("type"),
   tigerbeetleTransferId: varchar("tigerbeetle_transfer_id"),
   status: AccountStatementStatus("status").default("completed"),

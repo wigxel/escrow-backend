@@ -9,7 +9,9 @@ import {
   type escrowStatusRules,
   type TEscrowTransactionFilter,
 } from "~/dto/escrowTransactions.dto";
-import type { TEscrowRequest, TUser } from "~/migrations/schema";
+import type {   TEscrowRequest,
+  TEscrowTransaction,
+  TUser, } from "~/migrations/schema";
 import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
@@ -23,6 +25,7 @@ import { handleUserCreationFromEscrow } from "../user.service";
 import {
   canTransitionEscrowStatus,
   convertCurrencyUnit,
+  generateCustomReleaseCode,
   getBuyerAndSellerFromParticipants,
 } from "~/services/escrow/escrow.utils";
 import { id } from "tigerbeetle-node";
@@ -41,6 +44,10 @@ import { escrowActivityLog } from "../activityLog/concreteEntityLogs/escrow.acti
 import { dataResponse } from "~/libs/response";
 import { searchRepo } from "../search";
 import { SearchOps } from "../search/sql-search-resolver";
+import { ReviewRepo, ReviewRepoLive } from "~/repositories/review.repository";
+import { NotificationFacade } from "~/layers/notification/layer";
+import { hashPassword } from "~/layers/encryption/helpers";
+import { ReleaseCodeNotification } from "~/app/notifications/releaseCode.notify";
 import { appEnv } from "~/config/environment";
 import { validateZod } from "~/libs/request.helpers";
 import { pick } from "effect/Struct";
@@ -220,8 +227,25 @@ export const getEscrowRequestDetails = (data: {
         escrowId: data.escrowId,
         status: "pending",
       }),
+      Effect.mapError(
+        () =>
+          new NoSuchElementException("Invalid escrow id: No request details"),
+      ),
+    );
+
+    const escrowDetails = yield* _(
+      escrowTransactionRepo.firstOrThrow({ id: data.escrowId }),
       Effect.mapError(() => new NoSuchElementException("Invalid escrow id")),
     );
+
+    if (!canTransitionEscrowStatus(escrowDetails.status, "deposit.pending")) {
+      return dataResponse({
+        data: {
+          requestDetails: escrowRequestDetails,
+          isAuthenticated: !!data.currentUser,
+        },
+      });
+    }
 
     const sellerInfo = yield* _(
       userRepo.with("rating").first("id", escrowRequestDetails.senderId),
@@ -229,7 +253,7 @@ export const getEscrowRequestDetails = (data: {
         return new NoSuchElementException("Seller information missing");
       }),
     );
-
+    
     // update the escrow transaction status to "deposit.pending"
     // TODO: Move this logic out of this function
     yield* escrowTransactionRepo.update(
@@ -480,6 +504,8 @@ export const updateEscrowTransactionStatus = (params: {
 }) => {
   return Effect.gen(function* (_) {
     const escrowRepo = yield* _(EscrowTransactionRepoLayer.tag);
+    const userRepo = yield* UserRepoLayer.Tag;
+    const notifier = yield* NotificationFacade;
 
     const escrowDetails = yield* _(
       escrowRepo.firstOrThrow({ id: params.escrowId }),
@@ -498,16 +524,37 @@ export const updateEscrowTransactionStatus = (params: {
     }
 
     // makes certain the expected user is making the update
-    yield* validateUserStatusUpdate({
+    const { buyer } = yield* validateUserStatusUpdate({
       escrowId: escrowDetails.id,
       status: params.status,
       currentUser: params.currentUser,
     });
 
-    yield* escrowRepo.update(
-      { id: params.escrowId },
-      { status: params.status },
-    );
+    let updateData: TEscrowTransaction = { status: params.status };
+
+    if (params.status === "service.pending") {
+      const releaseCode = generateCustomReleaseCode();
+      const buyerDetails = yield* userRepo.firstOrThrow({ id: buyer.userId });
+      updateData = {
+        ...updateData,
+        releaseCode: yield* hashPassword(releaseCode),
+      };
+
+      //notify the user
+      yield* _(
+        notifier
+          .route("mail", { address: buyerDetails.email })
+          .notify(
+            new ReleaseCodeNotification(
+              { firstName: buyerDetails.firstName },
+              releaseCode,
+            ),
+          ),
+        Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
+      );
+    }
+
+    yield* escrowRepo.update({ id: params.escrowId }, updateData);
 
     yield* createActivityLog(
       escrowActivityLog.statusFactory(params.status)({ id: params.escrowId }),
@@ -567,5 +614,52 @@ export const validateUserStatusUpdate = (params: {
     }
 
     return { seller, buyer };
+  });
+};
+
+export const releaseFundsInfo = (escrowId: string) => {
+  return Effect.gen(function* (_) {
+    const escrowRepo = yield* EscrowTransactionRepoLayer.tag;
+    const partcipantsRepo = yield* EscrowParticipantRepoLayer.tag;
+    const reviewRepo = yield* ReviewRepo;
+    const paymentRepo = yield* EscrowPaymentRepoLayer.tag;
+    const userRepo = yield* UserRepoLayer.Tag;
+
+    const escrowDetails = yield* _(
+      escrowRepo.firstOrThrow({ id: escrowId }),
+      Effect.mapError(() => new ExpectedError("Invalid escrow id")),
+    );
+
+    const paymentDetails = yield* paymentRepo.firstOrThrow({ escrowId });
+
+    const participants = yield* partcipantsRepo.all({
+      where: SearchOps.eq("escrowId", escrowDetails.id),
+    });
+
+    const { seller, buyer } =
+      yield* getBuyerAndSellerFromParticipants(participants);
+    const userDetails = yield* userRepo.firstOrThrow({ id: seller.userId });
+
+    //get the sellers rating
+    const reviews = yield* reviewRepo.all({
+      where: SearchOps.eq("revieweeId", seller.userId),
+    });
+
+    const averageRating =
+      reviews.reduce((sum, rating) => sum + rating.rating, 0) / reviews.length;
+
+    return dataResponse({
+      data: {
+        userDetails: {
+          firstName: userDetails.firstName,
+          lastName: userDetails.lastName,
+          email: userDetails.email,
+          phone: userDetails.phone,
+          rating: averageRating,
+        },
+        escrowDetails,
+        paymentDetails,
+      },
+    });
   });
 };

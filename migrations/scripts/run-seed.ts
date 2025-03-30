@@ -20,6 +20,12 @@ import { UserRepoLayer } from "~/repositories/user.repository";
 import { DisputeCategorysRepoLayer } from "~/repositories/disputeCategories.repo";
 import { DisputeResolutionssRepoLayer } from "~/repositories/disputeResolution.repo";
 import { ReferralSourcesRepoLayer } from "~/repositories/referralSource.repo";
+import { AppLive } from "~/config/app";
+import { seedAddress } from "../seeds/address.seed";
+import { seedBankAccount } from "../seeds/bankAccount.seed";
+import { seedEscrow } from "../seeds/escrow.seed";
+import { seedReview } from "../seeds/review.seed";
+import { seedOrgAccount } from "../seeds/orgAccount.seed";
 
 const minimumLogLevel = Config.string("LOG_LEVEL").pipe(
   Effect.map((level) => {
@@ -59,7 +65,10 @@ function runSeeds<T extends Iterable<Effect.Effect<unknown, unknown, unknown>>>(
             Effect.provide(
               // @ts-expect-error
               runSeeds,
-              dependencies.pipe(Layer.provideMerge(TxModelDatabase)),
+              dependencies.pipe(
+                Layer.provideMerge(TxModelDatabase),
+                Layer.provideMerge(AppLive),
+              ),
             ).pipe(Effect.tapError(Effect.logError)),
           ),
         );
@@ -68,19 +77,26 @@ function runSeeds<T extends Iterable<Effect.Effect<unknown, unknown, unknown>>>(
   }).pipe(
     Effect.tap(() => Console.log("Seeding complete")),
     Effect.tapError((err) =>
-      Console.error(`Seeding failed. Rolled back. \nError: ${err.toString()}`),
+      Console.error(
+        `Seeding failed. Rolled back. \nError: ${err.toString()}, ${err.cause}`,
+      ),
     ),
   );
 }
 
 const program = runSeeds([
+  seedOrgAccount,
   seedUser,
   seedDisputeCategories,
   seedDisputeResolution,
   seedReferralSource,
+  seedAddress,
+  seedBankAccount,
+  seedEscrow,
+  seedReview,
 ]);
 
-const scopedEffect = Effect.scoped(Effect.provide(program, dependencies));
+const scopedEffect = Effect.scoped(Effect.provide(program, AppLive));
 
 Effect.runPromiseExit(scopedEffect).then((exit) => {
   exit.pipe(

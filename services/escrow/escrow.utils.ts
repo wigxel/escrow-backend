@@ -13,7 +13,7 @@ const escrowStatusTransitions = {
     "completed",
     "dispute",
   ],
-  "service.pending": ["service.confirmed"],
+  "service.pending": ["service.confirmed", "completed"],
   "service.confirmed": ["dispute", "completed"],
   dispute: [],
   cancelled: [],
@@ -66,4 +66,24 @@ export const convertCurrencyUnit = (
     return Number(amount) * nairaToKobo;
   }
   return Number(amount) * koboToNaira;
+};
+
+export const generateCustomReleaseCode = () => {
+  const generateRandomString = (length) => {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters[randomIndex];
+    }
+    return result;
+  };
+
+  // Generate a random prefix (3 characters for example)
+  const prefix = generateRandomString(3); // You can change the length as needed
+  const middle = generateRandomString(7);
+  const suffix = generateRandomString(6);
+
+  return `${prefix}-${middle}-${suffix}`;
 };

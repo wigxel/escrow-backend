@@ -40,6 +40,7 @@ export const userTable = pgTable(
   (table) => {
     return {
       emailIndex: uniqueIndex("emailIndex").on(table.email),
+      phoneIndex: uniqueIndex("phoneIndex").on(table.phone),
     };
   },
 );
