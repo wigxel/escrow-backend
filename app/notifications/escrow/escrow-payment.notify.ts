@@ -43,7 +43,8 @@ export class EscrowPaymentNotification extends Notification {
       return {
         tag: "escrow",
         title: "Escrow Payment Successful!",
-        message: "Good news! Your payment has been successfully deposited in escrow. The buyer’s funds are now secured, and you can continue with the transaction.",
+        message:
+          "Good news! Your payment has been successfully deposited in escrow. The buyer’s funds are now secured, and you can continue with the transaction.",
         metadata: this.metadata,
       };
     }
@@ -51,7 +52,8 @@ export class EscrowPaymentNotification extends Notification {
     return {
       tag: "escrow",
       title: "Escrow Payment Successful!",
-      message: "Your payment is now successfully held in escrow, ensuring a safe and secure transaction. The seller has received the confirmation",
+      message:
+        "Your payment is now successfully held in escrow, ensuring a safe and secure transaction. The seller has received the confirmation",
       metadata: this.metadata,
     };
   }

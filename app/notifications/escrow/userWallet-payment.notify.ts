@@ -43,7 +43,8 @@ export class UserWalletPaymentNotification extends Notification {
       return {
         tag: "escrow",
         title: "Funds Successfully Released",
-        message: "Your funds has been confirmed and released from escrow. The payment has now been credited to your wallet",
+        message:
+          "Your funds has been confirmed and released from escrow. The payment has now been credited to your wallet",
         metadata: this.metadata,
       };
     }
@@ -51,7 +52,8 @@ export class UserWalletPaymentNotification extends Notification {
     return {
       tag: "escrow",
       title: "Funds Successfully Released to Seller",
-      message: "Your payment has been successfully released from escrow to the user's wallet. The transaction is now complete, and the user has received their funds.",
+      message:
+        "Your payment has been successfully released from escrow to the user's wallet. The transaction is now complete, and the user has received their funds.",
       metadata: this.metadata,
     };
   }
