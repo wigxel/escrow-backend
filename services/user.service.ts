@@ -167,7 +167,6 @@ export function resendOtp(
     yield* _(
       notify
         .route("mail", { address: user.email })
-        // @todo: Add Password Reset Mail
         .notify(new EmailVerificationMail(user, otp)),
       Effect.match({ onFailure: () => {}, onSuccess: () => {} }),
     );

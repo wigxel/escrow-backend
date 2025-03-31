@@ -323,8 +323,6 @@ describe("Payment service", () => {
           program,
           tigerBeetleRepo.pipe(
             Layer.provideMerge(accountStatementRepo),
-            Layer.provideMerge(NotificationFacadeMock),
-            Layer.provideMerge(tigerBeetleRepo),
             Layer.provideMerge(escrowRepo),
             Layer.provideMerge(NotificationFacadeMock),
             Layer.provideMerge(activityLogMock),
