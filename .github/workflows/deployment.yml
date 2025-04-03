@@ -1,52 +1,25 @@
-name: Main Deployment
-#make this flow manually triggered
+name: Deploy Production
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  deployments:
+    name: ESCROW Production
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Building & Pushing GHCR Image
+      run: |
+        docker login -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }} ghcr.io
+        docker build -t ghcr.io/wigxel/escrow-backend:${{ github.sha }} . --no-cache
+        docker push ghcr.io/wigxel/escrow-backend:${{ github.sha }}
 
-      - name: Stop service & clean source & build
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          passphrase: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
-          timeout: 120s
-          script: |
-            cd ~/app/backend
-            rm -r ./.output
-
-      - name: Copy code to server
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          passphrase: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
-          source: ./
-          target: ~/app/backend
-          timeout: 120s
-
-      - name: Run Bootstrap Commands
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          passphrase: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
-          timeout: 120s
-          script: |
-            export PM2_APP="escrow-backend-alt"
-            cd ~/app/backend
-            sh ./scripts/start.sh
+    # - name: Deploying To Staging Server
+    #   run: |
+    #     install -m 600 -D /dev/null ~/.ssh/id_rsa
+    #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+    #     echo "${{ secrets.SSH_CONFIG }}" > ~/.ssh/config
+    #     ssh bumpa-storefront-themes -tt ./storefront.sh ${{ github.sha }}
+    #     ssh bumpa-storefront-themes -tt ./deployment.sh
