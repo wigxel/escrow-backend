@@ -16,10 +16,9 @@ jobs:
         docker build -t ghcr.io/wigxel/escrow-backend-production:${{ github.sha }} . --no-cache
         docker push ghcr.io/wigxel/escrow-backend-production:${{ github.sha }}
 
-    # - name: Deploying To Production Server
-    #   run: |
-    #     install -m 600 -D /dev/null ~/.ssh/id_rsa
-    #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-    #     echo "${{ secrets.SSH_CONFIG }}" > ~/.ssh/config
-    #     ssh bumpa-storefront-themes -tt ./storefront.sh ${{ github.sha }}
-    #     ssh bumpa-storefront-themes -tt ./deployment.sh
+    - name: Deploying To Production Server
+      run: |
+        install -m 600 -D /dev/null ~/.ssh/id_ed25519
+        echo "${{ secrets.SSH_DO_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        echo "${{ secrets.SSH_DO_CONFIG }}" > ~/.ssh/config
+        ssh escrow-server -tt ./escrow-backend-prod.sh ${{ github.sha }}
