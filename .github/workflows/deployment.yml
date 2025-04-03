@@ -13,10 +13,10 @@ jobs:
     - name: Building & Pushing GHCR Image
       run: |
         docker login -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }} ghcr.io
-        docker build -t ghcr.io/wigxel/escrow-backend:${{ github.sha }} . --no-cache
-        docker push ghcr.io/wigxel/escrow-backend:${{ github.sha }}
+        docker build -t ghcr.io/wigxel/escrow-backend-production:${{ github.sha }} . --no-cache
+        docker push ghcr.io/wigxel/escrow-backend-production:${{ github.sha }}
 
-    # - name: Deploying To Staging Server
+    # - name: Deploying To Production Server
     #   run: |
     #     install -m 600 -D /dev/null ~/.ssh/id_rsa
     #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
