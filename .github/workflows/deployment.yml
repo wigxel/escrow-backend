@@ -21,4 +21,4 @@ jobs:
         install -m 600 -D /dev/null ~/.ssh/id_ed25519
         echo "${{ secrets.SSH_DO_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
         echo "${{ secrets.SSH_DO_CONFIG }}" > ~/.ssh/config
-        ssh escrow-server -tt ./escrow-backend-prod.sh ${{ github.sha }}
+        ssh escrow-server -tt ./.escrow-backend-prod.sh ${{ github.sha }}
