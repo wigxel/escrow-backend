@@ -353,7 +353,7 @@ export const withdrawFromWallet = (
           code: TBTransferCode.WALLET_WITHDRAWAL,
           flags: TransferFlags.pending,
           ledger: "ngnLedger",
-        }), 
+        }),
       ]),
     );
 

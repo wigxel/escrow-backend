@@ -83,7 +83,7 @@ export const createDispute = (params: {
 
     if (!canTransitionEscrowStatus(escrowDetails.status, "dispute")) {
       yield* new ExpectedError(
-        `Cannot transition from ${escrowDetails.status} to dispute`,
+        `Error creating dispute. Cannot transition from ${escrowDetails.status} to dispute`,
       );
     }
 
@@ -117,7 +117,7 @@ export const createDispute = (params: {
       userIds: [seller.userId, buyer.userId],
     });
 
-    //upload the image to cloudinary and
+    // upload the image to cloudinary
     const uploadResult = yield* Effect.tryPromise(() =>
       fileManager.uploadFile(params.disputeData.file, {
         mimeType: params.disputeData.file.type,

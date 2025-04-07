@@ -9,9 +9,11 @@ import {
   type escrowStatusRules,
   type TEscrowTransactionFilter,
 } from "~/dto/escrowTransactions.dto";
-import type {   TEscrowRequest,
+import type {
+  TEscrowRequest,
   TEscrowTransaction,
-  TUser, } from "~/migrations/schema";
+  TUser,
+} from "~/migrations/schema";
 import { UserRepo, UserRepoLayer } from "~/repositories/user.repository";
 import { EscrowRequestRepoLayer } from "~/repositories/escrow/escrowRequest.repo";
 import { EscrowParticipantRepoLayer } from "~/repositories/escrow/escrowParticipant.repo";
@@ -253,7 +255,7 @@ export const getEscrowRequestDetails = (data: {
         return new NoSuchElementException("Seller information missing");
       }),
     );
-    
+
     // update the escrow transaction status to "deposit.pending"
     // TODO: Move this logic out of this function
     yield* escrowTransactionRepo.update(

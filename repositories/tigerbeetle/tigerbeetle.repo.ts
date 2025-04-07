@@ -41,9 +41,9 @@ export class TigerBeetleRepository {
 export class TigerBeetleRepo extends Context.Tag("TigerBeetleRepo")<
   TigerBeetleRepo,
   TigerBeetleRepository
->() { }
+>() {}
 
-console.log("TigerBeetleRepo initialized", process.env.TB_ADDRESS)
+console.log("TigerBeetleRepo initialized", process.env.TB_ADDRESS);
 
 export const TigerBeetleRepoLayer = {
   Tag: TigerBeetleRepo,

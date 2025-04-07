@@ -1,20 +1,33 @@
 import { z } from "zod";
+import { uuidValidator } from "./user.dto";
 
 export const newDisputeSchema = z.object({
-  escrowId: z
-    .string({ required_error: "Escrow transaction id is required" })
-    .uuid(),
+  escrowId: uuidValidator("Escrow ID"),
   reason: z.string({
     required_error: "Please provide the reason for the dispute",
   }),
-  categoryId: z.number({ coerce: true }).min(1),
-  resolutionId: z.number({ coerce: true }).min(1),
+  categoryId: z.number({
+    coerce: true,
+    required_error: "Dispute category must be a number",
+  }),
+  resolutionId: z.number({
+    coerce: true,
+    required_error: "Dispute resolution must be a number",
+  }),
   file: z
     .instanceof(File)
     .refine(
       (file) => ["image/jpeg", "image/png", "image/jpg"].includes(file.type),
       {
         message: "Only JPEG and PNG files are allowed",
+      },
+    )
+    .refine(
+      (file) => {
+        return file.size <= 10 * 1024 * 1024;
+      },
+      {
+        message: "File must be less than 10MB",
       },
     ),
 });
