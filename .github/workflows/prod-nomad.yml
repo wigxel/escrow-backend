@@ -33,8 +33,5 @@ jobs:
           cd .nomad
           echo "${{ secrets.ENV }}" > envfile && base64 -d envfile > .env
           python3 job.py
-          #cat generated_escrow.nomad.hcl
-          #nomad status
-          #nomad job validate generated_escrow.nomad.hcl
           nomad job run generated_escrow.nomad.hcl
-          #nomad exec -job escrow-backend pnpm db:migrate
+          nomad exec -job escrow-backend pnpm db:migrate
