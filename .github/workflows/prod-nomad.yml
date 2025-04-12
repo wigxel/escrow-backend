@@ -11,7 +11,7 @@ jobs:
     env:
       NOMAD_ADDR: ${{ secrets.NOMAD_ADDR }}
       NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
-      NOMAD_VAR_docker_repo: ghcr.io/shehuawwal/escrow-backend
+      NOMAD_VAR_docker_repo: ghcr.io/wigxel/escrow-backend-prod
       NOMAD_VAR_docker_tag: ${{ github.sha }}
       NOMAD_VAR_ghcr_username: ${{ secrets.GHCR_USERNAME }}
       NOMAD_VAR_ghcr_token: ${{ secrets.GHCR_TOKEN }}
