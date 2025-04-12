@@ -28,7 +28,7 @@ job "escrow-backend" {
         {{ENV_VARS}}
       }
       resources {
-        memory     = 512
+        memory     = 2048
         memory_max = 0
       }
     }
