@@ -6,7 +6,7 @@ job "escrow-backend" {
 
     network {
       port "http" {
-        static = ${var.escrow_port}
+        static = 8080
         to = 8080
       }
     }
@@ -48,9 +48,5 @@ variable "docker_tag" {
 }
 
 variable "docker_repo" {
-  type = string
-}
-
-variable "escrow_port" {
   type = string
 }

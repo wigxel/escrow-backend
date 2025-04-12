@@ -15,7 +15,6 @@ jobs:
       NOMAD_VAR_docker_tag: ${{ github.sha }}
       NOMAD_VAR_ghcr_username: ${{ secrets.GHCR_USERNAME }}
       NOMAD_VAR_ghcr_token: ${{ secrets.GHCR_TOKEN }}
-      NOMAD_VAR_escrow_port: 8080
     steps:
       - uses: actions/checkout@v4
       - name: Building & Pushing GHCR Image
