@@ -12,9 +12,11 @@ export const USER_ROLE = ["seller"] as const;
 export const createEscrowTransactionRules = z.object({
   amount: amountValidator,
   title: z.string({ required_error: "Title field is required" }).min(3),
-  description: z.string({
-    required_error: "Description field is required",
-  }),
+  description: z
+    .string({
+      required_error: "Description field is required",
+    })
+    .optional(),
   creatorRole: z.enum(USER_ROLE, { required_error: "Please provide a role" }),
   customerPhone: phoneValidator,
   customerUsername: usernameValidator.default("NONE"),

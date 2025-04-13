@@ -18,7 +18,7 @@ export class EscrowPaymentNotification extends Notification {
     if (this.client === "vendor") {
       return new MailMessage()
         .greeting(this.user.firstName)
-        .subject("Escrow Payment Successful!")
+        .subject("Escrow Payment Successful")
         .line(
           [
             "Great news! The payment for your item has been successfully processed and secured in escrow.",
@@ -29,7 +29,7 @@ export class EscrowPaymentNotification extends Notification {
 
     return new MailMessage()
       .greeting(this.user.firstName)
-      .subject("Escrow Payment Successful!")
+      .subject("Escrow Payment Successful")
       .line(
         [
           "Your payment is now successfully held in escrow, ",
@@ -42,7 +42,7 @@ export class EscrowPaymentNotification extends Notification {
     if (this.client === "vendor") {
       return {
         tag: "escrow",
-        title: "Escrow Payment Successful!",
+        title: "Escrow Payment Successful",
         message:
           "Good news! Your payment has been successfully deposited in escrow. The buyer’s funds are now secured, and you can continue with the transaction.",
         metadata: this.metadata,
@@ -51,7 +51,7 @@ export class EscrowPaymentNotification extends Notification {
 
     return {
       tag: "escrow",
-      title: "Escrow Payment Successful!",
+      title: "Escrow Payment Successful",
       message:
         "Your payment is now successfully held in escrow, ensuring a safe and secure transaction. The seller has received the confirmation",
       metadata: this.metadata,

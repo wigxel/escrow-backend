@@ -162,7 +162,10 @@ export const listUserEscrowTransactions = (
             filters.status
               ? SearchOps.eq("status", filters.status)
               : SearchOps.none(),
-            SearchOps.eq("createdBy", user_id),
+            // @todo Users should be able to list transactions that
+            // they participate in, not only the ones they created
+            // at the moment all users can see all transactions
+            // SearchOps.eq("createdBy", user_id),
           ),
           orderBy: { createdAt: "desc" },
         }),
@@ -192,7 +195,7 @@ export const getEscrowTransactionDetails = (params: {
     yield* Effect.logDebug(`Reading account balance: ${params.escrowId}`);
     const balance = yield* _(
       getAccountBalance(escrowDetails.escrowWalletDetails.tigerbeetleAccountId),
-      Effect.timeout("1 second"),
+      Effect.timeout("3 seconds"),
       Effect.catchTag("TimeoutException", () => {
         return new TimeoutException("Taking too long to fetch account balance");
       }),
@@ -428,10 +431,18 @@ export const initializeEscrowDeposit = (
           "Validating Payment Params",
           JSON.stringify(params),
         );
-        const payload = yield* validateZod(() =>
-          paymentMetaSchema.safeParseAsync({
-            amount,
-            metadata,
+
+        const payload = yield* pipe(
+          validateZod(() =>
+            paymentMetaSchema.safeParseAsync({
+              amount,
+              metadata,
+            }),
+          ),
+          Effect.catchTag("ValidationError", () => {
+            return new ExpectedError(
+              "Payment parameters mismatch. Payment rejected!",
+            );
           }),
         );
 

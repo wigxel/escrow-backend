@@ -14,7 +14,7 @@ export class CreateDisputeNotification extends Notification {
   toDatabase() {
     return {
       tag: "dispute",
-      title: "Escrow dispute Opened",
+      title: "New dispute open",
       message:
         "We’ve received your dispute regarding the recent escrow. Our team is reviewing the details and will be in touch with updates soon.",
       metadata: this.metadata,
