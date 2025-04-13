@@ -1,0 +1,37 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deployments:
+    name: ESCROW Production
+    runs-on: ubuntu-latest
+    env:
+      NOMAD_ADDR: ${{ secrets.NOMAD_ADDR }}
+      NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
+      NOMAD_VAR_docker_repo: ghcr.io/wigxel/escrow-backend-prod
+      NOMAD_VAR_docker_tag: ${{ github.sha }}
+      NOMAD_VAR_ghcr_username: ${{ secrets.GHCR_USERNAME }}
+      NOMAD_VAR_ghcr_token: ${{ secrets.GHCR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Building & Pushing GHCR Image
+        run: |
+          docker login -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }} ghcr.io
+          docker build -t $NOMAD_VAR_docker_repo:${{ github.sha }} . --no-cache
+          docker push $NOMAD_VAR_docker_repo:${{ github.sha }}
+      - name: Setup NOMAD CLI
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+          sudo apt-get update -qq >/dev/null 2>&1 && sudo apt-get install -qq -y nomad >/dev/null 2>&1
+      - name: Deploy ESCROW Backend
+        run: |
+          cd .nomad
+          echo "${{ secrets.ENV }}" > envfile && base64 -d envfile > .env
+          python3 job.py
+          nomad job run generated_escrow.nomad.hcl
+          sleep 30
+          nomad exec -job escrow-backend pnpm db:migrate
