@@ -15,7 +15,7 @@ import {
 } from "../tigerbeetle.service";
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
-import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
+import { TBTransferCode } from "~/layers/ledger/type";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { EscrowTransactionRepoLayer } from "~/repositories/escrow/escrowTransaction.repo";
 import { NoSuchElementException } from "effect/Cause";

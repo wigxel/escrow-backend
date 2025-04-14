@@ -3,8 +3,8 @@ import { Config, Context, Effect } from "effect";
 import { TaggedError } from "effect/Data";
 import postgres from "postgres";
 import * as schema from "../migrations/schema";
+import { TigerBeetleAdapter } from "~/layers/ledger/tigerbeetle";
 
-type t = typeof schema;
 export type DrizzlePgDatabase = PostgresJsDatabase<typeof schema>;
 
 export class DatabaseConnection extends Context.Tag("DatabaseConnection")<
@@ -29,7 +29,7 @@ export class DatabaseResourceError extends TaggedError("DatabaseResource") {
   }
 }
 
-export const acquire = Effect.gen(function* (_) {
+const acquire = Effect.gen(function* (_) {
   const DB_URL = yield* Config.string("DB_URL");
 
   const sql = postgres(DB_URL);
@@ -53,10 +53,25 @@ export const acquire = Effect.gen(function* (_) {
   }),
 );
 
-export const release = (res: DatabaseResourceInterface) => {
-  return Effect.promise(() => res.close()).pipe(
-    Effect.tap(Effect.logDebug("[Database] connection closed 🚫")),
-  );
-};
+export const DatabaseResource = Effect.succeed(Effect.runSync(acquire));
 
-export const DatabaseResource = Effect.acquireRelease(acquire, release);
+const connectToTB = Effect.gen(function* () {
+  const addr = yield* Config.string("TB_ADDRESS");
+
+  yield* Effect.logInfo("Connecting to Tigerbeetle Server", addr);
+  const instance = TigerBeetleAdapter.getInstance(addr);
+
+  const is_connected = yield* Effect.promise(() => instance.isConnected());
+
+  if (!is_connected) {
+    yield* Effect.fail(new Error("Tigerbeetle Server unreachable"));
+  }
+
+  yield* Effect.logInfo("✅ Tigerbeetle connected");
+
+  return instance;
+});
+
+export const TigerBeetleResource = Effect.runPromise(
+  connectToTB.pipe(Effect.retry({ times: 3 })),
+);

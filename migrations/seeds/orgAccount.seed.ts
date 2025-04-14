@@ -1,15 +1,17 @@
-import { Config, Effect } from "effect";
+import { Effect } from "effect";
 import { createSeed } from "./setup";
-import { createAccount, getTBAccount } from "~/services/tigerbeetle.service";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { createAccount, getAccount } from "~/services/tigerbeetle.service";
+import { TBAccountCode } from "~/layers/ledger/type";
 import { AccountFlags } from "tigerbeetle-node";
+import { organizationAccountId } from "~/config/environment";
 
 export const seedOrgAccount = createSeed(
   "OrgAccountSeed",
   Effect.gen(function* (_) {
-    const orgAccountId = yield* Config.string("ORG_ACCOUNT_ID");
+    const orgAccountId = yield* organizationAccountId;
+
     yield* _(
-      getTBAccount(orgAccountId),
+      getAccount(orgAccountId),
       Effect.matchEffect({
         onFailure(e) {
           return createAccount({

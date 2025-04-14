@@ -4,7 +4,7 @@ import { UserRepoLayer } from "~/repositories/user.repository";
 import { BankAccountFactory } from "../factories/bankAccount.factory";
 import { createAccount } from "~/services/tigerbeetle.service";
 import { id } from "tigerbeetle-node";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { TBAccountCode } from "~/layers/ledger/type";
 
 export const seedBankAccount = createSeed(
   "BankAccountSeed",
@@ -14,6 +14,7 @@ export const seedBankAccount = createSeed(
 
     for (const user of users) {
       const acctId = id();
+
       yield* Effect.all([
         BankAccountFactory.create({ userId: user.id }),
         createAccount({

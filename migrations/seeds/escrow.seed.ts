@@ -7,7 +7,7 @@ import { EscrowPaymentFactory } from "../factories/escrow/escrowPayment.factory"
 import { EscrowWalletFactory } from "../factories/escrow/escrowWallet.factory";
 import { id } from "tigerbeetle-node";
 import { createAccount } from "~/services/tigerbeetle.service";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { TBAccountCode } from "~/layers/ledger/type";
 
 export const seedEscrow = createSeed(
   "EscrowSeed",

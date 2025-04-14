@@ -11,7 +11,7 @@ import {
   type TTBTransfer,
   type TTBAccount,
   TBTransferCode,
-} from "./type/type";
+} from "./type";
 import { compoundLedger, isValidBigIntString } from "./utils";
 
 export class TigerBeetleAdapter {
@@ -29,7 +29,6 @@ export class TigerBeetleAdapter {
     if (!TigerBeetleAdapter.instance) {
       TigerBeetleAdapter.instance = new TigerBeetleAdapter(address, clusterId);
     }
-
     return TigerBeetleAdapter.instance;
   }
 
@@ -74,6 +73,19 @@ export class TigerBeetleAdapter {
     });
 
     return await this.client.createAccounts(modAccounts);
+  }
+
+  async isConnected() {
+    const DEFAULT_ADDRESS = "0";
+
+    // ping the server by performing an account lookup
+    // or timeout after one second
+    return await Promise.race([
+      this.lookupAccounts(DEFAULT_ADDRESS)
+        .then(() => true)
+        .catch((err) => false),
+      new Promise((res) => setTimeout(() => res(false), 3000)),
+    ]);
   }
 
   async createTransfers(params: TTBTransfer[] | TTBTransfer) {

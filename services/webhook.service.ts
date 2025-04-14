@@ -13,7 +13,7 @@ import type {
 import { handleSuccessPaymentEvents } from "./paystack/payment.service";
 import { WithdrawalRepoLayer } from "~/repositories/withdrawal.repo";
 import { NoSuchElementException } from "effect/Cause";
-import { TBTransferCode } from "~/utils/tigerBeetle/type/type";
+import { TBTransferCode } from "~/layers/ledger/type";
 import { id, TransferFlags } from "tigerbeetle-node";
 import { AccountStatementRepoLayer } from "~/repositories/accountStatement.repo";
 import { SearchOps } from "./search/sql-search-resolver";

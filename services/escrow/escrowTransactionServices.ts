@@ -36,7 +36,7 @@ import {
   createAccount as createTBAccount,
   getAccountBalance,
 } from "../tigerbeetle.service";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { TBAccountCode } from "~/layers/ledger/type";
 import type { TPaymentDetails, TSuccessPaymentMetaData } from "~/types/types";
 import {
   createActivityLog,

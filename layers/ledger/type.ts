@@ -1,5 +1,5 @@
 import type { TransferFlags } from "tigerbeetle-node";
-import type { compoundLedger } from "../utils";
+import type { compoundLedger } from "./utils";
 
 export type TTBAccount = {
   accountId: string;

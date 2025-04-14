@@ -8,7 +8,7 @@ import { createSeed } from "~/migrations/seeds/setup";
 import { UserRepo } from "~/repositories/user.repository";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { createAccount } from "~/services/tigerbeetle.service";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { TBAccountCode } from "~/layers/ledger/type";
 
 export const runSeed = createSeed(
   "UserSeed",

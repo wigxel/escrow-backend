@@ -21,7 +21,7 @@ import type {
 } from "~/dto/user.dto";
 import { id } from "tigerbeetle-node";
 import { createAccount, getAccountBalance } from "./tigerbeetle.service";
-import { TBAccountCode } from "~/utils/tigerBeetle/type/type";
+import { TBAccountCode } from "~/layers/ledger/type";
 import { UserWalletRepoLayer } from "~/repositories/userWallet.repo";
 import { NotificationFacade } from "~/layers/notification/layer";
 import { EscrowUserAccounntMail } from "~/app/mail/escrow/escrowUserAccount.notify";
